@@ -1,0 +1,3 @@
+[submodule "submodule/FixedLengthHelper"]
+	path = submodule/FixedLengthHelper
+	url = https://github.com/nuitsjp/FixedLengthHelper.git
