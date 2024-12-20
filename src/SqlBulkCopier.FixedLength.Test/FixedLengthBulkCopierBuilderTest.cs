@@ -15,7 +15,7 @@ public class FixedLengthBulkCopierBuilderTest
     }.ToString();
     
     [Fact]
-    public async Task Test1()
+    public async Task WriteToServerAsync()
     {
         var sqlBulkCopier = FixedLengthBulkCopierBuilder.CreateBuilder("[SalesLT].[SalesOrderDetail2]")
             .AddColumnMapping("SalesOrderID", 0, 10)
