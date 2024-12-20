@@ -32,6 +32,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Setup-Database.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SalesOrderDetail.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

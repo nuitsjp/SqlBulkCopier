@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\submodule\FixedLengthHelper\src\FixedLengthHelper\FixedLengthHelper.csproj" />
+    <ProjectReference Include="..\SqlBulkCopier\SqlBulkCopier.csproj" />
   </ItemGroup>
 
 </Project>
