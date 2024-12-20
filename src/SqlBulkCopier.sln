@@ -1,10 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35410.144 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlBulkCopier", "SqlBulkCopier\SqlBulkCopier.csproj", "{C1E8B143-D258-4650-B40D-FAA50C881958}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FixedLengthHelper", "..\submodule\FixedLengthHelper\src\FixedLengthHelper\FixedLengthHelper.csproj", "{8B8D261D-2523-4830-B3F1-3386B1C4D8EC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FixedLengthHelper.Test", "..\submodule\FixedLengthHelper\src\FixedLengthHelper.Test\FixedLengthHelper.Test.csproj", "{B8796737-9AAE-4484-93A6-CB5B839B6D6A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlBulkCopier.Test", "SqlBulkCopier.Test\SqlBulkCopier.Test.csproj", "{A2990C50-2A12-49FE-A9B5-155F3052C6AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlBulkCopier.FixedLength", "SqlBulkCopier.FixedLength\SqlBulkCopier.FixedLength.csproj", "{0BBB5990-4F90-4B69-91B0-910BEA89A721}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlBulkCopier.FixedLength.Test", "SqlBulkCopier.FixedLength.Test\SqlBulkCopier.FixedLength.Test.csproj", "{F6CAF035-6C6D-4ACE-BDED-6E15D27E6457}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +33,20 @@ Global
 		{B8796737-9AAE-4484-93A6-CB5B839B6D6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B8796737-9AAE-4484-93A6-CB5B839B6D6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B8796737-9AAE-4484-93A6-CB5B839B6D6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2990C50-2A12-49FE-A9B5-155F3052C6AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2990C50-2A12-49FE-A9B5-155F3052C6AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2990C50-2A12-49FE-A9B5-155F3052C6AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2990C50-2A12-49FE-A9B5-155F3052C6AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BBB5990-4F90-4B69-91B0-910BEA89A721}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BBB5990-4F90-4B69-91B0-910BEA89A721}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BBB5990-4F90-4B69-91B0-910BEA89A721}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BBB5990-4F90-4B69-91B0-910BEA89A721}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6CAF035-6C6D-4ACE-BDED-6E15D27E6457}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6CAF035-6C6D-4ACE-BDED-6E15D27E6457}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6CAF035-6C6D-4ACE-BDED-6E15D27E6457}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6CAF035-6C6D-4ACE-BDED-6E15D27E6457}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
