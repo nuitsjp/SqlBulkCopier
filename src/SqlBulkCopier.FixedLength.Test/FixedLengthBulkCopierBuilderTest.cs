@@ -1,4 +1,5 @@
 using System.Text;
+using Dapper;
 using Microsoft.Data.SqlClient;
 
 namespace SqlBulkCopier.FixedLength.Test;
@@ -28,6 +29,9 @@ public class FixedLengthBulkCopierBuilderTest
 
         await using SqlConnection sqlConnection = new(ConnectionString);
         await sqlConnection.OpenAsync();
+
+        await sqlConnection.ExecuteAsync("delete from [SalesLT].[SalesOrderDetail2]");
+
         Stream stream = File.Open("SalesOrderDetail.txt", FileMode.Open);
         await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8);
     }
