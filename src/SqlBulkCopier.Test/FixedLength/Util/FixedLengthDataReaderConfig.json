@@ -1,0 +1,25 @@
+{
+  "Columns": {
+    "Id": {
+      "Ordinal": 0,
+      "Offset": 0,
+      "Length": 5,
+      "TrimMode": "TrimStart",
+      "TrimChars": " 0123",
+      "IsEmptyNull": true
+    },
+    "Name": {
+      "Ordinal": 1,
+      "Offset": 5,
+      "Length": 10,
+      "TrimMode": "TrimEnd"
+    },
+    "Description": {
+      "Ordinal": 2,
+      "Offset": 15,
+      "Length": 20,
+      "TrimMode": "Trim",
+      "IsEmptyNull": false
+    }
+  }
+}
