@@ -9,20 +9,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Dapper" Version="2.1.35" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\SqlBulkCopier.CsvHelper.Hosting\SqlBulkCopier.CsvHelper.Hosting.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Update="appsettings.json">
+		<Content Include="..\Sample.CsvHelper\appsettings.json" Link="appsettings.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="Assets\Customer.csv">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+		</Content>
 	</ItemGroup>
 
 </Project>
