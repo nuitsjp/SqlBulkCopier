@@ -31,7 +31,9 @@ namespace SqlBulkCopier.FixedLength.Hosting
             var columns = sqlBulkCopier.GetSection("Columns");
             foreach (var column in columns.GetChildren())
             {
-                builder.AddColumnMapping(column.Key, 0, 1, SetupContext(column));
+                var offset = column.GetValue<int>("Offset");
+                var length = column.GetValue<int>("Length");
+                builder.AddColumnMapping(column.Key, offset, length, SetupContext(column));
             }
 
             return builder;

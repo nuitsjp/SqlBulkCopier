@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.CsvHelper", "Sample.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.SetupSampleDatabase", "Sample.SetupSampleDatabase\Sample.SetupSampleDatabase.csproj", "{BE703052-4BCE-449A-8AD3-8722E4547F6D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.FixedLength", "Sample.FixedLength\Sample.FixedLength.csproj", "{DDDD4647-ED1D-4B83-94F5-FD1A343C37D6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,6 +67,10 @@ Global
 		{BE703052-4BCE-449A-8AD3-8722E4547F6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE703052-4BCE-449A-8AD3-8722E4547F6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE703052-4BCE-449A-8AD3-8722E4547F6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDDD4647-ED1D-4B83-94F5-FD1A343C37D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDDD4647-ED1D-4B83-94F5-FD1A343C37D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDDD4647-ED1D-4B83-94F5-FD1A343C37D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDDD4647-ED1D-4B83-94F5-FD1A343C37D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -72,6 +78,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{FE340D2D-B717-42F8-B8AC-8D6700155643} = {514A3C1E-4F5C-44EB-9E51-9F58DD4A5CC3}
 		{BE703052-4BCE-449A-8AD3-8722E4547F6D} = {514A3C1E-4F5C-44EB-9E51-9F58DD4A5CC3}
+		{DDDD4647-ED1D-4B83-94F5-FD1A343C37D6} = {514A3C1E-4F5C-44EB-9E51-9F58DD4A5CC3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EF09E00D-B913-4C37-9CB3-9FE140D1D1B2}
