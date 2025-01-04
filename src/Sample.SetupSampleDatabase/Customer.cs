@@ -32,44 +32,40 @@ public class Customer
 
     public static async Task WriteFixedLengthAsync(string path, int count)
     {
-        var customers = GenerateCustomers(100);
-        var bytes = await CreateFixedLengthAsync(customers);
-        await File.WriteAllBytesAsync(path, bytes);
+        var customers = GenerateCustomers(count);
+        await CreateFixedLengthAsync(customers, path);
     }
 
     public static async Task WriteCsvAsync(string path, int count)
     {
-        var customers = GenerateCustomers(100);
-        var bytes = await CreateCsvAsync(customers);
-        await File.WriteAllBytesAsync(path, bytes);
+        var customers = GenerateCustomers(count);
+        await CreateCsvAsync(customers, path);
     }
 
-    public static async Task<byte[]> CreateCsvAsync(List<Customer> customers, bool includeHeader = true)
+    public static async Task CreateCsvAsync(IEnumerable<Customer> customers, string path)
     {
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
-            HasHeaderRecord = includeHeader,
+            HasHeaderRecord = true,
             Delimiter = ",",
             NewLine = "\r\n",
             Encoding = Encoding.UTF8,
             ShouldQuote = args => true,
         };
 
-        var memoryStream = new MemoryStream();
+        await using var memoryStream = File.OpenWrite(path);
         await using var writer = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true);
         await using var csv = new CsvWriter(writer, config);
 
         csv.Context.RegisterClassMap<CustomerMap>();
         await csv.WriteRecordsAsync(customers);
         await writer.FlushAsync();
-
-        return memoryStream.ToArray();
     }
 
-    static List<Customer> GenerateCustomers(int count)
+    static IEnumerable<Customer> GenerateCustomers(int count)
     {
         var idSeed = 0;
-        var faker = new Faker<Customer>("ja")
+        var faker = new Faker<Customer>("en_US")
             .RuleFor(x => x.CustomerId, _ => ++idSeed)
             .RuleFor(x => x.FirstName, f => f.Name.FirstName())
             .RuleFor(x => x.LastName, f => f.Name.LastName())
@@ -95,18 +91,34 @@ public class Customer
             .RuleFor(x => x.CreatedAt, DateTime.Now)
             .RuleFor(x => x.UpdatedAt, DateTime.Now);
 
-        return faker.Generate(count);
+        for (var i = 0; i < count; i++)
+        {
+            yield return faker.Generate();
+        }
     }
 
-    static async Task<byte[]> CreateFixedLengthAsync(List<Customer> dataList)
+    static async Task CreateFixedLengthAsync(IEnumerable<Customer> dataList, string path)
     {
         // UTF-8 エンコーディング (BOM なし)
         Encoding encoding = new UTF8Encoding(false);
 
-        using var stream = new MemoryStream();
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+
+        await using var stream = File.OpenWrite(path);
         await using var writer = new StreamWriter(stream, encoding);
+
+        var rowNumber = 0;
         foreach (var item in dataList)
         {
+            rowNumber++;
+            if (rowNumber % 100 == 0)
+            {
+                Console.Write($"\rWriting {rowNumber:###,###,###,###} records...");
+            }
+
             // 数値系
             await writer.WriteAsync(PadRightBytes(item.CustomerId?.ToString() ?? "", 10, encoding));
             await writer.WriteAsync(PadRightBytes(item.Income?.ToString("0.00") ?? "", 21, encoding));
@@ -142,12 +154,11 @@ public class Customer
             // NVARCHAR(MAX)フィールド - 適当な長さで切る
             await writer.WriteAsync(PadRightBytes(item.Notes ?? "", 500, encoding));
 
+
             await writer.WriteLineAsync(); // 行区切り
         }
 
         await writer.FlushAsync();
-
-        return stream.ToArray();
     }
 
     // 参考コードと同じPadRightBytesメソッドが必要です
