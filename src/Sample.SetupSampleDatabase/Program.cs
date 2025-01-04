@@ -6,6 +6,7 @@ using Sample.SetupSampleDatabase;
 
 await SetupDatabaseAsync();
 await Customer.WriteFixedLengthAsync(@"..\..\..\Asserts\Customer.dat", 100);
+await Customer.WriteCsvAsync(@"..\..\..\Asserts\Customer.csv", 100);
 
 Console.WriteLine("Setup Success.");
 return;

@@ -1,5 +1,8 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using Bogus;
+using CsvHelper.Configuration;
+using CsvHelper;
 
 namespace Sample.SetupSampleDatabase;
 
@@ -32,6 +35,35 @@ public class Customer
         var customers = GenerateCustomers(100);
         var bytes = await CreateFixedLengthAsync(customers);
         await File.WriteAllBytesAsync(path, bytes);
+    }
+
+    public static async Task WriteCsvAsync(string path, int count)
+    {
+        var customers = GenerateCustomers(100);
+        var bytes = await CreateCsvAsync(customers);
+        await File.WriteAllBytesAsync(path, bytes);
+    }
+
+    public static async Task<byte[]> CreateCsvAsync(List<Customer> customers, bool includeHeader = true)
+    {
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = includeHeader,
+            Delimiter = ",",
+            NewLine = "\r\n",
+            Encoding = Encoding.UTF8,
+            ShouldQuote = args => true,
+        };
+
+        var memoryStream = new MemoryStream();
+        await using var writer = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true);
+        await using var csv = new CsvWriter(writer, config);
+
+        csv.Context.RegisterClassMap<CustomerMap>();
+        await csv.WriteRecordsAsync(customers);
+        await writer.FlushAsync();
+
+        return memoryStream.ToArray();
     }
 
     static List<Customer> GenerateCustomers(int count)
