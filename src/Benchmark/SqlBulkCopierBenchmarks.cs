@@ -11,20 +11,21 @@ namespace Benchmark;
 
 public class SqlBulkCopierBenchmarks
 {
-    //private const string CsvFile = "Customer.csv";
-    //private const string FixedLengthFile = "Customer.dat";
-    private const string CsvFile = "Customer_10_000_000.csv";
-    private const string FixedLengthFile = "Customer_10_000_000.dat";
+    private const int Count = 10_000;
+    private string CsvFile => $"Customer_{Count:###_###_###_###}.csv";
+    private string FixedLengthFile => $"Customer_{Count:###_###_###_###}.dat";
+    //private const string CsvFile = "Customer_10_000_000.csv";
+    //private const string FixedLengthFile = "Customer_10_000_000.dat";
     public async Task RunAsync()
     {
         Console.WriteLine("Setup");
         await SetupAsync();
 
-        (string Name, Func<Task> Task)[] benchmarks =
+        (string File, string Name, Func<Task> Task)[] benchmarks =
         [
-            ("SQL BULK INSERT", NativeBulkInsert),
-            ("SqlBulkCopier from CSV", SqlBulkCopierFromCsv),
-            ("SqlBulkCopier from Fixed Length", SqlBulkCopierFromFixedLength)
+            ("CSV", "SQL BULK INSERT", NativeBulkInsert),
+            ("CSV", "SqlBulkCopier", SqlBulkCopierFromCsv),
+            ("Fixed Length", "SqlBulkCopier", SqlBulkCopierFromFixedLength)
         ];
 
         List<Result> results = [];
@@ -37,7 +38,7 @@ public class SqlBulkCopierBenchmarks
             await benchmark.Task();
             stopwatch.Stop();
             Console.WriteLine($" {stopwatch.Elapsed}");
-            results.Add(new Result(benchmark.Name, stopwatch.Elapsed));
+            results.Add(new Result(benchmark.File, benchmark.Name, stopwatch.Elapsed));
         }
 
         Build
@@ -47,21 +48,17 @@ public class SqlBulkCopierBenchmarks
 
     public async Task SetupAsync()
     {
-        if (File.Exists("Customer.csv") is false)
+        if (File.Exists(CsvFile) is false)
         {
-            await Customer.WriteCsvAsync("Customer.csv", 100);
+            Console.WriteLine("Create CSV file...");
+            await Customer.WriteCsvAsync(CsvFile, Count);
+            Console.WriteLine();
         }
-        if (File.Exists("Customer.dat") is false)
+        if (File.Exists(FixedLengthFile) is false)
         {
-            await Customer.WriteFixedLengthAsync("Customer.dat", 100);
-        }
-        if (File.Exists("Customer_10_000_000.csv") is false)
-        {
-            await Customer.WriteCsvAsync("Customer_10_000_000.csv", 10_000_000);
-        }
-        if (File.Exists("Customer_10_000_000.dat") is false)
-        {
-            await Customer.WriteFixedLengthAsync("Customer_10_000_000.dat", 10_000_000);
+            Console.WriteLine("Create Fixed Length file...");
+            await Customer.WriteFixedLengthAsync(FixedLengthFile, Count);
+            Console.WriteLine();
         }
 
         await Database.SetupAsync(true);
@@ -69,6 +66,7 @@ public class SqlBulkCopierBenchmarks
 
     public async Task TruncateAsync()
     {
+        Console.WriteLine("Truncate data and logs.");
         await using var connection = Database.Open();
         await connection.ExecuteAsync(
             """
@@ -309,4 +307,4 @@ public class SqlBulkCopierBenchmarks
 }
 
 
-public record Result(string Name, TimeSpan Time);
+public record Result(string File, string Name, TimeSpan Time);

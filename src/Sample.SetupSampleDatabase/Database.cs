@@ -22,6 +22,7 @@ public class Database
 
     public static async Task SetupAsync(bool alterFileSize = false)
     {
+        Console.WriteLine("Create database...");
         const string databaseName = "SqlBulkCopier";
 
         await using SqlConnection masterConnection = new(ConnectionString);
