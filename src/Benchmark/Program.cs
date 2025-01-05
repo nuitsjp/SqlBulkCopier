@@ -1,3 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using Benchmark;
 
-Console.WriteLine("Hello, World!");
+await new SqlBulkCopierBenchmarks()
+    .RunAsync();
