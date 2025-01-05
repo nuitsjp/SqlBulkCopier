@@ -1,19 +1,30 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using Dapper;
 using FluentTextTable;
+using Microsoft.Extensions.Configuration;
 using Sample.SetupSampleDatabase;
+using SqlBulkCopier.CsvHelper.Hosting;
+using SqlBulkCopier.FixedLength.Hosting;
 
 namespace Benchmark;
 
 public class SqlBulkCopierBenchmarks
 {
+    //private const string CsvFile = "Customer.csv";
+    //private const string FixedLengthFile = "Customer.dat";
+    private const string CsvFile = "Customer_10_000_000.csv";
+    private const string FixedLengthFile = "Customer_10_000_000.dat";
     public async Task RunAsync()
     {
+        Console.WriteLine("Setup");
         await SetupAsync();
 
         (string Name, Func<Task> Task)[] benchmarks =
         [
-            ("SQL BULK INSERT", NativeBulkInsert)
+            ("SQL BULK INSERT", NativeBulkInsert),
+            ("SqlBulkCopier from CSV", SqlBulkCopierFromCsv),
+            ("SqlBulkCopier from Fixed Length", SqlBulkCopierFromFixedLength)
         ];
 
         List<Result> results = [];
@@ -21,9 +32,11 @@ public class SqlBulkCopierBenchmarks
         {
             await TruncateAsync();
 
+            Console.Write($"{benchmark.Name}...");
             var stopwatch = Stopwatch.StartNew();
             await benchmark.Task();
             stopwatch.Stop();
+            Console.WriteLine($" {stopwatch.Elapsed}");
             results.Add(new Result(benchmark.Name, stopwatch.Elapsed));
         }
 
@@ -34,6 +47,23 @@ public class SqlBulkCopierBenchmarks
 
     public async Task SetupAsync()
     {
+        if (File.Exists("Customer.csv") is false)
+        {
+            await Customer.WriteCsvAsync("Customer.csv", 100);
+        }
+        if (File.Exists("Customer.dat") is false)
+        {
+            await Customer.WriteFixedLengthAsync("Customer.dat", 100);
+        }
+        if (File.Exists("Customer_10_000_000.csv") is false)
+        {
+            await Customer.WriteCsvAsync("Customer_10_000_000.csv", 10_000_000);
+        }
+        if (File.Exists("Customer_10_000_000.dat") is false)
+        {
+            await Customer.WriteFixedLengthAsync("Customer_10_000_000.dat", 10_000_000);
+        }
+
         await Database.SetupAsync(true);
     }
 
@@ -53,21 +83,229 @@ public class SqlBulkCopierBenchmarks
 
     public async Task NativeBulkInsert()
     {
+        var fullPath = new FileInfo(CsvFile).Directory!.FullName;
         await using var connection = Database.Open();
         await connection.ExecuteAsync(
-            """
+            $"""
             BULK INSERT SqlBulkCopier.dbo.Customer
-            FROM 'D:\SqlBulkCopier\src\Sample.SetupSampleDatabase\Asserts\Customer.csv'
+            FROM '{fullPath}\{CsvFile}'
             WITH
             (
-                FORMATFILE = 'D:\SqlBulkCopier\src\Sample.SetupSampleDatabase\Asserts\Customer.fmt',
+                FORMATFILE = '{fullPath}\Customer.fmt',
                 FIRSTROW = 2,    -- ヘッダー行をスキップ
                 DATAFILETYPE = 'char',
                 CODEPAGE = '65001'  -- UTF-8エンコーディングを指定
             );
             """
+            ,
+            // コマンドタイムアウトを5分に変更
+            commandTimeout: 300
         );
     }
+
+    public async Task SqlBulkCopierFromCsv()
+    {
+        const string appsettings =
+            """
+            {
+              "ConnectionStrings": {
+                "DefaultConnection": "Data Source=.;Initial Catalog=SqlBulkCopier;Integrated Security=True;Trust Server Certificate=True"
+              },
+              "SqlBulkCopier": {
+                "DestinationTableName": "[dbo].[Customer]",
+                "HasHeader": true,
+                "DefaultColumnSettings": {
+                  "TrimMode": "TrimEnd",
+                  "TreatEmptyStringAsNull": true
+                },
+                "Columns": {
+                  "CustomerId": {},
+                  "FirstName": {},
+                  "LastName": {},
+                  "Email": {},
+                  "PhoneNumber": {},
+                  "AddressLine1": {},
+                  "AddressLine2": {},
+                  "City": {},
+                  "State": {},
+                  "PostalCode": {},
+                  "Country": {},
+                  "BirthDate": {
+                    "SqlDbType": "Date",
+                    "Format": "yyyy-MM-dd"
+                  },
+                  "Gender": {},
+                  "Occupation": {},
+                  "Income": {},
+                  "RegistrationDate": {
+                    "SqlDbType": "DateTime",
+                    "Format": "yyyy-MM-dd HH:mm:ss.fff"
+                  },
+                  "LastLogin": {
+                    "SqlDbType": "DateTime",
+                    "Format": "yyyy-MM-dd HH:mm:ss.fff"
+                  },
+                  "IsActive": { "SqlDbType": "Bit" }
+                }
+              }
+            }
+            """
+        ;
+
+        var configuration = BuildJsonConfig(appsettings);
+        var bulkCopier = CsvBulkCopierParser.Parse(configuration);
+
+        // Open a connection to the database
+        await using var connection = Database.Open();
+
+        // Write data to the database using the bulk copier
+        await using Stream stream = File.OpenRead(CsvFile);
+
+        // Bulk copy to the database
+        await bulkCopier.WriteToServerAsync(connection, stream, Encoding.UTF8);
+
+    }
+
+    public async Task SqlBulkCopierFromFixedLength()
+    {
+        const string appsettings =
+            """
+            {
+              "ConnectionStrings": {
+                "DefaultConnection": "Data Source=.;Initial Catalog=SqlBulkCopier;Integrated Security=True;Trust Server Certificate=True"
+              },
+              "SqlBulkCopier": {
+                "DestinationTableName": "[dbo].[Customer]",
+                "DefaultColumnSettings": {
+                  "TrimEnd": true,
+                  "TreatEmptyStringAsNull": true
+                },
+                "Columns": {
+                  "CustomerId": {
+                    "Offset": 0,
+                    "Length": 10
+                  },
+                  "Income": {
+                    "Offset": 10,
+                    "Length": 21,
+                    "SqlDbType": "Decimal"
+                  },
+                  "FirstName": {
+                    "Offset": 31,
+                    "Length": 50
+                  },
+                  "LastName": {
+                    "Offset": 81,
+                    "Length": 50
+                  },
+                  "Email": {
+                    "Offset": 131,
+                    "Length": 100
+                  },
+                  "PhoneNumber": {
+                    "Offset": 231,
+                    "Length": 20
+                  },
+                  "AddressLine1": {
+                    "Offset": 251,
+                    "Length": 100
+                  },
+                  "AddressLine2": {
+                    "Offset": 351,
+                    "Length": 100
+                  },
+                  "City": {
+                    "Offset": 451,
+                    "Length": 50
+                  },
+                  "State": {
+                    "Offset": 501,
+                    "Length": 50
+                  },
+                  "PostalCode": {
+                    "Offset": 551,
+                    "Length": 10
+                  },
+                  "Country": {
+                    "Offset": 561,
+                    "Length": 50
+                  },
+                  "BirthDate": {
+                    "Offset": 611,
+                    "Length": 8,
+                    "SqlDbType": "Date",
+                    "Format": "yyyyMMdd"
+                  },
+                  "RegistrationDate": {
+                    "Offset": 619,
+                    "Length": 14,
+                    "SqlDbType": "DateTime",
+                    "Format": "yyyyMMddHHmmss"
+                  },
+                  "LastLogin": {
+                    "Offset": 633,
+                    "Length": 14,
+                    "SqlDbType": "DateTime",
+                    "Format": "yyyyMMddHHmmss"
+                  },
+                  "CreatedAt": {
+                    "Offset": 647,
+                    "Length": 14,
+                    "SqlDbType": "DateTime",
+                    "Format": "yyyyMMddHHmmss"
+                  },
+                  "UpdatedAt": {
+                    "Offset": 661,
+                    "Length": 14,
+                    "SqlDbType": "DateTime",
+                    "Format": "yyyyMMddHHmmss"
+                  },
+                  "Gender": {
+                    "Offset": 675,
+                    "Length": 10
+                  },
+                  "Occupation": {
+                    "Offset": 685,
+                    "Length": 50
+                  },
+                  "IsActive": {
+                    "Offset": 735,
+                    "Length": 1,
+                    "SqlDbType": "Bit"
+                  },
+                  "Notes": {
+                    "Offset": 736,
+                    "Length": 500
+                  }
+                }
+              }
+            }
+            """
+        ;
+
+        var configuration = BuildJsonConfig(appsettings);
+        var bulkCopier = FixedLengthBulkCopierParser.Parse(configuration);
+
+        // Open a connection to the database
+        await using var connection = Database.Open();
+
+        // Write data to the database using the bulk copier
+        await using Stream stream = File.OpenRead(FixedLengthFile);
+
+        // Bulk copy to the database
+        await bulkCopier.WriteToServerAsync(connection, stream, Encoding.UTF8);
+
+    }
+
+
+    static IConfiguration BuildJsonConfig(string json)
+    {
+        using var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+        return new ConfigurationBuilder()
+            .AddJsonStream(memoryStream)
+            .Build();
+    }
+
 }
 
 

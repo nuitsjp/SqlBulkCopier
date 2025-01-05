@@ -13,6 +13,7 @@ namespace SqlBulkCopier
             using var sqlBulkCopy = new SqlBulkCopy(connection);
             sqlBulkCopy.DestinationTableName = DestinationTableName;
             DataReaderBuilder.SetupColumnMappings(sqlBulkCopy);
+            sqlBulkCopy.BulkCopyTimeout = 300;
             await sqlBulkCopy.WriteToServerAsync(DataReaderBuilder.Build(stream, encoding));
         }
     }

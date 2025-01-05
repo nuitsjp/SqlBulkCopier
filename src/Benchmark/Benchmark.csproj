@@ -8,11 +8,19 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Include="..\Sample.SetupSampleDatabase\Asserts\Customer.fmt" Link="Customer.fmt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="FluentTextTable" Version="1.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Sample.SetupSampleDatabase\Sample.SetupSampleDatabase.csproj" />
+		<ProjectReference Include="..\SqlBulkCopier.CsvHelper.Hosting\SqlBulkCopier.CsvHelper.Hosting.csproj" />
+		<ProjectReference Include="..\SqlBulkCopier.FixedLength.Hosting\SqlBulkCopier.FixedLength.Hosting.csproj" />
 	</ItemGroup>
 
 </Project>
