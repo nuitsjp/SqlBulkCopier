@@ -44,17 +44,23 @@ public class Customer
 
     public static async Task CreateCsvAsync(IEnumerable<Customer> customers, string path)
     {
+        var encoding = new UTF8Encoding(false);
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
             HasHeaderRecord = true,
             Delimiter = ",",
             NewLine = "\r\n",
-            Encoding = Encoding.UTF8,
-            ShouldQuote = args => true,
+            Encoding = encoding,
+            ShouldQuote = _ => false
         };
 
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+
         await using var memoryStream = File.OpenWrite(path);
-        await using var writer = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true);
+        await using var writer = new StreamWriter(memoryStream, encoding, leaveOpen: true);
         await using var csv = new CsvWriter(writer, config);
 
         csv.Context.RegisterClassMap<CustomerMap>();
@@ -70,13 +76,13 @@ public class Customer
             .RuleFor(x => x.FirstName, f => f.Name.FirstName())
             .RuleFor(x => x.LastName, f => f.Name.LastName())
             .RuleFor(x => x.Email, f => f.Internet.Email())
-            .RuleFor(x => x.PhoneNumber, f => f.Phone.PhoneNumber())
+            .RuleFor(x => x.PhoneNumber, f => f.Phone.PhoneNumber().Truncate(20))
             .RuleFor(x => x.AddressLine1, f => f.Address.StreetAddress())
             .RuleFor(x => x.AddressLine2, f => f.Address.SecondaryAddress())
             .RuleFor(x => x.City, f => f.Address.City())
             .RuleFor(x => x.State, f => f.Address.StateAbbr())
             .RuleFor(x => x.PostalCode, f => f.Address.ZipCode())
-            .RuleFor(x => x.Country, f => f.Address.Country().Truncate(50))
+            .RuleFor(x => x.Country, f => f.Address.Country().Truncate(50).Replace(",", string.Empty))
             .RuleFor(x => x.BirthDate, f => f.Date.Past(40, DateTime.Now.AddYears(-20))) // 20〜60歳ぐらい
             .RuleFor(x => x.Gender, f => f.PickRandom("Male", "Female", "Other"))
             .RuleFor(x => x.Occupation, f => f.Name.JobTitle())
@@ -93,6 +99,10 @@ public class Customer
 
         for (var i = 0; i < count; i++)
         {
+            if (i % 100 == 0)
+            {
+                Console.Write($"\rWriting {i:###,###,###,###} records...");
+            }
             yield return faker.Generate();
         }
     }
@@ -110,15 +120,8 @@ public class Customer
         await using var stream = File.OpenWrite(path);
         await using var writer = new StreamWriter(stream, encoding);
 
-        var rowNumber = 0;
         foreach (var item in dataList)
         {
-            rowNumber++;
-            if (rowNumber % 100 == 0)
-            {
-                Console.Write($"\rWriting {rowNumber:###,###,###,###} records...");
-            }
-
             // 数値系
             await writer.WriteAsync(PadRightBytes(item.CustomerId?.ToString() ?? "", 10, encoding));
             await writer.WriteAsync(PadRightBytes(item.Income?.ToString("0.00") ?? "", 21, encoding));

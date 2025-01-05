@@ -1,40 +1,48 @@
-﻿using CsvHelper.Configuration;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using CsvHelper.TypeConversion;
 
 namespace Sample.SetupSampleDatabase;
 
-public class CustomerMap : ClassMap<Customer>
+public sealed class CustomerMap : ClassMap<Customer>
 {
     public CustomerMap()
     {
-        // 数値系
-        Map(m => m.CustomerId).Index(0);
-        Map(m => m.Income).Index(1).TypeConverterOption.Format("F2");  // 小数点2桁で出力
+        Map(m => m.CustomerId);
+        Map(m => m.FirstName);
+        Map(m => m.LastName);
+        Map(m => m.Email);
+        Map(m => m.PhoneNumber);
+        Map(m => m.AddressLine1);
+        Map(m => m.AddressLine2);
+        Map(m => m.City);
+        Map(m => m.State);
+        Map(m => m.PostalCode);
+        Map(m => m.Country);
+        Map(m => m.BirthDate).TypeConverterOption.Format("yyyy-MM-dd");
+        Map(m => m.Gender);
+        Map(m => m.Occupation);
+        Map(m => m.Income).TypeConverterOption.Format("F2");  // 小数点2桁で出力
+        Map(m => m.RegistrationDate).TypeConverterOption.Format("yyyy-MM-dd HH:mm:ss.fff");
+        Map(m => m.LastLogin).TypeConverterOption.Format("yyyy-MM-dd HH:mm:ss.fff");
+        Map(m => m.IsActive).TypeConverter<BoolToIntConverter>();
+        Map(m => m.Notes);
+        Map(m => m.CreatedAt).TypeConverterOption.Format("yyyy-MM-dd HH:mm:ss.fff");
+        Map(m => m.UpdatedAt).TypeConverterOption.Format("yyyy-MM-dd HH:mm:ss.fff");
+    }
+}
 
-        // 名前・連絡先情報
-        Map(m => m.FirstName).Index(2);
-        Map(m => m.LastName).Index(3);
-        Map(m => m.Email).Index(4);
-        Map(m => m.PhoneNumber).Index(5);
+public class BoolToIntConverter : DefaultTypeConverter
+{
+    public override string ConvertToString(object value, IWriterRow row, MemberMapData memberMapData)
+    {
+        if (value == null) return "0";
+        return (bool)value ? "1" : "0";
+    }
 
-        // 住所情報
-        Map(m => m.AddressLine1).Index(6);
-        Map(m => m.AddressLine2).Index(7);
-        Map(m => m.City).Index(8);
-        Map(m => m.State).Index(9);
-        Map(m => m.PostalCode).Index(10);
-        Map(m => m.Country).Index(11);
-
-        // 日付系
-        Map(m => m.BirthDate).Index(12).TypeConverterOption.Format("yyyyMMdd");
-        Map(m => m.RegistrationDate).Index(13).TypeConverterOption.Format("yyyyMMddHHmmss");
-        Map(m => m.LastLogin).Index(14).TypeConverterOption.Format("yyyyMMddHHmmss");
-        Map(m => m.CreatedAt).Index(15).TypeConverterOption.Format("yyyyMMddHHmmss");
-        Map(m => m.UpdatedAt).Index(16).TypeConverterOption.Format("yyyyMMddHHmmss");
-
-        // その他の情報
-        Map(m => m.Gender).Index(17);
-        Map(m => m.Occupation).Index(18);
-        Map(m => m.IsActive).Index(19);
-        Map(m => m.Notes).Index(20);
+    public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
+    {
+        if (string.IsNullOrEmpty(text)) return false;
+        return text.Trim() == "1";
     }
 }
