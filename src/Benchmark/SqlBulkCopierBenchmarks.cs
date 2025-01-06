@@ -1,85 +1,106 @@
-﻿using System.Diagnostics;
+﻿using System.Globalization;
 using System.Text;
+using BenchmarkDotNet.Attributes;
+using CsvHelper;
 using Dapper;
-using FluentTextTable;
+using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Sample.SetupSampleDatabase;
 using SqlBulkCopier.CsvHelper.Hosting;
 using SqlBulkCopier.FixedLength.Hosting;
+using Z.Dapper.Plus;
 
 namespace Benchmark;
 
+[Config(typeof(TestConfig))]
+//[SimpleJob(RuntimeMoniker.Net80, launchCount: 1, warmupCount: 0, iterationCount: 1)]
 public class SqlBulkCopierBenchmarks
 {
-    private const int Count = 1_000_000;
-    private string CsvFile => $"Customer_{Count:###_###_###_###}.csv";
-    private string FixedLengthFile => $"Customer_{Count:###_###_###_###}.dat";
-    //private const string CsvFile = "Customer_10_000_000.csv";
-    //private const string FixedLengthFile = "Customer_10_000_000.dat";
-    public async Task RunAsync()
-    {
-        Console.WriteLine("Setup");
-        await SetupAsync();
+    [Params(
+        //1_000
+        10_000
+        , 100_000
+        , 1_000_000
+        //, 10_000_000
+        )]
+    public int Count = 100_000;
 
-        (string File, string Name, Func<Task> Task)[] benchmarks =
-        [
-            ("CSV", "SQL BULK INSERT", NativeBulkInsertFromCsv),
-            ("CSV", "SqlBulkCopier", SqlBulkCopierFromCsv),
-            ("Fixed Length", "SQL BULK INSERT", NativeBulkInsertFromFixedLength),
-            ("Fixed Length", "SqlBulkCopier", SqlBulkCopierFromFixedLength)
-        ];
+    private const string ArtifactsPath = @"C:\Repos\SqlBulkCopier\src\Sample.SetupSampleDatabase\Asserts";
 
-        List<Result> results = [];
-        foreach (var benchmark in benchmarks)
-        {
-            await TruncateAsync();
+    private string CsvFile => $@"{ArtifactsPath}\Customer_{Count:###_###_###_###}.csv";
+    private string FixedLengthFile => $@"{ArtifactsPath}\Customer_{Count:###_###_###_###}.dat";
 
-            Console.Write($"{benchmark.Name}...");
-            var stopwatch = Stopwatch.StartNew();
-            await benchmark.Task();
-            stopwatch.Stop();
-            Console.WriteLine($" {stopwatch.Elapsed}");
-            results.Add(new Result(benchmark.File, benchmark.Name, stopwatch.Elapsed));
-        }
+    private static readonly int CommandTimeout = (int)TimeSpan.FromMinutes(10).TotalSeconds;
 
-        Build
-            .TextTable<Result>()
-            .WriteLine(results);
-    }
-
-    public async Task SetupAsync()
+    [IterationSetup]
+    public void Setup()
     {
         if (File.Exists(CsvFile) is false)
         {
             Console.WriteLine("Create CSV file...");
-            await Customer.WriteCsvAsync(CsvFile, Count);
+            Customer.WriteCsvAsync(CsvFile, Count).Wait();
             Console.WriteLine();
         }
         if (File.Exists(FixedLengthFile) is false)
         {
             Console.WriteLine("Create Fixed Length file...");
-            await Customer.WriteFixedLengthAsync(FixedLengthFile, Count);
+            Customer.WriteFixedLengthAsync(FixedLengthFile, Count).Wait();
             Console.WriteLine();
         }
 
-        //await Database.SetupAsync(true);
-    }
+        // Database.SetupAsync(true).Wait();
 
-    public async Task TruncateAsync()
-    {
-        Console.WriteLine("Truncate data and logs.");
-        await using var connection = Database.Open();
-        await connection.ExecuteAsync(
+        using var connection = Database.Open();
+        connection.Execute(
             """
             USE SqlBulkCopier;
 
             truncate table [SqlBulkCopier].[dbo].[Customer]
 
             DBCC SHRINKFILE ('SqlBulkCopier_log', 1);
+
+            DECLARE @DataFileSize INT;
+            DECLARE @LogFileSize INT;
+            DECLARE @TargetDataSize INT = 5120; -- 目標データファイルサイズ（MB）
+            DECLARE @TargetLogSize INT = 10240; -- 目標ログファイルサイズ（MB）
+            
+            -- 現在のファイルサイズを取得（MB単位）
+            SELECT @DataFileSize = size/128
+            FROM sys.master_files
+            WHERE database_id = DB_ID('SqlBulkCopier')
+            AND name = 'SqlBulkCopier';
+            
+            SELECT @LogFileSize = size/128
+            FROM sys.master_files
+            WHERE database_id = DB_ID('SqlBulkCopier')
+            AND name = 'SqlBulkCopier_log';
+            
+            -- データファイルのサイズチェックと変更
+            IF @DataFileSize < @TargetDataSize
+            BEGIN
+                ALTER DATABASE SqlBulkCopier 
+                MODIFY FILE (
+                    NAME = 'SqlBulkCopier',
+                    SIZE = 5120MB
+                );
+            END
+            
+            -- ログファイルのサイズチェックと変更
+            IF @LogFileSize < @TargetLogSize
+            BEGIN
+                ALTER DATABASE SqlBulkCopier 
+                MODIFY FILE (
+                    NAME = 'SqlBulkCopier_log',
+                    SIZE = 10240MB
+                );
+            END
+            
             """
         );
     }
 
+    [Benchmark(Description = "CSV : BULK INSERT")]
     public async Task NativeBulkInsertFromCsv()
     {
         var fullPath = new FileInfo(CsvFile).Directory!.FullName;
@@ -87,7 +108,7 @@ public class SqlBulkCopierBenchmarks
         await connection.ExecuteAsync(
             $"""
             BULK INSERT SqlBulkCopier.dbo.Customer
-            FROM '{fullPath}\{CsvFile}'
+            FROM '{CsvFile}'
             WITH
             (
                 FORMATFILE = '{fullPath}\Customer.fmt',
@@ -97,36 +118,11 @@ public class SqlBulkCopierBenchmarks
             );
             """
             ,
-            // コマンドタイムアウトを5分に変更
-            commandTimeout: 300
+            commandTimeout: CommandTimeout
         );
     }
 
-    public async Task NativeBulkInsertFromFixedLength()
-    {
-        var fullPath = new FileInfo(FixedLengthFile).Directory!.FullName;
-        await using var connection = Database.Open();
-        await connection.ExecuteAsync(
-            $"""
-             BULK INSERT SqlBulkCopier.dbo.Customer
-             FROM '{fullPath}\{FixedLengthFile}'
-             WITH
-             (
-                 FORMATFILE = '{fullPath}\Customer.xml',
-             	 CODEPAGE = '65001',  -- UTF-8
-                 FIRSTROW = 1,
-                 DATAFILETYPE = 'widechar',  -- UTF-8ファイル用
-                 MAXERRORS = 0,
-                 ROWTERMINATOR = '\r\n'
-             );
-             """
-            ,
-            // コマンドタイムアウトを5分に変更
-            commandTimeout: 300
-        );
-    }
-
-
+    [Benchmark(Description = "CSV : SqlBulkCopier")]
     public async Task SqlBulkCopierFromCsv()
     {
         const string appsettings =
@@ -190,6 +186,100 @@ public class SqlBulkCopierBenchmarks
 
     }
 
+    //[Benchmark(Description = "CSV : CsvHelper and Dapper")]
+    //public async Task CsvHelperAndDapper()
+    //{
+    //    using var reader = new StreamReader(CsvFile);
+    //    using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+    //    csv.Context.RegisterClassMap<CustomerMap>();
+    //    var customers = csv.GetRecords<Customer>();
+
+    //    // Open a connection to the database
+    //    await using var connection = Database.Open();
+
+    //    foreach (var customer in customers)
+    //    {
+    //        await connection.SingleInsertAsync(customer);
+    //    }
+
+    //    //await connection.BulkInsertAsync(customers);
+    //}
+
+    [Benchmark(Description = "CSV : CsvHelper and Dapper Plus")]
+    public async Task CsvHelperAndDapperPlus()
+    {
+        using var reader = new StreamReader(CsvFile);
+        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+        csv.Context.RegisterClassMap<CustomerMap>();
+        var customers = csv.GetRecords<Customer>();
+
+        // Open a connection to the database
+        await using var connection = Database.Open();
+        await connection.BulkInsertAsync(customers);
+    }
+
+    //[Benchmark(Description = "CSV : EF Core AddRangeAsync")]
+    //public async Task CsvEfCore()
+    //{
+    //    using var reader = new StreamReader(CsvFile);
+    //    using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+    //    csv.Context.RegisterClassMap<CustomerMap>();
+    //    var customers = csv.GetRecords<Customer>();
+
+    //    // 既存のSqlConnectionを使用する場合
+    //    await using var connection = Database.Open();
+    //    var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+    //    optionsBuilder.UseSqlServer(connection);
+    //    var options = optionsBuilder.Options;
+    //    var context = new ApplicationDbContext(options);
+    //    await context.Customers.AddRangeAsync(customers);
+    //    await context.SaveChangesAsync();
+    //}
+
+    [Benchmark(Description = "CSV : EF Core Bulk Extensions")]
+    public async Task CsvEfCoreWithBulkExtensions()
+    {
+        using var reader = new StreamReader(CsvFile);
+        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+        csv.Context.RegisterClassMap<CustomerMap>();
+        var customers = csv.GetRecords<Customer>();
+
+        // 既存のSqlConnectionを使用する場合
+        await using var connection = Database.Open();
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseSqlServer(connection);
+        var options = optionsBuilder.Options;
+        var context = new ApplicationDbContext(options);
+        await context.BulkInsertAsync(customers);
+        await context.SaveChangesAsync();
+    }
+
+    [Benchmark(Description = "Fixed Length : BULK INSERT")]
+    public async Task NativeBulkInsertFromFixedLength()
+    {
+        var fullPath = new FileInfo(FixedLengthFile).Directory!.FullName;
+        await using var connection = Database.Open();
+        await connection.ExecuteAsync(
+            $"""
+             BULK INSERT SqlBulkCopier.dbo.Customer
+             FROM '{FixedLengthFile}'
+             WITH
+             (
+                 FORMATFILE = '{fullPath}\Customer.xml',
+             	 CODEPAGE = '65001',  -- UTF-8
+                 FIRSTROW = 1,
+                 DATAFILETYPE = 'widechar',  -- UTF-8ファイル用
+                 MAXERRORS = 0,
+                 ROWTERMINATOR = '\r\n'
+             );
+             """
+            ,
+            commandTimeout: CommandTimeout
+        );
+    }
+
+
+    [Benchmark(Description = "Fixed Length : SqlBulkCopier")]
     public async Task SqlBulkCopierFromFixedLength()
     {
         const string appsettings =

@@ -3,9 +3,11 @@ using System.Text;
 using Bogus;
 using CsvHelper.Configuration;
 using CsvHelper;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Sample.SetupSampleDatabase;
 
+[Table("Customer")]
 public class Customer
 {
     public int? CustomerId { get; set; }
