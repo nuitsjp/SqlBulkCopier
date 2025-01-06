@@ -16,12 +16,8 @@ public class TestConfig : ManualConfig
             .WithLaunchCount(1)
             .WithWarmupCount(0)
             .WithStrategy(RunStrategy.ColdStart));
-        //AddJob(Job.Default);
-        //AddJob(Job.Default.WithStrategy(RunStrategy.ColdStart));
 
-        // 最適化検証を無効化
         AddDiagnoser([MemoryDiagnoser.Default]);
         AddColumnProvider(DefaultColumnProviders.Instance);
-        WithOptions(ConfigOptions.DisableOptimizationsValidator);
     }
 }

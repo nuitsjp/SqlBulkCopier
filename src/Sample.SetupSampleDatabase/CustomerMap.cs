@@ -34,13 +34,13 @@ public sealed class CustomerMap : ClassMap<Customer>
 
 public class BoolToIntConverter : DefaultTypeConverter
 {
-    public override string ConvertToString(object value, IWriterRow row, MemberMapData memberMapData)
+    public override string ConvertToString(object? value, IWriterRow row, MemberMapData memberMapData)
     {
         if (value == null) return "0";
         return (bool)value ? "1" : "0";
     }
 
-    public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
+    public override object ConvertFromString(string? text, IReaderRow row, MemberMapData memberMapData)
     {
         if (string.IsNullOrEmpty(text)) return false;
         return text.Trim() == "1";
