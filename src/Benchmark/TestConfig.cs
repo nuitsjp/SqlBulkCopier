@@ -8,7 +8,8 @@ public class TestConfig : ManualConfig
 {
     public TestConfig()
     {
-        AddJob(Job.Default);
+        AddJob(Job.ShortRun
+            .WithStrategy(RunStrategy.ColdStart));
 
         // 最適化検証を無効化
         WithOptions(ConfigOptions.DisableOptimizationsValidator);
