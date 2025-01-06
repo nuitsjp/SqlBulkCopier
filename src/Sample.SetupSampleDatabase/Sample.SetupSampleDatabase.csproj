@@ -22,10 +22,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Asserts\" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <None Update="Asserts\Customer.fmt">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>

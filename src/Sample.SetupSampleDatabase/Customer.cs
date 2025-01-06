@@ -122,42 +122,27 @@ public class Customer
 
         foreach (var item in dataList)
         {
-            // 数値系
             await writer.WriteAsync(PadRightBytes(item.CustomerId?.ToString() ?? "", 10, encoding));
-            await writer.WriteAsync(PadRightBytes(item.Income?.ToString("0.00") ?? "", 21, encoding));
-
-            // 文字列系 - 名前・連絡先情報
             await writer.WriteAsync(PadRightBytes(item.FirstName ?? "", 50, encoding));
             await writer.WriteAsync(PadRightBytes(item.LastName ?? "", 50, encoding));
             await writer.WriteAsync(PadRightBytes(item.Email ?? "", 100, encoding));
             await writer.WriteAsync(PadRightBytes(item.PhoneNumber ?? "", 20, encoding));
-
-            // 文字列系 - 住所情報
             await writer.WriteAsync(PadRightBytes(item.AddressLine1 ?? "", 100, encoding));
             await writer.WriteAsync(PadRightBytes(item.AddressLine2 ?? "", 100, encoding));
             await writer.WriteAsync(PadRightBytes(item.City ?? "", 50, encoding));
             await writer.WriteAsync(PadRightBytes(item.State ?? "", 50, encoding));
             await writer.WriteAsync(PadRightBytes(item.PostalCode ?? "", 10, encoding));
             await writer.WriteAsync(PadRightBytes(item.Country ?? "", 50, encoding));
-
-            // 日付時刻系
-            await writer.WriteAsync(PadRightBytes(item.BirthDate?.ToString("yyyyMMdd") ?? "", 8, encoding));
-            await writer.WriteAsync(PadRightBytes(item.RegistrationDate?.ToString("yyyyMMddHHmmss") ?? "", 14, encoding));
-            await writer.WriteAsync(PadRightBytes(item.LastLogin?.ToString("yyyyMMddHHmmss") ?? "", 14, encoding));
-            await writer.WriteAsync(PadRightBytes(item.CreatedAt?.ToString("yyyyMMddHHmmss") ?? "", 14, encoding));
-            await writer.WriteAsync(PadRightBytes(item.UpdatedAt?.ToString("yyyyMMddHHmmss") ?? "", 14, encoding));
-
-            // その他の文字列フィールド
+            await writer.WriteAsync(PadRightBytes(item.BirthDate?.ToString("yyyy-MM-dd") ?? "", 10, encoding));
             await writer.WriteAsync(PadRightBytes(item.Gender ?? "", 10, encoding));
             await writer.WriteAsync(PadRightBytes(item.Occupation ?? "", 50, encoding));
-
-            // ビット値
+            await writer.WriteAsync(PadRightBytes(item.Income?.ToString("0.00") ?? "", 21, encoding));
+            await writer.WriteAsync(PadRightBytes(item.RegistrationDate?.ToString("yyyy-MM-dd HH:mm:ss.fff") ?? "", 23, encoding));
+            await writer.WriteAsync(PadRightBytes(item.LastLogin?.ToString("yyyy-MM-dd HH:mm:ss.fff") ?? "", 23, encoding));
             await writer.WriteAsync(PadRightBytes(item.IsActive == true ? "1" : "0", 1, encoding));
-
-            // NVARCHAR(MAX)フィールド - 適当な長さで切る
             await writer.WriteAsync(PadRightBytes(item.Notes ?? "", 500, encoding));
-
-
+            await writer.WriteAsync(PadRightBytes(item.CreatedAt?.ToString("yyyy-MM-dd HH:mm:ss.fff") ?? "", 23, encoding));
+            await writer.WriteAsync(PadRightBytes(item.UpdatedAt?.ToString("yyyy-MM-dd HH:mm:ss.fff") ?? "", 23, encoding));
             await writer.WriteLineAsync(); // 行区切り
         }
 
