@@ -1,5 +1,8 @@
 ﻿using System.Diagnostics;
 using Benchmark;
+using BenchmarkDotNet.Running;
+
+//var summary = BenchmarkRunner.Run<SqlBulkCopierBenchmarks>();
 
 var benchmarks = new SqlBulkCopierBenchmarks();
 var benchmarkItems = benchmarks.GetBenchmarkItems();
@@ -57,24 +60,3 @@ foreach (var result in aggregatedResults)
 
 
 public record BenchmarkResult(string FileType, string Name, TimeSpan Elapsed);
-
-//var summary = BenchmarkRunner.Run<SqlBulkCopierBenchmarks>();
-
-//benchmarks.Setup();
-//var stopwatch = Stopwatch.StartNew();
-//await benchmarks.EfCoreWithBulkExtensionsFromCsv();
-//stopwatch.Stop();
-//Console.WriteLine($"Elapsed: {stopwatch.ElapsedMilliseconds}ms");
-
-//benchmarks.Setup();
-//stopwatch.Restart();
-//await benchmarks.SqlBulkCopierFromCsv();
-//stopwatch.Stop();
-//Console.WriteLine($"Elapsed: {stopwatch.ElapsedMilliseconds}ms");
-
-
-//benchmarks.Setup();
-//stopwatch.Restart();
-//await benchmarks.NativeBulkInsertFromCsv();
-//stopwatch.Stop();
-//Console.WriteLine($"Elapsed: {stopwatch.ElapsedMilliseconds}ms");

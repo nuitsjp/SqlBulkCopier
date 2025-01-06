@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Text;
+using System.Threading.Channels;
 using BenchmarkDotNet.Attributes;
 using CsvHelper;
 using Dapper;
@@ -9,8 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Sample.SetupSampleDatabase;
 using SqlBulkCopier.CsvHelper.Hosting;
-using SqlBulkCopier.FixedLength.Hosting;
-using Z.Dapper.Plus;
 
 namespace Benchmark;
 
@@ -23,10 +22,10 @@ public class SqlBulkCopierBenchmarks
 {
     [Params(
         //1_000
-        //10_000
-        100_000
-        //, 1_000_000
-        //, 10_000_000
+        10_000
+        , 100_000
+        , 1_000_000
+        , 10_000_000
         )]
     public int Count = 100_000;
 
@@ -40,11 +39,12 @@ public class SqlBulkCopierBenchmarks
     public IEnumerable<BenchmarkItem> GetBenchmarkItems() =>
     [
         new ("CSV", "BULK INSERT", NativeBulkInsertFromCsv),
-        new ("CSV", "SqlBulkCopier", SqlBulkCopierFromCsv),
+        //new ("CSV", "SqlBulkCopier", SqlBulkCopierFromCsv),
         //new ("CSV", "CsvHelper and Dapper", CsvHelperAndDapper),
         //new ("CSV", "CsvHelper and Dapper Plus", CsvHelperAndDapperPlus),
         //new ("CSV", "EF Core AddRangeAsync", CsvEfCore),
-        new ("CSV", "EF Core Bulk Extensions", EfCoreWithBulkExtensionsFromCsv)
+        new ("CSV", "EF Core Bulk Extensions", EfCoreWithBulkExtensionsFromCsv),
+        new ("CSV", "EF Core Bulk Extensions manual batch", EfCoreWithBulkExtensionsManualBatchFromCsv)
     ];
 
     [IterationSetup]
@@ -268,6 +268,73 @@ public class SqlBulkCopierBenchmarks
         var context = new ApplicationDbContext(options);
         await context.BulkInsertAsync(customers);
         await context.SaveChangesAsync();
+        AssertResultCount(connection);
+    }
+
+
+    [Benchmark(Description = "CSV : EF Core Bulk Extensions manual batch.")]
+    // 並列処理を行う場合
+    public async Task EfCoreWithBulkExtensionsManualBatchFromCsv()
+    {
+        const int batchSize = 5000;
+        var bulkConfig = new BulkConfig
+        {
+            BulkCopyTimeout = 0,
+            BatchSize = batchSize,
+            EnableStreaming = true
+        };
+
+        var channel = Channel.CreateBounded<List<Customer>>(new BoundedChannelOptions(3)
+        {
+            FullMode = BoundedChannelFullMode.Wait
+        });
+
+        // 読み取りタスク
+        var readTask = Task.Run(async () =>
+        {
+            try
+            {
+                using var reader = new StreamReader(CsvFile);
+                using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+                csv.Context.RegisterClassMap<CustomerMap>();
+
+                var buffer = new List<Customer>(batchSize);
+                await foreach (var customer in csv.GetRecordsAsync<Customer>())
+                {
+                    buffer.Add(customer);
+                    if (buffer.Count >= batchSize)
+                    {
+                        await channel.Writer.WriteAsync(buffer);
+                        buffer = new List<Customer>(batchSize);
+                    }
+                }
+
+                if (buffer.Any())
+                {
+                    await channel.Writer.WriteAsync(buffer);
+                }
+            }
+            finally
+            {
+                channel.Writer.Complete();
+            }
+        });
+
+        // 書き込みタスク
+        await using var connection = Database.Open();
+        var writeTask = Task.Run(async () =>
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+            optionsBuilder.UseSqlServer(connection);
+            var context = new ApplicationDbContext(optionsBuilder.Options);
+
+            await foreach (var batch in channel.Reader.ReadAllAsync())
+            {
+                await context.BulkInsertAsync(batch, bulkConfig);
+            }
+        });
+
+        await Task.WhenAll(readTask, writeTask);
         AssertResultCount(connection);
     }
 
