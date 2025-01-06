@@ -11,7 +11,7 @@ namespace Benchmark;
 
 public class SqlBulkCopierBenchmarks
 {
-    private const int Count = 1_000;
+    private const int Count = 1_000_000;
     private string CsvFile => $"Customer_{Count:###_###_###_###}.csv";
     private string FixedLengthFile => $"Customer_{Count:###_###_###_###}.dat";
     //private const string CsvFile = "Customer_10_000_000.csv";
@@ -251,8 +251,7 @@ public class SqlBulkCopierBenchmarks
                   },
                   "BirthDate": {
                     "Offset": 590,
-                    "Length": 10,
-                    "SqlDbType": "Date"
+                    "Length": 10
                   },
                   "Gender": {
                     "Offset": 600,
@@ -264,18 +263,15 @@ public class SqlBulkCopierBenchmarks
                   },
                   "Income": {
                     "Offset": 660,
-                    "Length": 21,
-                    "SqlDbType": "Decimal"
+                    "Length": 21
                   },
                   "RegistrationDate": {
                     "Offset": 681,
-                    "Length": 23,
-                    "SqlDbType": "DateTime"
+                    "Length": 23
                   },
                   "LastLogin": {
                     "Offset": 704,
-                    "Length": 23,
-                    "SqlDbType": "DateTime"
+                    "Length": 23
                   },
                   "IsActive": {
                     "Offset": 727,
@@ -288,13 +284,11 @@ public class SqlBulkCopierBenchmarks
                   },
                   "CreatedAt": {
                     "Offset": 1228,
-                    "Length": 23,
-                    "SqlDbType": "DateTime"
+                    "Length": 23
                   },
                   "UpdatedAt": {
                     "Offset": 1251,
-                    "Length": 23,
-                    "SqlDbType": "DateTime"
+                    "Length": 23
                   }
                 }
               }

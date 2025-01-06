@@ -97,7 +97,7 @@ public class Customer
             .RuleFor(x => x.CreatedAt, DateTime.Now)
             .RuleFor(x => x.UpdatedAt, DateTime.Now);
 
-        for (var i = 0; i < count; i++)
+        for (var i = 1; i <= count; i++)
         {
             if (i % 100 == 0)
             {
