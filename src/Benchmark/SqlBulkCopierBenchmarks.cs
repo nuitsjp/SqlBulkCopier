@@ -14,6 +14,9 @@ using Z.Dapper.Plus;
 
 namespace Benchmark;
 
+public record BenchmarkItem(
+    string FileType, string Name, Func<Task> BenchmarkAsync);
+
 [Config(typeof(TestConfig))]
 //[SimpleJob(RuntimeMoniker.Net80, launchCount: 1, warmupCount: 0, iterationCount: 1)]
 public class SqlBulkCopierBenchmarks
@@ -33,6 +36,16 @@ public class SqlBulkCopierBenchmarks
     private string FixedLengthFile => $@"{ArtifactsPath}\Customer_{Count:###_###_###_###}.dat";
 
     private static readonly int CommandTimeout = (int)TimeSpan.FromMinutes(10).TotalSeconds;
+
+    public IEnumerable<BenchmarkItem> GetBenchmarkItems() =>
+    [
+        new ("CSV", "BULK INSERT", NativeBulkInsertFromCsv),
+        new ("CSV", "SqlBulkCopier", SqlBulkCopierFromCsv),
+        //new ("CSV", "CsvHelper and Dapper", CsvHelperAndDapper),
+        //new ("CSV", "CsvHelper and Dapper Plus", CsvHelperAndDapperPlus),
+        //new ("CSV", "EF Core AddRangeAsync", CsvEfCore),
+        new ("CSV", "EF Core Bulk Extensions", EfCoreWithBulkExtensionsFromCsv)
+    ];
 
     [IterationSetup]
     public void Setup()
@@ -245,7 +258,7 @@ public class SqlBulkCopierBenchmarks
         using var reader = new StreamReader(CsvFile);
         using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
         csv.Context.RegisterClassMap<CustomerMap>();
-        var customers = csv.GetRecords<Customer>();
+        var customers = csv.GetRecords<Customer>().ToArray();
 
         // 既存のSqlConnectionを使用する場合
         await using var connection = Database.Open();
@@ -256,6 +269,14 @@ public class SqlBulkCopierBenchmarks
         await context.BulkInsertAsync(customers);
         await context.SaveChangesAsync();
         AssertResultCount(connection);
+    }
+
+    private IEnumerable<Customer> ReadCustomer(CsvReader csvReader)
+    {
+        while (csvReader.Read())
+        {
+            yield return csvReader.GetRecord<Customer>();
+        }
     }
 
     //[Benchmark(Description = "Fixed Length : BULK INSERT")]
