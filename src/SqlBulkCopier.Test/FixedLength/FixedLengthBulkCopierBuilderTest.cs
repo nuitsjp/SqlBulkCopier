@@ -100,7 +100,7 @@ namespace SqlBulkCopier.Test.FixedLength
                 .Build();
 
             // ファイルを開いて実行
-            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8);
+            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
             // Assert
             var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
@@ -198,7 +198,7 @@ namespace SqlBulkCopier.Test.FixedLength
                 .Build();
 
             // ファイルを開いて実行
-            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, encoding);
+            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, encoding, TimeSpan.FromMinutes(30));
 
             // Assert
             var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(

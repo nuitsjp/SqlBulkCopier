@@ -8,12 +8,12 @@ namespace SqlBulkCopier
         string DestinationTableName,
         IDataReaderBuilder DataReaderBuilder) : IBulkCopier
     {
-        public async Task WriteToServerAsync(SqlConnection connection, Stream stream, Encoding encoding)
+        public async Task WriteToServerAsync(SqlConnection connection, Stream stream, Encoding encoding, TimeSpan timeout)
         {
             using var sqlBulkCopy = new SqlBulkCopy(connection);
             sqlBulkCopy.DestinationTableName = DestinationTableName;
             DataReaderBuilder.SetupColumnMappings(sqlBulkCopy);
-            sqlBulkCopy.BulkCopyTimeout = 300;
+            sqlBulkCopy.BulkCopyTimeout = (int)timeout.TotalSeconds;
             await sqlBulkCopy.WriteToServerAsync(DataReaderBuilder.Build(stream, encoding));
         }
     }

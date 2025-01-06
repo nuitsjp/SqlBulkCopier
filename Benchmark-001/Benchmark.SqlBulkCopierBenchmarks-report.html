@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>Benchmark.SqlBulkCopierBenchmarks-20250106-151628</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.22631.4602/23H2/2023Update/SunValley3)
+13th Gen Intel Core i9-13900H, 1 CPU, 20 logical and 14 physical cores
+.NET SDK 9.0.101
+  [Host]   : .NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2 [AttachedDebugger]
+  ShortRun : .NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2
+</code></pre>
+<pre><code>Job=ShortRun  InvocationCount=1  IterationCount=3  
+LaunchCount=1  RunStrategy=ColdStart  UnrollFactor=1  
+WarmupCount=3  
+</code></pre>
+
+<table>
+<thead><tr><th>Method                     </th><th>Count</th><th>Mean  </th><th>Error </th><th>StdDev</th><th>Median</th>
+</tr>
+</thead><tbody><tr><td>&#39;CSV : BULK INSERT&#39;</td><td>10000</td><td>84.53 ms</td><td>163.08 ms</td><td>8.939 ms</td><td>84.81 ms</td>
+</tr><tr><td>&#39;CSV : SqlBulkCopier&#39;</td><td>10000</td><td>235.14 ms</td><td>1,362.06 ms</td><td>74.659 ms</td><td>194.01 ms</td>
+</tr><tr><td>&#39;CSV : CsvHelper and Dapper Plus&#39;</td><td>10000</td><td>396.28 ms</td><td>4,660.28 ms</td><td>255.446 ms</td><td>263.96 ms</td>
+</tr><tr><td>&#39;CSV : EF Core Bulk Extensions&#39;</td><td>10000</td><td>198.58 ms</td><td>2,755.93 ms</td><td>151.062 ms</td><td>129.59 ms</td>
+</tr><tr><td>&#39;Fixed Length : BULK INSERT&#39;</td><td>10000</td><td>205.84 ms</td><td>2,763.00 ms</td><td>151.450 ms</td><td>123.18 ms</td>
+</tr><tr><td>&#39;Fixed Length : SqlBulkCopier&#39;</td><td>10000</td><td>403.02 ms</td><td>2,944.97 ms</td><td>161.424 ms</td><td>330.89 ms</td>
+</tr><tr><td>&#39;CSV : BULK INSERT&#39;</td><td>100000</td><td>862.88 ms</td><td>2,808.71 ms</td><td>153.955 ms</td><td>791.35 ms</td>
+</tr><tr><td>&#39;CSV : SqlBulkCopier&#39;</td><td>100000</td><td>1,221.87 ms</td><td>12,453.84 ms</td><td>682.637 ms</td><td>910.23 ms</td>
+</tr><tr><td>&#39;CSV : CsvHelper and Dapper Plus&#39;</td><td>100000</td><td>1,904.72 ms</td><td>7,885.92 ms</td><td>432.254 ms</td><td>1,803.65 ms</td>
+</tr><tr><td>&#39;CSV : EF Core Bulk Extensions&#39;</td><td>100000</td><td>588.65 ms</td><td>5,739.57 ms</td><td>314.605 ms</td><td>546.96 ms</td>
+</tr><tr><td>&#39;Fixed Length : BULK INSERT&#39;</td><td>100000</td><td>2,073.55 ms</td><td>10,349.30 ms</td><td>567.280 ms</td><td>1,917.81 ms</td>
+</tr><tr><td>&#39;Fixed Length : SqlBulkCopier&#39;</td><td>100000</td><td>2,824.31 ms</td><td>15,134.33 ms</td><td>829.564 ms</td><td>2,495.85 ms</td>
+</tr><tr><td>&#39;CSV : BULK INSERT&#39;</td><td>1000000</td><td>10,103.54 ms</td><td>18,203.28 ms</td><td>997.783 ms</td><td>9,812.12 ms</td>
+</tr><tr><td>&#39;CSV : SqlBulkCopier&#39;</td><td>1000000</td><td>9,246.17 ms</td><td>17,849.29 ms</td><td>978.380 ms</td><td>8,940.25 ms</td>
+</tr><tr><td>&#39;CSV : CsvHelper and Dapper Plus&#39;</td><td>1000000</td><td>16,834.91 ms</td><td>30,157.58 ms</td><td>1,653.039 ms</td><td>16,789.33 ms</td>
+</tr><tr><td>&#39;CSV : EF Core Bulk Extensions&#39;</td><td>1000000</td><td>3,336.95 ms</td><td>5,490.15 ms</td><td>300.934 ms</td><td>3,166.24 ms</td>
+</tr><tr><td>&#39;Fixed Length : BULK INSERT&#39;</td><td>1000000</td><td>25,546.74 ms</td><td>68,451.08 ms</td><td>3,752.035 ms</td><td>27,441.13 ms</td>
+</tr><tr><td>&#39;Fixed Length : SqlBulkCopier&#39;</td><td>1000000</td><td>25,296.11 ms</td><td>64,513.01 ms</td><td>3,536.176 ms</td><td>26,150.81 ms</td>
+</tr></tbody></table>
+</body>
+</html>

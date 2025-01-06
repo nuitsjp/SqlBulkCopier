@@ -22,7 +22,7 @@ public class BulkCopyService(
         await using Stream stream = File.OpenRead(@"Assets\Customer.csv");
 
         // Bulk copy to the database
-        await bulkCopier.WriteToServerAsync(connection, stream, Encoding.UTF8);
+        await bulkCopier.WriteToServerAsync(connection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
         // Stop the application when the task is completed
         applicationLifetime.StopApplication();

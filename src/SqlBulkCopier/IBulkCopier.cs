@@ -5,6 +5,6 @@ namespace SqlBulkCopier
 {
     public interface IBulkCopier
     {
-        Task WriteToServerAsync(SqlConnection connection, Stream stream, Encoding encoding);
+        Task WriteToServerAsync(SqlConnection connection, Stream stream, Encoding encoding, TimeSpan timeout);
     }
 }
