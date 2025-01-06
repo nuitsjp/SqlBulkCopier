@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Sample.SetupSampleDatabase;
@@ -8,10 +9,9 @@ using SqlBulkCopier.FixedLength.Hosting;
 namespace Benchmark;
 
 [Config(typeof(TestConfig))]
-//[SimpleJob(RuntimeMoniker.Net80, launchCount: 1, warmupCount: 0, iterationCount: 1)]
 public class FixedLengthBenchmarks : BenchmarksBase
 {
-    [Benchmark(Description = "Fixed Length : BULK INSERT", Baseline = true)]
+    [Benchmark(Description = "BULK INSERT", Baseline = true)]
     public async Task NativeBulkInsertFromFixedLength()
     {
         var fullPath = new FileInfo(FixedLengthFile).Directory!.FullName;
@@ -38,7 +38,7 @@ public class FixedLengthBenchmarks : BenchmarksBase
     }
 
 
-    [Benchmark(Description = "Fixed Length : SqlBulkCopier")]
+    [Benchmark(Description = "SqlBulkCopier")]
     public async Task SqlBulkCopierFromFixedLength()
     {
         const string appsettings =
