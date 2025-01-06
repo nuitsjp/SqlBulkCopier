@@ -11,7 +11,7 @@ namespace Benchmark;
 
 public class SqlBulkCopierBenchmarks
 {
-    private const int Count = 10_000;
+    private const int Count = 1_000;
     private string CsvFile => $"Customer_{Count:###_###_###_###}.csv";
     private string FixedLengthFile => $"Customer_{Count:###_###_###_###}.dat";
     //private const string CsvFile = "Customer_10_000_000.csv";
@@ -23,8 +23,9 @@ public class SqlBulkCopierBenchmarks
 
         (string File, string Name, Func<Task> Task)[] benchmarks =
         [
-            ("CSV", "SQL BULK INSERT", NativeBulkInsert),
+            ("CSV", "SQL BULK INSERT", NativeBulkInsertFromCsv),
             ("CSV", "SqlBulkCopier", SqlBulkCopierFromCsv),
+            ("Fixed Length", "SQL BULK INSERT", NativeBulkInsertFromFixedLength),
             ("Fixed Length", "SqlBulkCopier", SqlBulkCopierFromFixedLength)
         ];
 
@@ -61,7 +62,7 @@ public class SqlBulkCopierBenchmarks
             Console.WriteLine();
         }
 
-        await Database.SetupAsync(true);
+        //await Database.SetupAsync(true);
     }
 
     public async Task TruncateAsync()
@@ -79,7 +80,7 @@ public class SqlBulkCopierBenchmarks
         );
     }
 
-    public async Task NativeBulkInsert()
+    public async Task NativeBulkInsertFromCsv()
     {
         var fullPath = new FileInfo(CsvFile).Directory!.FullName;
         await using var connection = Database.Open();
@@ -100,6 +101,31 @@ public class SqlBulkCopierBenchmarks
             commandTimeout: 300
         );
     }
+
+    public async Task NativeBulkInsertFromFixedLength()
+    {
+        var fullPath = new FileInfo(FixedLengthFile).Directory!.FullName;
+        await using var connection = Database.Open();
+        await connection.ExecuteAsync(
+            $"""
+             BULK INSERT SqlBulkCopier.dbo.Customer
+             FROM '{fullPath}\{FixedLengthFile}'
+             WITH
+             (
+                 FORMATFILE = '{fullPath}\Customer.xml',
+             	 CODEPAGE = '65001',  -- UTF-8
+                 FIRSTROW = 1,
+                 DATAFILETYPE = 'widechar',  -- UTF-8ファイル用
+                 MAXERRORS = 0,
+                 ROWTERMINATOR = '\r\n'
+             );
+             """
+            ,
+            // コマンドタイムアウトを5分に変更
+            commandTimeout: 300
+        );
+    }
+
 
     public async Task SqlBulkCopierFromCsv()
     {
@@ -183,97 +209,92 @@ public class SqlBulkCopierBenchmarks
                     "Offset": 0,
                     "Length": 10
                   },
-                  "Income": {
-                    "Offset": 10,
-                    "Length": 21,
-                    "SqlDbType": "Decimal"
-                  },
                   "FirstName": {
-                    "Offset": 31,
+                    "Offset": 10,
                     "Length": 50
                   },
                   "LastName": {
-                    "Offset": 81,
+                    "Offset": 60,
                     "Length": 50
                   },
                   "Email": {
-                    "Offset": 131,
+                    "Offset": 110,
                     "Length": 100
                   },
                   "PhoneNumber": {
-                    "Offset": 231,
+                    "Offset": 210,
                     "Length": 20
                   },
                   "AddressLine1": {
-                    "Offset": 251,
+                    "Offset": 230,
                     "Length": 100
                   },
                   "AddressLine2": {
-                    "Offset": 351,
+                    "Offset": 330,
                     "Length": 100
                   },
                   "City": {
-                    "Offset": 451,
+                    "Offset": 430,
                     "Length": 50
                   },
                   "State": {
-                    "Offset": 501,
+                    "Offset": 480,
                     "Length": 50
                   },
                   "PostalCode": {
-                    "Offset": 551,
+                    "Offset": 530,
                     "Length": 10
                   },
                   "Country": {
-                    "Offset": 561,
+                    "Offset": 540,
                     "Length": 50
                   },
                   "BirthDate": {
-                    "Offset": 611,
-                    "Length": 8,
-                    "SqlDbType": "Date",
-                    "Format": "yyyyMMdd"
-                  },
-                  "RegistrationDate": {
-                    "Offset": 619,
-                    "Length": 14,
-                    "SqlDbType": "DateTime",
-                    "Format": "yyyyMMddHHmmss"
-                  },
-                  "LastLogin": {
-                    "Offset": 633,
-                    "Length": 14,
-                    "SqlDbType": "DateTime",
-                    "Format": "yyyyMMddHHmmss"
-                  },
-                  "CreatedAt": {
-                    "Offset": 647,
-                    "Length": 14,
-                    "SqlDbType": "DateTime",
-                    "Format": "yyyyMMddHHmmss"
-                  },
-                  "UpdatedAt": {
-                    "Offset": 661,
-                    "Length": 14,
-                    "SqlDbType": "DateTime",
-                    "Format": "yyyyMMddHHmmss"
+                    "Offset": 590,
+                    "Length": 10,
+                    "SqlDbType": "Date"
                   },
                   "Gender": {
-                    "Offset": 675,
+                    "Offset": 600,
                     "Length": 10
                   },
                   "Occupation": {
-                    "Offset": 685,
+                    "Offset": 610,
                     "Length": 50
                   },
+                  "Income": {
+                    "Offset": 660,
+                    "Length": 21,
+                    "SqlDbType": "Decimal"
+                  },
+                  "RegistrationDate": {
+                    "Offset": 681,
+                    "Length": 23,
+                    "SqlDbType": "DateTime"
+                  },
+                  "LastLogin": {
+                    "Offset": 704,
+                    "Length": 23,
+                    "SqlDbType": "DateTime"
+                  },
                   "IsActive": {
-                    "Offset": 735,
+                    "Offset": 727,
                     "Length": 1,
                     "SqlDbType": "Bit"
                   },
                   "Notes": {
-                    "Offset": 736,
+                    "Offset": 728,
                     "Length": 500
+                  },
+                  "CreatedAt": {
+                    "Offset": 1228,
+                    "Length": 23,
+                    "SqlDbType": "DateTime"
+                  },
+                  "UpdatedAt": {
+                    "Offset": 1251,
+                    "Length": 23,
+                    "SqlDbType": "DateTime"
                   }
                 }
               }

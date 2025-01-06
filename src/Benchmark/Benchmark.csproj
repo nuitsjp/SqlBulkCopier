@@ -8,6 +8,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Include="..\Sample.SetupSampleDatabase\Asserts\Customer.xml" Link="Customer.xml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
 	  <None Include="..\Sample.SetupSampleDatabase\Asserts\Customer.fmt" Link="Customer.fmt">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
