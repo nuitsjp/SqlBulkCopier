@@ -12,11 +12,11 @@ public class BenchmarksBase
     protected const string ArtifactsPath = @"C:\Repos\SqlBulkCopier\src\Sample.SetupSampleDatabase\Asserts";
 
     [Params(
-        1_000
+        //1_000
         //10_000
-        , 100_000
+        100_000
         //, 1_000_000
-        , 10_000_000
+        //, 10_000_000
     )]
     public int Count = 100_000;
 
