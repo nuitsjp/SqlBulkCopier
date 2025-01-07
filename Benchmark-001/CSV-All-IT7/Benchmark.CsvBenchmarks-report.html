@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>Benchmark.CsvBenchmarks-20250107-100747</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.22631.4602/23H2/2023Update/SunValley3)
+AMD Ryzen 9 7950X, 1 CPU, 32 logical and 16 physical cores
+.NET SDK 9.0.100-rc.2.24474.11
+  [Host]   : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI [AttachedDebugger]
+  ShortRun : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
+</code></pre>
+<pre><code>Job=ShortRun  InvocationCount=1  IterationCount=7  
+LaunchCount=1  RunStrategy=ColdStart  UnrollFactor=1  
+WarmupCount=0  
+</code></pre>
+
+<table>
+<thead><tr><th>Method             </th><th>Count</th><th>Mean   </th><th>Error </th><th>StdDev </th><th>Median </th><th>Ratio</th><th>RatioSD</th><th>Gen0  </th><th>Gen1  </th><th>Gen2</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>&#39;BULK INSERT&#39;</td><td>1000</td><td>12.84 ms</td><td>10.95 ms</td><td>4.860 ms</td><td>10.95 ms</td><td>0.96</td><td>0.63</td><td>-</td><td>-</td><td>-</td><td>7.38 KB</td><td>0.006</td>
+</tr><tr><td>SqlBulkCopier</td><td>1000</td><td>41.43 ms</td><td>168.59 ms</td><td>74.855 ms</td><td>15.01 ms</td><td>3.08</td><td>6.11</td><td>-</td><td>-</td><td>-</td><td>1175.07 KB</td><td>1.000</td>
+</tr><tr><td>&#39;Dapper Plus Bulk Insert&#39;</td><td>1000</td><td>1,249.43 ms</td><td>7,340.34 ms</td><td>3,259.158 ms</td><td>13.04 ms</td><td>92.96</td><td>260.90</td><td>-</td><td>-</td><td>-</td><td>2761.83 KB</td><td>2.350</td>
+</tr><tr><td>&#39;EF Core Bulk Extensions&#39;</td><td>1000</td><td>1,348.82 ms</td><td>7,420.81 ms</td><td>3,294.886 ms</td><td>40.16 ms</td><td>100.35</td><td>264.42</td><td>-</td><td>-</td><td>-</td><td>3630.17 KB</td><td>3.089</td>
+</tr><tr><td>&#39;BULK INSERT&#39;</td><td>100000</td><td>797.97 ms</td><td>712.99 ms</td><td>316.570 ms</td><td>682.63 ms</td><td>1.07</td><td>0.56</td><td>-</td><td>-</td><td>-</td><td>7.4 KB</td><td>0.000</td>
+</tr><tr><td>SqlBulkCopier</td><td>100000</td><td>903.21 ms</td><td>1,126.75 ms</td><td>500.284 ms</td><td>654.04 ms</td><td>1.21</td><td>0.78</td><td>6000.0000</td><td>-</td><td>-</td><td>104363.58 KB</td><td>1.000</td>
+</tr><tr><td>&#39;Dapper Plus Bulk Insert&#39;</td><td>100000</td><td>1,323.90 ms</td><td>1,469.34 ms</td><td>652.395 ms</td><td>1,082.57 ms</td><td>1.77</td><td>1.05</td><td>17000.0000</td><td>12000.0000</td><td>2000.0000</td><td>249328.05 KB</td><td>2.389</td>
+</tr><tr><td>&#39;EF Core Bulk Extensions&#39;</td><td>100000</td><td>1,581.24 ms</td><td>1,495.09 ms</td><td>663.831 ms</td><td>1,368.18 ms</td><td>2.11</td><td>1.14</td><td>19000.0000</td><td>15000.0000</td><td>2000.0000</td><td>330306.16 KB</td><td>3.165</td>
+</tr><tr><td>&#39;BULK INSERT&#39;</td><td>10000000</td><td>69,167.32 ms</td><td>24,633.24 ms</td><td>10,937.310 ms</td><td>62,450.92 ms</td><td>1.56</td><td>0.24</td><td>-</td><td>-</td><td>-</td><td>14.88 KB</td><td>0.000</td>
+</tr><tr><td>SqlBulkCopier</td><td>10000000</td><td>44,445.69 ms</td><td>5,261.11 ms</td><td>2,335.966 ms</td><td>43,504.83 ms</td><td>1.00</td><td>0.07</td><td>642000.0000</td><td>2000.0000</td><td>-</td><td>10500500.9 KB</td><td>1.000</td>
+</tr><tr><td>&#39;Dapper Plus Bulk Insert&#39;</td><td>10000000</td><td>88,509.15 ms</td><td>14,047.80 ms</td><td>6,237.312 ms</td><td>86,289.93 ms</td><td>2.00</td><td>0.16</td><td>1507000.0000</td><td>966000.0000</td><td>3000.0000</td><td>25096522.15 KB</td><td>2.390</td>
+</tr><tr><td>&#39;EF Core Bulk Extensions&#39;</td><td>10000000</td><td>121,410.20 ms</td><td>11,356.61 ms</td><td>5,042.405 ms</td><td>120,609.58 ms</td><td>2.74</td><td>0.16</td><td>1723000.0000</td><td>1075000.0000</td><td>2000.0000</td><td>34418070.19 KB</td><td>3.278</td>
+</tr></tbody></table>
+</body>
+</html>
