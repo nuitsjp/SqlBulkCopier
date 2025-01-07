@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Globalization;
+using FixedLengthHelper;
 using Microsoft.Extensions.Configuration;
 using SqlBulkCopier.Hosting;
 
@@ -28,6 +29,8 @@ namespace SqlBulkCopier.FixedLength.Hosting
             builder.SetDefaultColumnContext(
                 SetupContext(sqlBulkCopier.GetSection("DefaultColumnSettings")));
 
+            builder.SetRowFilter(GetRowFilter(sqlBulkCopier));
+
             var columns = sqlBulkCopier.GetSection("Columns");
             foreach (var column in columns.GetChildren())
             {
@@ -50,6 +53,25 @@ namespace SqlBulkCopier.FixedLength.Hosting
                 trimAction(c);
                 treatEmptyStringAsNullAction(c);
                 sqlDbTypeAction(c);
+            };
+        }
+
+        private static Predicate<IFixedLengthReader> GetRowFilter(IConfigurationSection sqlBulkCopier)
+        {
+            var rowFilter = sqlBulkCopier.GetSection("RowFilter");
+            var startsWith = rowFilter.GetSection("StartsWith").Get<string[]>();
+            var endsWith = rowFilter.GetSection("EndsWith").Get<string[]>();
+
+            return reader =>
+            {
+                if (startsWith is not null)
+                {
+                    foreach (var starts in startsWith)
+                    {
+                    }
+                }
+
+                return true;
             };
         }
 

@@ -1,8 +1,10 @@
 ﻿using System.Data;
 using System.Globalization;
 using System.Text;
+using FixedLengthHelper;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
+using Moq;
 using SqlBulkCopier.FixedLength;
 using SqlBulkCopier.FixedLength.Hosting;
 
@@ -1704,15 +1706,11 @@ namespace SqlBulkCopier.Test.FixedLength.Hosting
                                         {
                                           "SqlBulkCopier": {
                                             "DestinationTableName": "[dbo].[Customer]",
-                                            "HasHeader": true,
+                                            "RowFilter": {
+                                                "StartsWith": ["A", "B"]
+                                            },
                                             "Columns": {
-                                              "CustomerId": { "Offset": 0, "Length": 10 },
-                                              "BirthDate": {
-                                                "Offset": 10, 
-                                                "Length": 8,
-                                                "SqlDbType": "Date",
-                                                "Format": "yyyyMMdd"
-                                              }
+                                              "CustomerId": { "Offset": 0, "Length": 5 }
                                             }
                                           }
                                         }
@@ -1721,23 +1719,20 @@ namespace SqlBulkCopier.Test.FixedLength.Hosting
 
                     // Act
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
-                    builder.DefaultColumnContext(context);
-                    context.Build();
 
                     // Assert
-                    builder.Columns.Should().HaveCount(2);
-                    var customerId = builder.Columns.SingleOrDefault(x => x.Name == "CustomerId");
-                    customerId.Should().NotBeNull();
-                    customerId!.OffsetBytes.Should().Be(0);
-                    customerId.LengthBytes.Should().Be(10);
-
-                    var birthDate = builder.Columns.SingleOrDefault(x => x.Name == "BirthDate");
-                    birthDate.Should().NotBeNull();
-                    birthDate!.OffsetBytes.Should().Be(10);
-                    birthDate.LengthBytes.Should().Be(8);
-                    birthDate.SqlDbType.Should().Be(SqlDbType.Date);
-                    birthDate.Format.Should().Be("yyyyMMdd");
+                    var encoding = new UTF8Encoding(false);
+                    using var stream = new MemoryStream(encoding.GetBytes(
+                        """
+                        A skip by row filter
+                        12345
+                        B skip by row filter
+                        """));
+                    using var fixedLengthReader = new FixedLengthReader(new ByteStreamReader(stream), encoding);
+                    FixedLengthDataReader reader = new(fixedLengthReader, [], builder.RowFilter);
+                    reader.Read().Should().BeTrue();
+                    encoding.GetString(fixedLengthReader.CurrentRow).Should().Be("12345");
+                    reader.Read().Should().BeFalse();
 
                 }
             }
