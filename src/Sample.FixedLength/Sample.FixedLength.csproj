@@ -5,7 +5,6 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -13,21 +12,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\SqlBulkCopier.CsvHelper.Hosting\SqlBulkCopier.CsvHelper.Hosting.csproj" />
+		<ProjectReference Include="..\SqlBulkCopier.FixedLength.Hosting\SqlBulkCopier.FixedLength.Hosting.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="appsettings.json">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		<Folder Include="Assets\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\Sample.SetupSampleDatabase\Asserts\Customer.dat" Link="Assets\Customer.dat">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Assets\" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Include="..\Sample.SetupSampleDatabase\Asserts\Customer.csv" Link="Assets\Customer.csv">
+	  <None Update="appsettings.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>

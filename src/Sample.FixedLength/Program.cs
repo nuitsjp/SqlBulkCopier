@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Sample.CsvHelper;
-using SqlBulkCopier.CsvHelper.Hosting;
+using Sample.FixedLength;
+using SqlBulkCopier.FixedLength.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
 

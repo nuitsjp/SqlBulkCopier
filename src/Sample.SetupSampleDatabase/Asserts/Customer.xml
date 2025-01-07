@@ -1,0 +1,49 @@
+﻿<?xml version="1.0"?>
+<BCPFORMAT xmlns="http://schemas.microsoft.com/sqlserver/2004/bulkload/format" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<RECORD>
+		<FIELD ID="1" xsi:type="CharFixed" LENGTH="10" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="2" xsi:type="CharFixed" LENGTH="50" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="3" xsi:type="CharFixed" LENGTH="50" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="4" xsi:type="CharFixed" LENGTH="100" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="5" xsi:type="CharFixed" LENGTH="20" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="6" xsi:type="CharFixed" LENGTH="100" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="7" xsi:type="CharFixed" LENGTH="100" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="8" xsi:type="CharFixed" LENGTH="50" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="9" xsi:type="CharFixed" LENGTH="50" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="10" xsi:type="CharFixed" LENGTH="10" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="11" xsi:type="CharFixed" LENGTH="50" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="12" xsi:type="CharFixed" LENGTH="10" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="13" xsi:type="CharFixed" LENGTH="10" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="14" xsi:type="CharFixed" LENGTH="50" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="15" xsi:type="CharFixed" LENGTH="21" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="16" xsi:type="CharFixed" LENGTH="23" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="17" xsi:type="CharFixed" LENGTH="23" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="18" xsi:type="CharFixed" LENGTH="1" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="19" xsi:type="CharFixed" LENGTH="500" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="20" xsi:type="CharFixed" LENGTH="23" COLLATION="Japanese_CI_AS"/>
+		<FIELD ID="21" xsi:type="CharTerm" LENGTH="23" TERMINATOR="\r\n" COLLATION="Japanese_CI_AS"/>
+	</RECORD>
+	<ROW>
+		<COLUMN SOURCE="1" NAME="CustomerId" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="2" NAME="FirstName" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="3" NAME="LastName" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="4" NAME="Email" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="5" NAME="PhoneNumber" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="6" NAME="AddressLine1" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="7" NAME="AddressLine2" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="8" NAME="City" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="9" NAME="State" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="10" NAME="PostalCode" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="11" NAME="Country" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="12" NAME="BirthDate" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="13" NAME="Gender" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="14" NAME="Occupation" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="15" NAME="Income" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="16" NAME="RegistrationDate" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="17" NAME="LastLogin" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="18" NAME="IsActive" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="19" NAME="Notes" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="20" NAME="CreatedAt" xsi:type="SQLVARYCHAR"/>
+		<COLUMN SOURCE="21" NAME="UpdatedAt" xsi:type="SQLVARYCHAR"/>
+	</ROW>
+</BCPFORMAT>

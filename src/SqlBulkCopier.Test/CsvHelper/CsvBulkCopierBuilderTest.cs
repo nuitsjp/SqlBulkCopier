@@ -105,7 +105,7 @@ namespace SqlBulkCopier.Test.CsvHelper
                 // ビルド
                 .Build();
 
-            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8);
+            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
             // Assert
             var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
@@ -199,7 +199,7 @@ namespace SqlBulkCopier.Test.CsvHelper
                 // ビルド
                 .Build();
 
-            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8);
+            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
             // Assert
             var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
@@ -280,7 +280,7 @@ namespace SqlBulkCopier.Test.CsvHelper
                 // ビルド
                 .Build();
 
-            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8);
+            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
             // Assert
             var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
@@ -373,7 +373,7 @@ namespace SqlBulkCopier.Test.CsvHelper
                 // ビルド
                 .Build();
 
-            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8);
+            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
             // Assert
             var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
@@ -435,7 +435,7 @@ namespace SqlBulkCopier.Test.CsvHelper
                 .Build();
 
             // CSV から SQL Server へ
-            await sqlBulkCopier.WriteToServerAsync(connection, stream, Encoding.UTF8);
+            await sqlBulkCopier.WriteToServerAsync(connection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
             // Assert
             var insertedRows = (await connection.QueryAsync<Customer>(

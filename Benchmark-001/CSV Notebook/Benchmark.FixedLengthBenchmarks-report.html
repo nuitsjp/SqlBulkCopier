@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>Benchmark.FixedLengthBenchmarks-20250107-082909</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.22631.4602/23H2/2023Update/SunValley3)
+13th Gen Intel Core i9-13900H, 1 CPU, 20 logical and 14 physical cores
+.NET SDK 9.0.101
+  [Host]   : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2 [AttachedDebugger]
+  ShortRun : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
+</code></pre>
+<pre><code>Job=ShortRun  InvocationCount=1  IterationCount=7  
+LaunchCount=1  RunStrategy=ColdStart  UnrollFactor=1  
+WarmupCount=0  
+</code></pre>
+
+<table>
+<thead><tr><th>Method </th><th>Count</th><th>Mean   </th><th>Error  </th><th>StdDev </th><th>Median </th><th>Ratio</th><th>RatioSD</th><th>Gen0  </th><th>Gen1</th><th>Gen2</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>&#39;BULK INSERT&#39;</td><td>1000</td><td>23.79 ms</td><td>28.77 ms</td><td>12.77 ms</td><td>18.70 ms</td><td>1.18</td><td>0.73</td><td>-</td><td>-</td><td>-</td><td>7.49 KB</td><td>1.00</td>
+</tr><tr><td>SqlBulkCopier</td><td>1000</td><td>143.90 ms</td><td>513.69 ms</td><td>228.08 ms</td><td>28.64 ms</td><td>7.12</td><td>11.31</td><td>-</td><td>-</td><td>-</td><td>4919.13 KB</td><td>656.57</td>
+</tr><tr><td>&#39;BULK INSERT&#39;</td><td>100000</td><td>1,721.66 ms</td><td>1,943.03 ms</td><td>862.72 ms</td><td>1,366.25 ms</td><td>1.13</td><td>0.63</td><td>-</td><td>-</td><td>-</td><td>8.14 KB</td><td>1.00</td>
+</tr><tr><td>SqlBulkCopier</td><td>100000</td><td>1,910.47 ms</td><td>2,587.75 ms</td><td>1,148.98 ms</td><td>1,379.47 ms</td><td>1.26</td><td>0.81</td><td>38000.0000</td><td>-</td><td>-</td><td>465980.13 KB</td><td>57,241.32</td>
+</tr><tr><td>&#39;BULK INSERT&#39;</td><td>10000000</td><td>410,153.60 ms</td><td>299,783.54 ms</td><td>133,105.75 ms</td><td>375,547.93 ms</td><td>1.07</td><td>0.41</td><td>18000.0000</td><td>18000.0000</td><td>-</td><td>38.83 KB</td><td>1.00</td>
+</tr><tr><td>SqlBulkCopier</td><td>10000000</td><td>470,420.34 ms</td><td>229,455.95 ms</td><td>101,879.86 ms</td><td>506,914.41 ms</td><td>1.23</td><td>0.37</td><td>3942000.0000</td><td>53000.0000</td><td>4000.0000</td><td>47929314.27 KB</td><td>1,234,396.83</td>
+</tr></tbody></table>
+</body>
+</html>

@@ -1704,8 +1704,10 @@ namespace SqlBulkCopier.Test.FixedLength.Hosting
                                             "DestinationTableName": "[dbo].[Customer]",
                                             "HasHeader": true,
                                             "Columns": {
-                                              "CustomerId": {},
+                                              "CustomerId": { "Offset": 0, "Length": 10 },
                                               "BirthDate": {
+                                                "Offset": 10, 
+                                                "Length": 8,
                                                 "SqlDbType": "Date",
                                                 "Format": "yyyyMMdd"
                                               }
@@ -1725,10 +1727,14 @@ namespace SqlBulkCopier.Test.FixedLength.Hosting
                 builder.Columns.Should().HaveCount(2);
                 var customerId = builder.Columns.SingleOrDefault(x => x.Name == "CustomerId");
                 customerId.Should().NotBeNull();
+                customerId!.OffsetBytes.Should().Be(0);
+                customerId.LengthBytes.Should().Be(10);
 
                 var birthDate = builder.Columns.SingleOrDefault(x => x.Name == "BirthDate");
                 birthDate.Should().NotBeNull();
-                birthDate!.SqlDbType.Should().Be(SqlDbType.Date);
+                birthDate!.OffsetBytes.Should().Be(10);
+                birthDate.LengthBytes.Should().Be(8);
+                birthDate.SqlDbType.Should().Be(SqlDbType.Date);
                 birthDate.Format.Should().Be("yyyyMMdd");
             }
         }
