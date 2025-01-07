@@ -14,9 +14,9 @@ public class BenchmarksBase
     [Params(
         //1_000
         //10_000
-        100_000
+        //100_000
         //, 1_000_000
-        //, 10_000_000
+        10_000_000
     )]
     public int Count = 100_000;
 
