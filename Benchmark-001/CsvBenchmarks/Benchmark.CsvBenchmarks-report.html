@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>Benchmark.CsvBenchmarks-20250107-104111</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.22631.4602/23H2/2023Update/SunValley3)
+13th Gen Intel Core i9-13900H, 1 CPU, 20 logical and 14 physical cores
+.NET SDK 9.0.101
+  [Host]    : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2 [AttachedDebugger]
+  MediumRun : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
+</code></pre>
+<pre><code>Job=MediumRun  InvocationCount=1  IterationCount=15  
+LaunchCount=2  UnrollFactor=1  WarmupCount=1  
+</code></pre>
+
+<table>
+<thead><tr><th>Method </th><th>Count</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Ratio</th><th>RatioSD</th><th>Gen0 </th><th>Gen1</th><th>Gen2</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>&#39;BULK INSERT&#39;</td><td>10000000</td><td>2.022 m</td><td>0.0685 m</td><td>0.1004 m</td><td>0.99</td><td>0.07</td><td>7000.0000</td><td>7000.0000</td><td>-</td><td>20.38 KB</td><td>0.000</td>
+</tr><tr><td>SqlBulkCopier</td><td>10000000</td><td>2.045 m</td><td>0.0683 m</td><td>0.0980 m</td><td>1.00</td><td>0.07</td><td>882000.0000</td><td>12000.0000</td><td>1000.0000</td><td>10800740.41 KB</td><td>1.000</td>
+</tr></tbody></table>
+</body>
+</html>

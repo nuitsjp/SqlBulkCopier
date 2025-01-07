@@ -10,12 +10,13 @@ public class TestConfig : ManualConfig
 {
     public TestConfig()
     {
-        //AddJob(Job.Dry);
-        AddJob(Job.ShortRun
-            .WithIterationCount(7)
-            .WithLaunchCount(1)
-            .WithWarmupCount(0)
-            .WithStrategy(RunStrategy.ColdStart));
+        AddJob(Job.MediumRun
+            .WithWarmupCount(1));
+        //AddJob(Job.ShortRun
+        //    .WithIterationCount(7)
+        //    .WithLaunchCount(1)
+        //    .WithWarmupCount(0)
+        //    .WithStrategy(RunStrategy.ColdStart));
 
         AddDiagnoser([MemoryDiagnoser.Default]);
         AddColumnProvider(DefaultColumnProviders.Instance);
