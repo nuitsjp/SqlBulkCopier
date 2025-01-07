@@ -1694,6 +1694,54 @@ namespace SqlBulkCopier.Test.FixedLength.Hosting
                 }
             }
 
+            public class RowFilter
+            {
+                [Fact]
+                public void StartWith()
+                {
+                    // Arrange
+                    const string settings = """
+                                        {
+                                          "SqlBulkCopier": {
+                                            "DestinationTableName": "[dbo].[Customer]",
+                                            "HasHeader": true,
+                                            "Columns": {
+                                              "CustomerId": { "Offset": 0, "Length": 10 },
+                                              "BirthDate": {
+                                                "Offset": 10, 
+                                                "Length": 8,
+                                                "SqlDbType": "Date",
+                                                "Format": "yyyyMMdd"
+                                              }
+                                            }
+                                          }
+                                        }
+                                        """;
+                    var configuration = BuildJsonConfig(settings);
+
+                    // Act
+                    var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
+                    var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
+                    builder.DefaultColumnContext(context);
+                    context.Build();
+
+                    // Assert
+                    builder.Columns.Should().HaveCount(2);
+                    var customerId = builder.Columns.SingleOrDefault(x => x.Name == "CustomerId");
+                    customerId.Should().NotBeNull();
+                    customerId!.OffsetBytes.Should().Be(0);
+                    customerId.LengthBytes.Should().Be(10);
+
+                    var birthDate = builder.Columns.SingleOrDefault(x => x.Name == "BirthDate");
+                    birthDate.Should().NotBeNull();
+                    birthDate!.OffsetBytes.Should().Be(10);
+                    birthDate.LengthBytes.Should().Be(8);
+                    birthDate.SqlDbType.Should().Be(SqlDbType.Date);
+                    birthDate.Format.Should().Be("yyyyMMdd");
+
+                }
+            }
+
             [Fact]
             public void Column()
             {
