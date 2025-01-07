@@ -123,18 +123,18 @@ public class CsvBenchmarks : BenchmarksBase
     //    }
     //}
 
-    //[Benchmark(Description = "Dapper Plus Bulk Insert")]
-    //public async Task CsvHelperAndDapperPlus()
-    //{
-    //    using var reader = new StreamReader(CsvFile);
-    //    using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-    //    csv.Context.RegisterClassMap<CustomerMap>();
-    //    var customers = csv.GetRecords<Customer>();
+    [Benchmark(Description = "Dapper Plus Bulk Insert")]
+    public async Task CsvHelperAndDapperPlus()
+    {
+        using var reader = new StreamReader(CsvFile);
+        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+        csv.Context.RegisterClassMap<CustomerMap>();
+        var customers = csv.GetRecords<Customer>();
 
-    //    // Open a connection to the database
-    //    await using var connection = Database.Open();
-    //    await connection.BulkInsertAsync(customers);
-    //}
+        // Open a connection to the database
+        await using var connection = Database.Open();
+        await connection.BulkInsertAsync(customers);
+    }
 
     //[Benchmark(Description = "EF Core AddRangeAsync")]
     //public async Task CsvEfCore()
@@ -154,31 +154,31 @@ public class CsvBenchmarks : BenchmarksBase
     //    await context.SaveChangesAsync();
     //}
 
-    //[Benchmark(Description = "EF Core Bulk Extensions")]
-    //public async Task EfCoreWithBulkExtensionsFromCsv()
-    //{
-    //    using var reader = new StreamReader(CsvFile);
-    //    using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-    //    csv.Context.RegisterClassMap<CustomerMap>();
-    //    var customers = csv.GetRecords<Customer>().ToArray();
+    [Benchmark(Description = "EF Core Bulk Extensions")]
+    public async Task EfCoreWithBulkExtensionsFromCsv()
+    {
+        using var reader = new StreamReader(CsvFile);
+        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+        csv.Context.RegisterClassMap<CustomerMap>();
+        var customers = csv.GetRecords<Customer>().ToArray();
 
-    //    既存のSqlConnectionを使用する場合
-    //   await using var connection = Database.Open();
-    //    var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-    //    optionsBuilder.UseSqlServer(connection);
-    //    var options = optionsBuilder.Options;
+        //既存のSqlConnectionを使用する場合
+        await using var connection = Database.Open();
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseSqlServer(connection);
+        var options = optionsBuilder.Options;
 
-    //    var bulkConfig = new BulkConfig
-    //    {
-    //        BulkCopyTimeout = (int)CommandTimeout.TotalSeconds,
-    //        EnableStreaming = true
-    //    };
+        var bulkConfig = new BulkConfig
+        {
+            BulkCopyTimeout = (int)CommandTimeout.TotalSeconds,
+            EnableStreaming = true
+        };
 
-    //    var context = new ApplicationDbContext(options);
-    //    await context.BulkInsertAsync(customers, bulkConfig);
-    //    await context.SaveChangesAsync();
-    //    AssertResultCount(connection);
-    //}
+        var context = new ApplicationDbContext(options);
+        await context.BulkInsertAsync(customers, bulkConfig);
+        await context.SaveChangesAsync();
+        AssertResultCount(connection);
+    }
 
 
     //[Benchmark(Description = "EF Core Bulk Extensions manual batch.")]
