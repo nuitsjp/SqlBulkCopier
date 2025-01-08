@@ -14,8 +14,6 @@ using Z.Dapper.Plus;
 namespace Benchmark;
 
 [Config(typeof(TestConfig))]
-//[SimpleJob(RuntimeMoniker.Net80, launchCount: 1, warmupCount: 0, iterationCount: 1)]
-[RPlotExporter]
 public class CsvBenchmarks : BenchmarksBase
 {
     [Benchmark(Description = "BULK INSERT")]
