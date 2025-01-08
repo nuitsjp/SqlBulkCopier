@@ -15,7 +15,7 @@ namespace SqlBulkCopier.FixedLength
 
         private readonly List<FixedLengthColumn> _columns = [];
         public List<FixedLengthColumn> Columns => _columns;
-        private Predicate<IFixedLengthReader> _rowFilter = _ => true;
+        public Predicate<IFixedLengthReader> RowFilter { get; private set; } = _ => true;
         private readonly string _destinationTableName;
 
         private FixedLengthBulkCopierBuilder(string destinationTableName)
@@ -31,7 +31,7 @@ namespace SqlBulkCopier.FixedLength
 
         public IFixedLengthBulkCopierBuilder SetRowFilter(Predicate<IFixedLengthReader> rowFilter)
         {
-            _rowFilter = rowFilter;
+            RowFilter = rowFilter;
             return this;
         }
 
@@ -50,7 +50,7 @@ namespace SqlBulkCopier.FixedLength
         {
             return new BulkCopier(
                 _destinationTableName,
-                new FixedLengthDataReaderBuilder(_columns, _rowFilter));
+                new FixedLengthDataReaderBuilder(_columns, RowFilter));
         }
     }
 }

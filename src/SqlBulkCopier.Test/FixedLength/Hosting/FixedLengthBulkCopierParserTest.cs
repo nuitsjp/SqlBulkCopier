@@ -1,8 +1,10 @@
 ﻿using System.Data;
 using System.Globalization;
 using System.Text;
+using FixedLengthHelper;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
+using Moq;
 using SqlBulkCopier.FixedLength;
 using SqlBulkCopier.FixedLength.Hosting;
 
@@ -1691,6 +1693,47 @@ namespace SqlBulkCopier.Test.FixedLength.Hosting
                             column.DateTimeStyle.Should().Be(DateTimeStyles.AllowWhiteSpaces);
                         }
                     }
+                }
+            }
+
+            public class RowFilter
+            {
+                [Fact]
+                public void StartWith()
+                {
+                    // Arrange
+                    const string settings = """
+                                        {
+                                          "SqlBulkCopier": {
+                                            "DestinationTableName": "[dbo].[Customer]",
+                                            "RowFilter": {
+                                                "StartsWith": ["A", "B"]
+                                            },
+                                            "Columns": {
+                                              "CustomerId": { "Offset": 0, "Length": 5 }
+                                            }
+                                          }
+                                        }
+                                        """;
+                    var configuration = BuildJsonConfig(settings);
+
+                    // Act
+                    var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
+
+                    // Assert
+                    var encoding = new UTF8Encoding(false);
+                    using var stream = new MemoryStream(encoding.GetBytes(
+                        """
+                        A skip by row filter
+                        12345
+                        B skip by row filter
+                        """));
+                    using var fixedLengthReader = new FixedLengthReader(new ByteStreamReader(stream), encoding);
+                    FixedLengthDataReader reader = new(fixedLengthReader, [], builder.RowFilter);
+                    reader.Read().Should().BeTrue();
+                    encoding.GetString(fixedLengthReader.CurrentRow).Should().Be("12345");
+                    reader.Read().Should().BeFalse();
+
                 }
             }
 
