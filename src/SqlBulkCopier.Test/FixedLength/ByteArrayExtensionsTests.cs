@@ -42,6 +42,7 @@ public class ByteArrayExtensionsTests
         [InlineData(new byte[] { 1, 2, 3 }, new byte[] { 2, 3 }, false)]
         [InlineData(new byte[] { 1, 2, 3 }, new byte[] { 1, 2, 3 }, true)]
         [InlineData(new byte[] { 1 }, new byte[] { 1, 2 }, false)]
+        [InlineData(new byte[] { }, new byte[] { }, true)]
         public void WithValidInputs_ShouldReturnExpectedResult(byte[] source, byte[] pattern, bool expected)
         {
             // Act
@@ -89,6 +90,7 @@ public class ByteArrayExtensionsTests
         [InlineData(new byte[] { 1, 2, 3 }, new byte[] { 1, 2 }, false)]
         [InlineData(new byte[] { 1, 2, 3 }, new byte[] { 1, 2, 3 }, true)]
         [InlineData(new byte[] { 1 }, new byte[] { 1, 2 }, false)]
+        [InlineData(new byte[] { }, new byte[] { }, true)]
         public void WithValidInputs_ShouldReturnExpectedResult(byte[] source, byte[] pattern, bool expected)
         {
             // Act
