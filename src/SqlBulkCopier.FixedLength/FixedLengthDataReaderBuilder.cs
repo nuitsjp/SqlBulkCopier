@@ -27,7 +27,7 @@ namespace SqlBulkCopier.FixedLength
         public IDataReader Build(Stream stream, Encoding encoding)
         {
             return new FixedLengthDataReader(
-                new FixedLengthReader(new ByteStreamReader(stream), encoding),
+                new FixedLengthReader(stream, encoding),
                 columns.ToArray(),
                 rowFilter);
         }

@@ -100,7 +100,7 @@ namespace SqlBulkCopier.Test.FixedLength
                 .Build();
 
             // ファイルを開いて実行
-            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
+            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, new UTF8Encoding(false), TimeSpan.FromMinutes(30));
 
             // Assert
             var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(

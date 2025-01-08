@@ -29,7 +29,7 @@ namespace SqlBulkCopier.Test.FixedLength
             // Arrange
             var stream = new MemoryStream(""u8.ToArray());
             using var reader = new FixedLengthDataReader(
-                new FixedLengthReader(new ByteStreamReader(stream), Encoding.UTF8),
+                new FixedLengthReader(stream, Encoding.UTF8),
                 [
                     CreateColumn(0, "CustomerId", 0, 5),
                     CreateColumn(1, "Name", 5, 21),
@@ -46,7 +46,7 @@ namespace SqlBulkCopier.Test.FixedLength
         {
             // Arrange
             var stream = new MemoryStream(""u8.ToArray());
-            using var reader = new FixedLengthDataReader(new FixedLengthReader(new ByteStreamReader(stream), Encoding.UTF8), [], DefaultPredicate);
+            using var reader = new FixedLengthDataReader(new FixedLengthReader(stream, Encoding.UTF8), [], DefaultPredicate);
 
             // Act & Assert
             reader.Depth.Should().Be(0);
@@ -57,7 +57,7 @@ namespace SqlBulkCopier.Test.FixedLength
         {
             // Arrange
             var stream = new MemoryStream(""u8.ToArray());
-            var reader = new FixedLengthDataReader(new FixedLengthReader(new ByteStreamReader(stream), Encoding.UTF8), [], DefaultPredicate);
+            var reader = new FixedLengthDataReader(new FixedLengthReader(stream, Encoding.UTF8), [], DefaultPredicate);
 
             // Act & Assert
             reader.IsClosed.Should().BeFalse();
@@ -70,7 +70,7 @@ namespace SqlBulkCopier.Test.FixedLength
         {
             // Arrange
             var stream = new MemoryStream(""u8.ToArray());
-            using var reader = new FixedLengthDataReader(new FixedLengthReader(new ByteStreamReader(stream), Encoding.UTF8), [], DefaultPredicate);
+            using var reader = new FixedLengthDataReader(new FixedLengthReader(stream, Encoding.UTF8), [], DefaultPredicate);
 
             // Act & Assert
             reader.RecordsAffected.Should().Be(0);
@@ -90,7 +90,7 @@ namespace SqlBulkCopier.Test.FixedLength
 
             // Act
             using var reader = new FixedLengthDataReader(
-                new FixedLengthReader(new ByteStreamReader(stream), Encoding.UTF8),
+                new FixedLengthReader(stream, new UTF8Encoding(false)),
                 [
                     CreateColumn(0, "CustomerId", 0, 5),
                     CreateColumn(1, "Name", 5, 21),
@@ -119,7 +119,7 @@ namespace SqlBulkCopier.Test.FixedLength
         {
             // Arrange
             var stream = new MemoryStream(""u8.ToArray());
-            using var reader = new FixedLengthDataReader(new FixedLengthReader(new ByteStreamReader(stream), Encoding.UTF8), [], DefaultPredicate);
+            using var reader = new FixedLengthDataReader(new FixedLengthReader(stream, Encoding.UTF8), [], DefaultPredicate);
 
             // Act & Assert
             reader.GetFieldType(0).Should().Be(typeof(string));
@@ -141,7 +141,7 @@ namespace SqlBulkCopier.Test.FixedLength
 
                 // Act
                 using var reader = new FixedLengthDataReader(
-                    new FixedLengthReader(new ByteStreamReader(stream), Encoding.UTF8),
+                    new FixedLengthReader(stream, new UTF8Encoding(false)),
                     [
                         CreateColumn(0, "CustomerId", 0, 5),
                         CreateColumn(1, "Name", 5, 21),
@@ -179,7 +179,7 @@ namespace SqlBulkCopier.Test.FixedLength
 
                 // Act
                 using var reader = new FixedLengthDataReader(
-                    new FixedLengthReader(new ByteStreamReader(stream), Encoding.UTF8),
+                    new FixedLengthReader(stream, new UTF8Encoding(false)),
                     [
                         (FixedLengthColumn)new FixedLengthColumnContext(0, "CustomerId", 0, 5).TrimStart(['0', '2', '4']).Build(),
                         (FixedLengthColumn)new FixedLengthColumnContext(1, "Name", 5, 21).TrimEnd().Build(),
@@ -212,7 +212,7 @@ namespace SqlBulkCopier.Test.FixedLength
 
                 // Act
                 using var reader = new FixedLengthDataReader(
-                    new FixedLengthReader(new ByteStreamReader(stream), Encoding.UTF8),
+                    new FixedLengthReader(stream, new UTF8Encoding(false)),
                     [
                         (FixedLengthColumn)new FixedLengthColumnContext(0, "CustomerId", 0, 5)
                             .Trim()
@@ -244,7 +244,7 @@ namespace SqlBulkCopier.Test.FixedLength
                 // Arrange
                 var stream = new MemoryStream(
                     "00554Pedro Gomez          123423006022004"u8.ToArray());
-                using var reader = new FixedLengthDataReader(new FixedLengthReader(new ByteStreamReader(stream), Encoding.UTF8), [], DefaultPredicate);
+                using var reader = new FixedLengthDataReader(new FixedLengthReader(stream, Encoding.UTF8), [], DefaultPredicate);
 
                 // Act
                 reader.Read().Should().BeTrue();
@@ -264,7 +264,7 @@ namespace SqlBulkCopier.Test.FixedLength
                 // Arrange
                 var stream = new MemoryStream(""u8.ToArray());
                 using var reader = new FixedLengthDataReader(
-                    new FixedLengthReader(new ByteStreamReader(stream), Encoding.UTF8),
+                    new FixedLengthReader(stream, Encoding.UTF8),
                     [
                         CreateColumn(0, "CustomerId", 0, 5),
                         CreateColumn(1, "Name", 5, 21),
@@ -283,7 +283,7 @@ namespace SqlBulkCopier.Test.FixedLength
             {
                 // Arrange
                 var stream = new MemoryStream(""u8.ToArray());
-                using var reader = new FixedLengthDataReader(new FixedLengthReader(new ByteStreamReader(stream), Encoding.UTF8), [], DefaultPredicate);
+                using var reader = new FixedLengthDataReader(new FixedLengthReader(stream, Encoding.UTF8), [], DefaultPredicate);
 
                 // Act
                 // ReSharper disable once AccessToDisposedClosure
@@ -299,7 +299,7 @@ namespace SqlBulkCopier.Test.FixedLength
         {
             // Arrange
             var stream = new MemoryStream(""u8.ToArray());
-            var reader = new FixedLengthDataReader(new FixedLengthReader(new ByteStreamReader(stream), Encoding.UTF8), [], DefaultPredicate);
+            var reader = new FixedLengthDataReader(new FixedLengthReader(stream, Encoding.UTF8), [], DefaultPredicate);
             // Act & Assert
             reader.IsClosed.Should().BeFalse();
             reader.Close();
@@ -312,7 +312,7 @@ namespace SqlBulkCopier.Test.FixedLength
         {
             // Arrange
             var stream = new MemoryStream(""u8.ToArray());
-            using var reader = new FixedLengthDataReader(new FixedLengthReader(new ByteStreamReader(stream), Encoding.UTF8), [], DefaultPredicate);
+            using var reader = new FixedLengthDataReader(new FixedLengthReader(stream, Encoding.UTF8), [], DefaultPredicate);
 
             // Act & Assert
             // ReSharper disable AccessToDisposedClosure
