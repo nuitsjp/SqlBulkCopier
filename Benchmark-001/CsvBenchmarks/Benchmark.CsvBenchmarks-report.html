@@ -2,7 +2,7 @@
 <html lang='en'>
 <head>
 <meta charset='utf-8' />
-<title>Benchmark.CsvBenchmarks-20250107-104111</title>
+<title>Benchmark.CsvBenchmarks-20250107-140200</title>
 
 <style type="text/css">
 	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
@@ -14,20 +14,30 @@
 <body>
 <pre><code>
 BenchmarkDotNet v0.14.0, Windows 11 (10.0.22631.4602/23H2/2023Update/SunValley3)
-13th Gen Intel Core i9-13900H, 1 CPU, 20 logical and 14 physical cores
-.NET SDK 9.0.101
-  [Host]    : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2 [AttachedDebugger]
-  MediumRun : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
+AMD Ryzen 9 7950X, 1 CPU, 32 logical and 16 physical cores
+.NET SDK 9.0.100-rc.2.24474.11
+  [Host]    : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI [AttachedDebugger]
+  MediumRun : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
 </code></pre>
 <pre><code>Job=MediumRun  InvocationCount=1  IterationCount=15  
 LaunchCount=2  UnrollFactor=1  WarmupCount=1  
 </code></pre>
 
 <table>
-<thead><tr><th>Method </th><th>Count</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Ratio</th><th>RatioSD</th><th>Gen0 </th><th>Gen1</th><th>Gen2</th><th>Allocated</th><th>Alloc Ratio</th>
+<thead><tr><th>Method             </th><th>Count</th><th>Mean    </th><th>Error  </th><th>StdDev </th><th>Ratio</th><th>RatioSD</th><th>Gen0  </th><th>Gen1  </th><th>Gen2</th><th>Allocated</th><th>Alloc Ratio</th>
 </tr>
-</thead><tbody><tr><td>&#39;BULK INSERT&#39;</td><td>10000000</td><td>2.022 m</td><td>0.0685 m</td><td>0.1004 m</td><td>0.99</td><td>0.07</td><td>7000.0000</td><td>7000.0000</td><td>-</td><td>20.38 KB</td><td>0.000</td>
-</tr><tr><td>SqlBulkCopier</td><td>10000000</td><td>2.045 m</td><td>0.0683 m</td><td>0.0980 m</td><td>1.00</td><td>0.07</td><td>882000.0000</td><td>12000.0000</td><td>1000.0000</td><td>10800740.41 KB</td><td>1.000</td>
+</thead><tbody><tr><td>&#39;BULK INSERT&#39;</td><td>1000</td><td>10.883 ms</td><td>0.3598 ms</td><td>0.5273 ms</td><td>1.29</td><td>0.08</td><td>-</td><td>-</td><td>-</td><td>7.09 KB</td><td>0.006</td>
+</tr><tr><td>SqlBulkCopier</td><td>1000</td><td>8.436 ms</td><td>0.2876 ms</td><td>0.3839 ms</td><td>1.00</td><td>0.06</td><td>-</td><td>-</td><td>-</td><td>1175.2 KB</td><td>1.000</td>
+</tr><tr><td>&#39;Dapper Plus Bulk Insert&#39;</td><td>1000</td><td>12.116 ms</td><td>0.3368 ms</td><td>0.4497 ms</td><td>1.44</td><td>0.08</td><td>-</td><td>-</td><td>-</td><td>2760.73 KB</td><td>2.349</td>
+</tr><tr><td>&#39;EF Core Bulk Extensions&#39;</td><td>1000</td><td>14.928 ms</td><td>0.2967 ms</td><td>0.4061 ms</td><td>1.77</td><td>0.09</td><td>-</td><td>-</td><td>-</td><td>3626.13 KB</td><td>3.086</td>
+</tr><tr><td>&#39;BULK INSERT&#39;</td><td>100000</td><td>555.209 ms</td><td>12.1333 ms</td><td>17.4012 ms</td><td>1.26</td><td>0.04</td><td>-</td><td>-</td><td>-</td><td>7.11 KB</td><td>0.000</td>
+</tr><tr><td>SqlBulkCopier</td><td>100000</td><td>441.721 ms</td><td>4.0438 ms</td><td>5.3983 ms</td><td>1.00</td><td>0.02</td><td>6000.0000</td><td>-</td><td>-</td><td>104364.32 KB</td><td>1.000</td>
+</tr><tr><td>&#39;Dapper Plus Bulk Insert&#39;</td><td>100000</td><td>960.073 ms</td><td>170.4031 ms</td><td>238.8813 ms</td><td>2.17</td><td>0.53</td><td>17000.0000</td><td>12000.0000</td><td>2000.0000</td><td>249328.83 KB</td><td>2.389</td>
+</tr><tr><td>&#39;EF Core Bulk Extensions&#39;</td><td>100000</td><td>1,154.556 ms</td><td>91.0230 ms</td><td>124.5934 ms</td><td>2.61</td><td>0.28</td><td>19000.0000</td><td>15000.0000</td><td>2000.0000</td><td>329759.08 KB</td><td>3.160</td>
+</tr><tr><td>&#39;BULK INSERT&#39;</td><td>10000000</td><td>53,098.321 ms</td><td>148.1776 ms</td><td>217.1969 ms</td><td>1.23</td><td>0.01</td><td>-</td><td>-</td><td>-</td><td>13.83 KB</td><td>0.000</td>
+</tr><tr><td>SqlBulkCopier</td><td>10000000</td><td>43,340.580 ms</td><td>130.9198 ms</td><td>195.9546 ms</td><td>1.00</td><td>0.01</td><td>642000.0000</td><td>3000.0000</td><td>-</td><td>10500820.12 KB</td><td>1.000</td>
+</tr><tr><td>&#39;Dapper Plus Bulk Insert&#39;</td><td>10000000</td><td>83,522.121 ms</td><td>1,557.1799 ms</td><td>2,233.2611 ms</td><td>1.93</td><td>0.05</td><td>1508000.0000</td><td>968000.0000</td><td>4000.0000</td><td>25096525.22 KB</td><td>2.390</td>
+</tr><tr><td>&#39;EF Core Bulk Extensions&#39;</td><td>10000000</td><td>112,286.486 ms</td><td>271.0799 ms</td><td>397.3454 ms</td><td>2.59</td><td>0.01</td><td>1727000.0000</td><td>1074000.0000</td><td>2000.0000</td><td>34482131.09 KB</td><td>3.284</td>
 </tr></tbody></table>
 </body>
 </html>

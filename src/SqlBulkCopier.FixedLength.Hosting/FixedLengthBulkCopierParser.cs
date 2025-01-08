@@ -60,10 +60,18 @@ namespace SqlBulkCopier.FixedLength.Hosting
         {
             var rowFilter = sqlBulkCopier.GetSection("RowFilter");
             var startsWith = rowFilter.GetSection("StartsWith").Get<string[]>();
+            var contains = rowFilter.GetSection("Contains").Get<string[]>();
             var endsWith = rowFilter.GetSection("EndsWith").Get<string[]>();
 
             return reader =>
             {
+                if (startsWith is null
+                    && contains is null
+                    && endsWith is null)
+                {
+                    return true;
+                }
+                ReadOnlySpan<byte> currentRow = reader.CurrentRow;
                 if (startsWith is not null)
                 {
                     foreach (var starts in startsWith)

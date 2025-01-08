@@ -2,6 +2,7 @@
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Engines;
+using BenchmarkDotNet.Exporters.Csv;
 using BenchmarkDotNet.Jobs;
 
 namespace Benchmark;
@@ -12,13 +13,8 @@ public class TestConfig : ManualConfig
     {
         AddJob(Job.MediumRun
             .WithWarmupCount(1));
-        //AddJob(Job.ShortRun
-        //    .WithIterationCount(7)
-        //    .WithLaunchCount(1)
-        //    .WithWarmupCount(0)
-        //    .WithStrategy(RunStrategy.ColdStart));
-
         AddDiagnoser([MemoryDiagnoser.Default]);
         AddColumnProvider(DefaultColumnProviders.Instance);
+        AddExporter(CsvExporter.Default);
     }
 }

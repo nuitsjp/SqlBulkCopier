@@ -4,7 +4,6 @@ using System.Text;
 using FixedLengthHelper;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
-using Moq;
 using SqlBulkCopier.FixedLength;
 using SqlBulkCopier.FixedLength.Hosting;
 
@@ -1728,7 +1727,7 @@ namespace SqlBulkCopier.Test.FixedLength.Hosting
                         12345
                         B skip by row filter
                         """));
-                    using var fixedLengthReader = new FixedLengthReader(new ByteStreamReader(stream), encoding);
+                    using var fixedLengthReader = new FixedLengthReader(stream, encoding);
                     FixedLengthDataReader reader = new(fixedLengthReader, [], builder.RowFilter);
                     reader.Read().Should().BeTrue();
                     encoding.GetString(fixedLengthReader.CurrentRow).Should().Be("12345");

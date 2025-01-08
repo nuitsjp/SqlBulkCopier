@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>Benchmark.FixedLengthBenchmarks-20250107-171932</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.22631.4602/23H2/2023Update/SunValley3)
+AMD Ryzen 9 7950X, 1 CPU, 32 logical and 16 physical cores
+.NET SDK 9.0.100-rc.2.24474.11
+  [Host]    : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI [AttachedDebugger]
+  MediumRun : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
+</code></pre>
+<pre><code>Job=MediumRun  InvocationCount=1  IterationCount=15  
+LaunchCount=2  UnrollFactor=1  WarmupCount=1  
+</code></pre>
+
+<table>
+<thead><tr><th>Method </th><th>Count</th><th>Mean   </th><th>Error </th><th>StdDev</th><th>Median </th><th>Ratio</th><th>RatioSD</th><th>Gen0  </th><th>Gen1</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>&#39;BULK INSERT&#39;</td><td>1000</td><td>12.79 ms</td><td>0.246 ms</td><td>0.361 ms</td><td>12.78 ms</td><td>1.00</td><td>0.04</td><td>-</td><td>-</td><td>7.16 KB</td><td>1.00</td>
+</tr><tr><td>SqlBulkCopier</td><td>1000</td><td>13.73 ms</td><td>0.705 ms</td><td>0.916 ms</td><td>13.52 ms</td><td>1.07</td><td>0.08</td><td>-</td><td>-</td><td>4678.21 KB</td><td>653.01</td>
+</tr><tr><td>&#39;BULK INSERT&#39;</td><td>100000</td><td>1,133.98 ms</td><td>324.420 ms</td><td>485.577 ms</td><td>825.25 ms</td><td>1.15</td><td>0.62</td><td>-</td><td>-</td><td>7.31 KB</td><td>1.00</td>
+</tr><tr><td>SqlBulkCopier</td><td>100000</td><td>1,106.19 ms</td><td>241.257 ms</td><td>338.208 ms</td><td>967.26 ms</td><td>1.12</td><td>0.49</td><td>28000.0000</td><td>-</td><td>467640.77 KB</td><td>63,950.88</td>
+</tr><tr><td>&#39;BULK INSERT&#39;</td><td>10000000</td><td>122,136.81 ms</td><td>346.039 ms</td><td>507.219 ms</td><td>122,090.02 ms</td><td>1.00</td><td>0.01</td><td>-</td><td>-</td><td>22.63 KB</td><td>1.00</td>
+</tr><tr><td>SqlBulkCopier</td><td>10000000</td><td>136,659.96 ms</td><td>1,612.352 ms</td><td>2,413.293 ms</td><td>135,980.22 ms</td><td>1.12</td><td>0.02</td><td>2827000.0000</td><td>8000.0000</td><td>46174234.03 KB</td><td>2,040,145.65</td>
+</tr></tbody></table>
+</body>
+</html>
