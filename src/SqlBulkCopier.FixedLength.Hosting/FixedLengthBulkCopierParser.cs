@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using FixedLengthHelper;
 using Microsoft.Extensions.Configuration;
 using SqlBulkCopier.Hosting;
@@ -59,28 +60,66 @@ namespace SqlBulkCopier.FixedLength.Hosting
         private static Predicate<IFixedLengthReader> GetRowFilter(IConfigurationSection sqlBulkCopier)
         {
             var rowFilter = sqlBulkCopier.GetSection("RowFilter");
-            var startsWith = rowFilter.GetSection("StartsWith").Get<string[]>();
-            var contains = rowFilter.GetSection("Contains").Get<string[]>();
-            var endsWith = rowFilter.GetSection("EndsWith").Get<string[]>();
+            PredicateContext context = new(
+                rowFilter.GetSection("StartsWith").Get<string[]>(),
+                rowFilter.GetSection("Equals").Get<string[]>(),
+                rowFilter.GetSection("EndsWith").Get<string[]>());
+            return context.Predicate;
+        }
 
-            return reader =>
+        private class PredicateContext(
+            string[]? startsWithStrings,
+            string[]? equalsStrings,
+            string[]? endsWithStrings)
+        {
+            private bool _isFirst = true;
+            private readonly string[] _startsWithStrings = startsWithStrings ?? [];
+            private readonly string[] _equalsStrings = equalsStrings ?? [];
+            private readonly string[] _endsWithStrings = endsWithStrings ?? [];
+            private byte[][] _startsWithByteArrays = [];
+            private byte[][] _equalsByteArrays = [];
+            private byte[][] _endsWithByteArrays = [];
+
+
+            public bool Predicate(IFixedLengthReader reader)
             {
-                if (startsWith is null
-                    && contains is null
-                    && endsWith is null)
+                if (_isFirst)
                 {
-                    return true;
+                    var encoding = reader.Encoding;
+                    _isFirst = false;
+                    _startsWithByteArrays = _startsWithStrings.Select(s => encoding.GetBytes(s)).ToArray();
+                    _equalsByteArrays = _equalsStrings.Select(s => encoding.GetBytes(s)).ToArray();
+                    _endsWithByteArrays = _endsWithStrings.Select(s => encoding.GetBytes(s)).ToArray();
                 }
-                ReadOnlySpan<byte> currentRow = reader.CurrentRow;
-                if (startsWith is not null)
+
+                var currentRow = reader.CurrentRow;
+                foreach (var startsWithByteArray in _startsWithByteArrays)
                 {
-                    foreach (var starts in startsWith)
+                    if (currentRow.StartsWith(startsWithByteArray))
                     {
+                        return false;
                     }
                 }
 
+                foreach (var equalsByteArray in _equalsByteArrays)
+                {
+                    if (currentRow.SequenceEqualsOptimized(equalsByteArray))
+                    {
+                        return false;
+                    }
+                }
+
+                foreach (var endsWithByteArray in _endsWithByteArrays)
+                {
+                    if (currentRow.EndsWith(endsWithByteArray))
+                    {
+                        return false;
+                    }
+                }
+
+
                 return true;
-            };
+            }
         }
 
         private static Action<IColumnContext> TreatEmptyStringAsNullAction(IConfigurationSection column)

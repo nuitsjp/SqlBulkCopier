@@ -1698,7 +1698,8 @@ namespace SqlBulkCopier.Test.FixedLength.Hosting
             public class RowFilter
             {
                 [Fact]
-                public void StartWith()
+                public void StartsWith()
+
                 {
                     // Arrange
                     const string settings = """
@@ -1724,8 +1725,84 @@ namespace SqlBulkCopier.Test.FixedLength.Hosting
                     using var stream = new MemoryStream(encoding.GetBytes(
                         """
                         A skip by row filter
-                        12345
+                        12345A
                         B skip by row filter
+                        """));
+                    using var fixedLengthReader = new FixedLengthReader(stream, encoding);
+                    FixedLengthDataReader reader = new(fixedLengthReader, [], builder.RowFilter);
+                    reader.Read().Should().BeTrue();
+                    encoding.GetString(fixedLengthReader.CurrentRow).Should().Be("12345A");
+                    reader.Read().Should().BeFalse();
+
+                }
+
+                [Fact]
+                public void WhenEquals()
+                {
+                    // Arrange
+                    const string settings = """
+                                            {
+                                              "SqlBulkCopier": {
+                                                "DestinationTableName": "[dbo].[Customer]",
+                                                "RowFilter": {
+                                                    "Equals": ["A", "B"]
+                                                },
+                                                "Columns": {
+                                                  "CustomerId": { "Offset": 0, "Length": 5 }
+                                                }
+                                              }
+                                            }
+                                            """;
+                    var configuration = BuildJsonConfig(settings);
+
+                    // Act
+                    var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
+
+                    // Assert
+                    var encoding = new UTF8Encoding(false);
+                    using var stream = new MemoryStream(encoding.GetBytes(
+                        """
+                        A
+                        A12345B
+                        B
+                        """));
+                    using var fixedLengthReader = new FixedLengthReader(stream, encoding);
+                    FixedLengthDataReader reader = new(fixedLengthReader, [], builder.RowFilter);
+                    reader.Read().Should().BeTrue();
+                    encoding.GetString(fixedLengthReader.CurrentRow).Should().Be("A12345B");
+                    reader.Read().Should().BeFalse();
+
+                }
+
+                [Fact]
+                public void EndsWith()
+                {
+                    // Arrange
+                    const string settings = """
+                                            {
+                                              "SqlBulkCopier": {
+                                                "DestinationTableName": "[dbo].[Customer]",
+                                                "RowFilter": {
+                                                    "EndsWith": ["A", "B"]
+                                                },
+                                                "Columns": {
+                                                  "CustomerId": { "Offset": 0, "Length": 5 }
+                                                }
+                                              }
+                                            }
+                                            """;
+                    var configuration = BuildJsonConfig(settings);
+
+                    // Act
+                    var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
+
+                    // Assert
+                    var encoding = new UTF8Encoding(false);
+                    using var stream = new MemoryStream(encoding.GetBytes(
+                        """
+                        skip by row filter A
+                        12345
+                        skip by row filter B
                         """));
                     using var fixedLengthReader = new FixedLengthReader(stream, encoding);
                     FixedLengthDataReader reader = new(fixedLengthReader, [], builder.RowFilter);
