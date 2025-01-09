@@ -76,6 +76,29 @@ namespace SqlBulkCopier.Test.FixedLength
             }
 
             [Fact]
+            public async Task ByConnectionString_WithTruncate()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .Build(SqlBulkCopierConnectionString);
+
+                // Act
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets),
+                    new UTF8Encoding(false),
+                    TimeSpan.FromMinutes(30));
+
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets),
+                    new UTF8Encoding(false),
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                await AssertAsync();
+            }
+
+
+            [Fact]
             public async Task ByConnectionStringAndOptions()
             {
                 // Arrange

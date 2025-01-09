@@ -62,7 +62,7 @@ namespace SqlBulkCopier.Test
                 CREATE TABLE dbo.BulkInsertTestTarget
                 (
                     -- 一意に識別するための主キー
-                    Id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                    Id INT NOT NULL PRIMARY KEY,
                 
                     -- 数値系 (Exact Numerics)
                     TinyInt TINYINT,

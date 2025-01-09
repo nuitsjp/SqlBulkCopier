@@ -11,9 +11,10 @@ public class BulkCopier : IBulkCopier
         IDataReaderBuilder dataReaderBuilder,
         SqlConnection connection)
     {
-        DestinationTableName = destinationTableName;
         DataReaderBuilder = dataReaderBuilder;
         _sqlBulkCopy = new SqlBulkCopy(connection);
+        _sqlBulkCopy.DestinationTableName = destinationTableName;
+        DataReaderBuilder.SetupColumnMappings(_sqlBulkCopy);
     }
 
     public BulkCopier(
@@ -21,9 +22,10 @@ public class BulkCopier : IBulkCopier
         IDataReaderBuilder dataReaderBuilder,
         string connectionString)
     {
-        DestinationTableName = destinationTableName;
         DataReaderBuilder = dataReaderBuilder;
         _sqlBulkCopy = new SqlBulkCopy(connectionString);
+        _sqlBulkCopy.DestinationTableName = destinationTableName;
+        DataReaderBuilder.SetupColumnMappings(_sqlBulkCopy);
     }
 
     public BulkCopier(
@@ -32,9 +34,10 @@ public class BulkCopier : IBulkCopier
         string connectionString, 
         SqlBulkCopyOptions copyOptions)
     {
-        DestinationTableName = destinationTableName;
         DataReaderBuilder = dataReaderBuilder;
         _sqlBulkCopy = new SqlBulkCopy(connectionString, copyOptions);
+        _sqlBulkCopy.DestinationTableName = destinationTableName;
+        DataReaderBuilder.SetupColumnMappings(_sqlBulkCopy);
     }
 
     public BulkCopier(
@@ -44,18 +47,16 @@ public class BulkCopier : IBulkCopier
         SqlBulkCopyOptions copyOptions, 
         SqlTransaction externalTransaction)
     {
-        DestinationTableName = destinationTableName;
         DataReaderBuilder = dataReaderBuilder;
         _sqlBulkCopy = new SqlBulkCopy(connection, copyOptions, externalTransaction);
+        _sqlBulkCopy.DestinationTableName = destinationTableName;
+        DataReaderBuilder.SetupColumnMappings(_sqlBulkCopy);
     }
 
-    public string DestinationTableName { get; init; }
     public IDataReaderBuilder DataReaderBuilder { get; init; }
 
     public async Task WriteToServerAsync(Stream stream, Encoding encoding, TimeSpan timeout)
     {
-        _sqlBulkCopy.DestinationTableName = DestinationTableName;
-        DataReaderBuilder.SetupColumnMappings(_sqlBulkCopy);
         _sqlBulkCopy.BulkCopyTimeout = (int)timeout.TotalSeconds;
         await _sqlBulkCopy.WriteToServerAsync(DataReaderBuilder.Build(stream, encoding));
     }
