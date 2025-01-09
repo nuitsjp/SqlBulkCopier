@@ -90,7 +90,7 @@ public class CsvBenchmarks : BenchmarksBase
         ;
 
         var configuration = BuildJsonConfig(appsettings);
-        var bulkCopier = CsvBulkCopierParser.Parse(configuration);
+        var bulkCopierBuilder = CsvBulkCopierParser.Parse(configuration);
 
         // Open a connection to the database
         await using var connection = Database.Open();
@@ -99,7 +99,7 @@ public class CsvBenchmarks : BenchmarksBase
         await using Stream stream = File.OpenRead(CsvFile);
 
         // Bulk copy to the database
-        await bulkCopier.Build(connection).WriteToServerAsync(connection, stream, Encoding.UTF8, CommandTimeout);
+        await bulkCopierBuilder.Build(connection).WriteToServerAsync(stream, Encoding.UTF8, CommandTimeout);
         AssertResultCount(connection);
 
     }

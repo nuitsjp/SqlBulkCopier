@@ -42,7 +42,7 @@ namespace SqlBulkCopier.Test.FixedLength.Hosting
             // Assert
             var provider = services.BuildServiceProvider();
             provider.GetService<SqlConnectionProvider>().Should().NotBeNull();
-            provider.GetService<IFixedLengthBulkCopierBuilder>().Should().NotBeNull();
+            provider.GetService<IBulkCopierBuilder>().Should().NotBeNull();
         }
 
         static IConfiguration BuildJsonConfig(string json)

@@ -52,23 +52,12 @@ public class BulkCopier : IBulkCopier
     public string DestinationTableName { get; init; }
     public IDataReaderBuilder DataReaderBuilder { get; init; }
 
-    public async Task WriteToServerAsync(SqlConnection connection, Stream stream, Encoding encoding, TimeSpan timeout)
+    public async Task WriteToServerAsync(Stream stream, Encoding encoding, TimeSpan timeout)
     {
-        using var sqlBulkCopy = new SqlBulkCopy(connection);
-        sqlBulkCopy.DestinationTableName = DestinationTableName;
-        DataReaderBuilder.SetupColumnMappings(sqlBulkCopy);
-        sqlBulkCopy.BulkCopyTimeout = (int)timeout.TotalSeconds;
-        await sqlBulkCopy.WriteToServerAsync(DataReaderBuilder.Build(stream, encoding));
-    }
-
-    public async Task WriteToServerAsync(SqlConnection connection, SqlTransaction transaction, Stream stream, Encoding encoding,
-        TimeSpan timeout)
-    {
-        using var sqlBulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction);
-        sqlBulkCopy.DestinationTableName = DestinationTableName;
-        DataReaderBuilder.SetupColumnMappings(sqlBulkCopy);
-        sqlBulkCopy.BulkCopyTimeout = (int)timeout.TotalSeconds;
-        await sqlBulkCopy.WriteToServerAsync(DataReaderBuilder.Build(stream, encoding));
+        _sqlBulkCopy.DestinationTableName = DestinationTableName;
+        DataReaderBuilder.SetupColumnMappings(_sqlBulkCopy);
+        _sqlBulkCopy.BulkCopyTimeout = (int)timeout.TotalSeconds;
+        await _sqlBulkCopy.WriteToServerAsync(DataReaderBuilder.Build(stream, encoding));
     }
 
     void IDisposable.Dispose()

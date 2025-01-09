@@ -105,7 +105,7 @@ namespace SqlBulkCopier.Test.CsvHelper
                 // ビルド
                 .Build(sqlConnection);
 
-            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
+            await sqlBulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
             // Assert
             var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
@@ -189,8 +189,6 @@ namespace SqlBulkCopier.Test.CsvHelper
                 .Build(connection, SqlBulkCopyOptions.Default, transaction);
 
             await sqlBulkCopier.WriteToServerAsync(
-                connection,
-                transaction,
                 stream, 
                 Encoding.UTF8, 
                 TimeSpan.FromMinutes(30));
@@ -299,7 +297,7 @@ namespace SqlBulkCopier.Test.CsvHelper
                 // ビルド
                 .Build(sqlConnection);
 
-            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
+            await sqlBulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
             // Assert
             var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
@@ -380,7 +378,7 @@ namespace SqlBulkCopier.Test.CsvHelper
                 // ビルド
                 .Build(sqlConnection);
 
-            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
+            await sqlBulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
             // Assert
             var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
@@ -473,7 +471,7 @@ namespace SqlBulkCopier.Test.CsvHelper
                 // ビルド
                 .Build(sqlConnection);
 
-            await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
+            await sqlBulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
             // Assert
             var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
@@ -535,7 +533,7 @@ namespace SqlBulkCopier.Test.CsvHelper
                 .Build(connection);
 
             // CSV から SQL Server へ
-            await sqlBulkCopier.WriteToServerAsync(connection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
+            await sqlBulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
             // Assert
             var insertedRows = (await connection.QueryAsync<Customer>(

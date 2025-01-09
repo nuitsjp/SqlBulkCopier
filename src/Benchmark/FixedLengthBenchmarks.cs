@@ -156,7 +156,7 @@ public class FixedLengthBenchmarks : BenchmarksBase
 
         // Bulk copy to the database
         var bulkCopier = builder.Build(connection);
-        await bulkCopier.WriteToServerAsync(connection, stream, Encoding.UTF8, CommandTimeout);
+        await bulkCopier.WriteToServerAsync(stream, Encoding.UTF8, CommandTimeout);
 
         AssertResultCount(connection);
     }

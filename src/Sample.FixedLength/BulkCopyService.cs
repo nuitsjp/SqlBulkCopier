@@ -9,7 +9,7 @@ namespace Sample.FixedLength;
 /// A service that uses the bulk copier to write data to the database.
 /// </summary>
 public class BulkCopyService(
-    IBulkCopier bulkCopier, 
+    IBulkCopierBuilder bulkCopier, 
     SqlConnectionProvider sqlConnectionProvider,
     IHostApplicationLifetime applicationLifetime) : BackgroundService
 {
@@ -22,7 +22,7 @@ public class BulkCopyService(
         await using Stream stream = File.OpenRead(@"Assets\Customer.dat");
 
         // Bulk copy to the database
-        await bulkCopier.WriteToServerAsync(connection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
+        await bulkCopier.Build(connection).WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
         // Stop the application when the task is completed
         applicationLifetime.StopApplication();

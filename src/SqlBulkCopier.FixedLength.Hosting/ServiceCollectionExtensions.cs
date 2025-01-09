@@ -11,7 +11,7 @@ namespace SqlBulkCopier.FixedLength.Hosting
             string sectionName = FixedLengthBulkCopierParser.DefaultSectionName)
         {
             services.AddTransient<SqlConnectionProvider>();
-            services.AddTransient(provider => FixedLengthBulkCopierParser.Parse(provider.GetRequiredService<IConfiguration>()));
+            services.AddTransient<IBulkCopierBuilder>(provider => FixedLengthBulkCopierParser.Parse(provider.GetRequiredService<IConfiguration>()));
             return services;
         }
 
