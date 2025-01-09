@@ -37,155 +37,91 @@ namespace SqlBulkCopier.Test.FixedLength
         {
             private const string DatabaseName = "FixedLengthBulkCopierBuilderTest";
 
+            private const int Count = 100;
+
+            private List<BulkInsertTestTarget> Targets { get; } = GenerateBulkInsertTestTargetData(Count);
+
             [Fact]
             public async Task ByConnection()
             {
                 // Arrange
-                const int count = 100;
-                var targets = GenerateBulkInsertTestTargetData(count);
-                using var stream = await CreateFixedLengthAsync(targets);
-
-                using var sqlConnection = new SqlConnection(SqlBulkCopierConnectionString);
-                await sqlConnection.OpenAsync(CancellationToken.None);
-
                 var sqlBulkCopier = ProvideBuilder()
-                    .Build(sqlConnection);
+                    .Build(await OpenConnectionAsync());
 
                 // ファイルを開いて実行
-                await sqlBulkCopier.WriteToServerAsync(stream, new UTF8Encoding(false), TimeSpan.FromMinutes(30));
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets), 
+                    new UTF8Encoding(false), 
+                    TimeSpan.FromMinutes(30));
 
                 // Assert
-                var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
-                    "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id")).ToArray();
-
-                insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
-                insertedRows.Length.Should().Be(count);
-
-                // 先頭行などを必要に応じて検証
-                var expected = targets.First();
-                var actual = insertedRows.First();
-                ShouldBe(expected, actual);
+                await AssertAsync();
             }
 
             [Fact]
             public async Task ByConnectionString()
             {
                 // Arrange
-                const int count = 100;
-                var targets = GenerateBulkInsertTestTargetData(count);
-                using var stream = await CreateFixedLengthAsync(targets);
-
                 var sqlBulkCopier = ProvideBuilder()
-                    // ビルド
                     .Build(SqlBulkCopierConnectionString);
 
                 // ファイルを開いて実行
-                await sqlBulkCopier.WriteToServerAsync(stream, new UTF8Encoding(false), TimeSpan.FromMinutes(30));
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets),
+                    new UTF8Encoding(false),
+                    TimeSpan.FromMinutes(30));
 
                 // Assert
-                using var sqlConnection = new SqlConnection(SqlBulkCopierConnectionString);
-                await sqlConnection.OpenAsync(CancellationToken.None);
-
-                var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
-                    "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id")).ToArray();
-
-                insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
-                insertedRows.Length.Should().Be(count);
-
-                // 先頭行などを必要に応じて検証
-                var expected = targets.First();
-                var actual = insertedRows.First();
-                ShouldBe(expected, actual);
+                await AssertAsync();
             }
 
             [Fact]
             public async Task ByConnectionStringAndOptions()
             {
                 // Arrange
-                const int count = 100;
-                var targets = GenerateBulkInsertTestTargetData(count);
-                using var stream = await CreateFixedLengthAsync(targets);
-
                 var sqlBulkCopier = ProvideBuilder()
-                    // ビルド
                     .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
 
                 // ファイルを開いて実行
-                await sqlBulkCopier.WriteToServerAsync(stream, new UTF8Encoding(false), TimeSpan.FromMinutes(30));
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets),
+                    new UTF8Encoding(false),
+                    TimeSpan.FromMinutes(30));
 
                 // Assert
-                using var sqlConnection = new SqlConnection(SqlBulkCopierConnectionString);
-                await sqlConnection.OpenAsync(CancellationToken.None);
-
-                var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
-                    "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id")).ToArray();
-
-                insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
-                insertedRows.Length.Should().Be(count);
-
-                // 先頭行などを必要に応じて検証
-                var expected = targets.First();
-                var actual = insertedRows.First();
-                ShouldBe(expected, actual);
+                await AssertAsync();
             }
-
 
             [Fact]
             public async Task ByConnection_WithTransaction()
             {
                 // Arrange
-                const int count = 100;
-                var targets = GenerateBulkInsertTestTargetData(count);
-                using var stream = await CreateFixedLengthAsync(targets);
-                using var sqlConnection = new SqlConnection(SqlBulkCopierConnectionString);
-                await sqlConnection.OpenAsync(CancellationToken.None);
-                using var transaction = sqlConnection.BeginTransaction();
+                using (var connection = await OpenConnectionAsync())
+                {
+                    using var transaction = connection.BeginTransaction();
 
-                var sqlBulkCopier = ProvideBuilder()
-                    // ビルド
-                    .Build(sqlConnection, SqlBulkCopyOptions.Default, transaction);
+                    var sqlBulkCopier = ProvideBuilder()
+                        .Build(connection, SqlBulkCopyOptions.Default, transaction);
 
-                // ファイルを開いて実行
-                await sqlBulkCopier.WriteToServerAsync(stream, new UTF8Encoding(false), TimeSpan.FromMinutes(30));
+                    // ファイルを開いて実行
+                    await sqlBulkCopier.WriteToServerAsync(
+                        await CreateFixedLengthAsync(Targets),
+                        new UTF8Encoding(false),
+                        TimeSpan.FromMinutes(30));
+                    transaction.Commit();
+                }
 
                 // Assert
-                var insertedRows =
-                    (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
-                        "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id",
-                        transaction: transaction))
-                    .ToArray();
-
-                insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
-                insertedRows.Length.Should().Be(count);
-
-                // 先頭行などを必要に応じて検証
-                var expected = targets.First();
-                var actual = insertedRows.First();
-                ShouldBe(expected, actual);
-
-                transaction.Rollback();
-
-                using var newConnection = new SqlConnection(SqlBulkCopierConnectionString);
-                await newConnection.OpenAsync(CancellationToken.None);
-                (await newConnection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[BulkInsertTestTarget]"))
-                    .Should().Be(0);
+                await AssertAsync();
             }
 
             [Fact]
-            public async Task WriteToServer_WithHeaderAndFooterAsync()
+            public async Task WithHeaderAndFooterAsync()
             {
                 // Arrange
-                const int count = 1;
-                var targets = GenerateBulkInsertTestTargetData(count);
-                using var stream = await CreateFixedLengthAsync(targets, true);
-                using var sqlConnection = new SqlConnection(SqlBulkCopierConnectionString);
-                await sqlConnection.OpenAsync(CancellationToken.None);
-
                 Encoding encoding = new UTF8Encoding(false);
 
-                var sqlBulkCopier = FixedLengthBulkCopierBuilder
-                    .Create("[dbo].[BulkInsertTestTarget]")
-                    .SetDefaultColumnContext(c => c.TrimEnd().TreatEmptyStringAsNull())
+                var sqlBulkCopier = ProvideBuilder()
                     .SetRowFilter(reader =>
                     {
                         if (reader.CurrentRow.Length == 0)
@@ -202,69 +138,38 @@ namespace SqlBulkCopier.Test.FixedLength
                         }
                         return true;
                     })
-
-                    .AddColumnMapping("Id", 0, 10)
-                    .AddColumnMapping("TinyInt", 10, 3)
-                    .AddColumnMapping("SmallInt", 13, 6)
-                    .AddColumnMapping("IntValue", 19, 11)
-                    .AddColumnMapping("BigInt", 30, 20)
-
-                    // bit列は "0" or "1" → bool に明示変換が必要
-                    .AddColumnMapping("BitValue", 50, 1, c => c.AsBit())
-
-                    // decimal や float なども標準的な数値文字列であれば自動変換が可能
-                    .AddColumnMapping("DecimalValue", 51, 21)
-                    .AddColumnMapping("NumericValue", 72, 21)
-                    .AddColumnMapping("MoneyValue", 93, 21)
-                    .AddColumnMapping("SmallMoneyValue", 114, 21)
-                    .AddColumnMapping("FloatValue", 135, 15)
-                    .AddColumnMapping("RealValue", 150, 12)
-
-                    // 日付系：yyyyMMdd, yyyyMMddHHmmss などは SQLServer が自動認識しない場合が多い
-                    // よって、パーサーを指定
-                    .AddColumnMapping("DateValue", 162, 8, c => c.AsDate("yyyyMMdd"))
-                    .AddColumnMapping("DateTimeValue", 170, 14, c => c.AsDateTime("yyyyMMddHHmmss"))
-                    .AddColumnMapping("SmallDateTimeValue", 184, 14, c => c.AsSmallDateTime("yyyyMMddHHmmss"))
-                    .AddColumnMapping("DateTime2Value", 198, 14, c => c.AsDateTime2("yyyyMMddHHmmss"))
-
-                    // time: "HHmmss" として保存しているなら要手動パース
-                    .AddColumnMapping("TimeValue", 212, 6, c => c.AsTime("hhmmss"))
-
-                    // datetimeoffset: "yyyyMMddHHmmss+09:00" など → 要パーサー
-                    .AddColumnMapping("DateTimeOffsetValue", 218, 18, c => c.AsDateTimeOffset("yyyyMMddHHmmK"))
-
-                    // 文字列系は何も指定しなければそのまま文字列としてマッピングされる（必要に応じて TrimEnd）
-                    .AddColumnMapping("CharValue", 236, 10)
-                    .AddColumnMapping("VarCharValue", 246, 50)
-                    .AddColumnMapping("NCharValue", 296, 10)
-                    .AddColumnMapping("NVarCharValue", 306, 50)
-
-                    // バイナリを Base64 で書き出しているなら、Convert.FromBase64String が必要
-                    // もし ASCII 文字列そのままなら変換不要
-                    .AddColumnMapping("BinaryValue", 356, 20, c => c.AsBinary())
-                    .AddColumnMapping("VarBinaryValue", 376, 100, c => c.AsVarBinary())
-
-                    // GUID
-                    .AddColumnMapping("UniqueIdValue", 476, 36, c => c.AsUniqueIdentifier())
-
-                    // XML → そのまま文字列で受け取れる
-                    .AddColumnMapping("XmlValue", 512, 100)
-
                     // ビルド
-                    .Build(sqlConnection);
+                    .Build(await OpenConnectionAsync());
 
                 // ファイルを開いて実行
-                await sqlBulkCopier.WriteToServerAsync(stream, encoding, TimeSpan.FromMinutes(30));
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets), 
+                    encoding, 
+                    TimeSpan.FromMinutes(30));
 
                 // Assert
+                await AssertAsync();
+            }
+
+            private async Task<SqlConnection> OpenConnectionAsync()
+            {
+                var sqlConnection = new SqlConnection(SqlBulkCopierConnectionString);
+                await sqlConnection.OpenAsync(CancellationToken.None);
+                return sqlConnection;
+            }
+
+            private async Task AssertAsync()
+            {
+                using var sqlConnection = await OpenConnectionAsync();
+
                 var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
                     "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id")).ToArray();
 
                 insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
-                insertedRows.Length.Should().Be(count);
+                insertedRows.Length.Should().Be(Count);
 
                 // 先頭行などを必要に応じて検証
-                var expected = targets.First();
+                var expected = Targets.First();
                 var actual = insertedRows.First();
                 ShouldBe(expected, actual);
             }
