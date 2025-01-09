@@ -2,6 +2,7 @@ using System.Text;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SqlBulkCopier.FixedLength;
 using SqlBulkCopier.FixedLength.Hosting;
 using SqlBulkCopier.Hosting;
 
@@ -41,7 +42,7 @@ namespace SqlBulkCopier.Test.FixedLength.Hosting
             // Assert
             var provider = services.BuildServiceProvider();
             provider.GetService<SqlConnectionProvider>().Should().NotBeNull();
-            provider.GetService<IBulkCopier>().Should().NotBeNull();
+            provider.GetService<IFixedLengthBulkCopierBuilder>().Should().NotBeNull();
         }
 
         static IConfiguration BuildJsonConfig(string json)

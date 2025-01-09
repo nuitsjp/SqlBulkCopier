@@ -97,7 +97,7 @@ namespace SqlBulkCopier.Test.FixedLength
                 .AddColumnMapping("XmlValue", 512, 100)
 
                 // ビルド
-                .Build();
+                .Build(sqlConnection);
 
             // ファイルを開いて実行
             await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, new UTF8Encoding(false), TimeSpan.FromMinutes(30));
@@ -195,7 +195,7 @@ namespace SqlBulkCopier.Test.FixedLength
                 .AddColumnMapping("XmlValue", 512, 100)
 
                 // ビルド
-                .Build();
+                .Build(sqlConnection);
 
             // ファイルを開いて実行
             await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, encoding, TimeSpan.FromMinutes(30));

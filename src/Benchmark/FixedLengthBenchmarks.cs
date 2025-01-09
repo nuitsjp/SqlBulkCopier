@@ -146,7 +146,7 @@ public class FixedLengthBenchmarks : BenchmarksBase
         ;
 
         var configuration = BuildJsonConfig(appsettings);
-        var bulkCopier = FixedLengthBulkCopierParser.Parse(configuration);
+        var builder = FixedLengthBulkCopierParser.Parse(configuration);
 
         // Open a connection to the database
         await using var connection = Database.Open();
@@ -155,6 +155,7 @@ public class FixedLengthBenchmarks : BenchmarksBase
         await using Stream stream = File.OpenRead(FixedLengthFile);
 
         // Bulk copy to the database
+        var bulkCopier = builder.Build(connection);
         await bulkCopier.WriteToServerAsync(connection, stream, Encoding.UTF8, CommandTimeout);
 
         AssertResultCount(connection);

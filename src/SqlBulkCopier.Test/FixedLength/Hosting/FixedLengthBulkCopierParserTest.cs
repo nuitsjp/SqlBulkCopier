@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text;
 using FixedLengthHelper;
 using FluentAssertions;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using SqlBulkCopier.FixedLength;
 using SqlBulkCopier.FixedLength.Hosting;
@@ -26,9 +27,10 @@ namespace SqlBulkCopier.Test.FixedLength.Hosting
             var configuration = BuildJsonConfig(settings);
 
             // Act
-            var bulkCopier = (BulkCopier)FixedLengthBulkCopierParser.Parse(configuration);
+            var bulkCopierBuilder = FixedLengthBulkCopierParser.Parse(configuration);
 
             // Assert
+            var bulkCopier = (BulkCopier)bulkCopierBuilder.Build((SqlConnection)null!);
             bulkCopier.DataReaderBuilder.Should().BeOfType<FixedLengthDataReaderBuilder>();
         }
 

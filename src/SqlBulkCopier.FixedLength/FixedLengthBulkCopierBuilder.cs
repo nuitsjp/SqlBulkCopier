@@ -1,4 +1,5 @@
 ﻿using FixedLengthHelper;
+using Microsoft.Data.SqlClient;
 
 namespace SqlBulkCopier.FixedLength
 {
@@ -51,6 +52,28 @@ namespace SqlBulkCopier.FixedLength
             return new BulkCopier(
                 _destinationTableName,
                 new FixedLengthDataReaderBuilder(_columns, RowFilter));
+        }
+
+        public IBulkCopier Build(SqlConnection connection)
+        {
+            return new BulkCopier(
+                _destinationTableName,
+                new FixedLengthDataReaderBuilder(_columns, RowFilter));
+        }
+
+        public IBulkCopier Build(string connectionString)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IBulkCopier Build(string connectionString, SqlBulkCopyOptions copyOptions)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IBulkCopier Build(SqlConnection connection, SqlBulkCopyOptions copyOptions, SqlTransaction externalTransaction)
+        {
+            throw new NotImplementedException();
         }
     }
 }

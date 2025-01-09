@@ -11,11 +11,9 @@ namespace SqlBulkCopier.FixedLength.Hosting
     {
         public const string DefaultSectionName = "SqlBulkCopier";
 
-        public static IBulkCopier Parse(IConfiguration configuration, string sectionName = DefaultSectionName)
+        public static IFixedLengthBulkCopierBuilder Parse(IConfiguration configuration, string sectionName = DefaultSectionName)
         {
-            return BuildBuilder(
-                    configuration.GetRequiredSection(sectionName))
-                .Build();
+            return BuildBuilder(configuration.GetRequiredSection(sectionName));
         }
 
         internal static IFixedLengthBulkCopierBuilder BuildBuilder(IConfigurationSection sqlBulkCopier)
