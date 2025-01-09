@@ -57,17 +57,29 @@ namespace SqlBulkCopier.FixedLength
 
         public IBulkCopier Build(string connectionString)
         {
-            throw new NotImplementedException();
+            return new BulkCopier(
+                _destinationTableName,
+                new FixedLengthDataReaderBuilder(_columns, RowFilter),
+                connectionString);
         }
 
         public IBulkCopier Build(string connectionString, SqlBulkCopyOptions copyOptions)
         {
-            throw new NotImplementedException();
+            return new BulkCopier(
+                _destinationTableName,
+                new FixedLengthDataReaderBuilder(_columns, RowFilter),
+                connectionString,
+                copyOptions);
         }
 
         public IBulkCopier Build(SqlConnection connection, SqlBulkCopyOptions copyOptions, SqlTransaction externalTransaction)
         {
-            throw new NotImplementedException();
+            return new BulkCopier(
+                _destinationTableName,
+                new FixedLengthDataReaderBuilder(_columns, RowFilter),
+                connection,
+                copyOptions,
+                externalTransaction);
         }
     }
 }
