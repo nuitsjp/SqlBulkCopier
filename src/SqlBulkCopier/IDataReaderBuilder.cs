@@ -2,11 +2,10 @@
 using System.Text;
 using Microsoft.Data.SqlClient;
 
-namespace SqlBulkCopier
+namespace SqlBulkCopier;
+
+public interface IDataReaderBuilder
 {
-    public interface IDataReaderBuilder
-    {
-        void SetupColumnMappings(SqlBulkCopy sqlBulkCopy);
-        IDataReader Build(Stream stream, Encoding encoding);
-    }
+    void SetupColumnMappings(SqlBulkCopy sqlBulkCopy);
+    IDataReader Build(Stream stream, Encoding encoding);
 }

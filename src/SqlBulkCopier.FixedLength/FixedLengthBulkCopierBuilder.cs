@@ -1,85 +1,84 @@
 ﻿using FixedLengthHelper;
 using Microsoft.Data.SqlClient;
 
-namespace SqlBulkCopier.FixedLength
+namespace SqlBulkCopier.FixedLength;
+
+public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
 {
-    public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
+    public static IFixedLengthBulkCopierBuilder Create(string destinationTableName)
+        => new FixedLengthBulkCopierBuilder(destinationTableName);
+
+
+    /// <summary>
+    /// Default column context
+    /// </summary>
+    public Action<IColumnContext> DefaultColumnContext { get; set; } = _ => { };
+
+    private readonly List<FixedLengthColumn> _columns = [];
+    public List<FixedLengthColumn> Columns => _columns;
+    public Predicate<IFixedLengthReader> RowFilter { get; private set; } = _ => true;
+    private readonly string _destinationTableName;
+
+    private FixedLengthBulkCopierBuilder(string destinationTableName)
     {
-        public static IFixedLengthBulkCopierBuilder Create(string destinationTableName)
-            => new FixedLengthBulkCopierBuilder(destinationTableName);
+        _destinationTableName = destinationTableName;
+    }
 
+    public IFixedLengthBulkCopierBuilder SetDefaultColumnContext(Action<IColumnContext> c)
+    {
+        DefaultColumnContext = c;
+        return this;
+    }
 
-        /// <summary>
-        /// Default column context
-        /// </summary>
-        public Action<IColumnContext> DefaultColumnContext { get; set; } = _ => { };
+    public IFixedLengthBulkCopierBuilder SetRowFilter(Predicate<IFixedLengthReader> rowFilter)
+    {
+        RowFilter = rowFilter;
+        return this;
+    }
 
-        private readonly List<FixedLengthColumn> _columns = [];
-        public List<FixedLengthColumn> Columns => _columns;
-        public Predicate<IFixedLengthReader> RowFilter { get; private set; } = _ => true;
-        private readonly string _destinationTableName;
+    public IFixedLengthBulkCopierBuilder AddColumnMapping(string dbColumnName, int offsetBytes, int lengthBytes)
+        => AddColumnMapping(dbColumnName, offsetBytes, lengthBytes, _ => { });
 
-        private FixedLengthBulkCopierBuilder(string destinationTableName)
-        {
-            _destinationTableName = destinationTableName;
-        }
+    public IFixedLengthBulkCopierBuilder AddColumnMapping(string dbColumnName, int offsetBytes, int lengthBytes, Action<IColumnContext> c)
+    {
+        var columnContext = new FixedLengthColumnContext(_columns.Count, dbColumnName, offsetBytes, lengthBytes);
+        DefaultColumnContext(columnContext);
+        c(columnContext);
+        _columns.Add((FixedLengthColumn)columnContext.Build());
+        return this;
+    }
+    public IBulkCopier Build(SqlConnection connection)
+    {
+        return new BulkCopier(
+            _destinationTableName,
+            new FixedLengthDataReaderBuilder(_columns, RowFilter),
+            connection);
+    }
 
-        public IFixedLengthBulkCopierBuilder SetDefaultColumnContext(Action<IColumnContext> c)
-        {
-            DefaultColumnContext = c;
-            return this;
-        }
+    public IBulkCopier Build(string connectionString)
+    {
+        return new BulkCopier(
+            _destinationTableName,
+            new FixedLengthDataReaderBuilder(_columns, RowFilter),
+            connectionString);
+    }
 
-        public IFixedLengthBulkCopierBuilder SetRowFilter(Predicate<IFixedLengthReader> rowFilter)
-        {
-            RowFilter = rowFilter;
-            return this;
-        }
+    public IBulkCopier Build(string connectionString, SqlBulkCopyOptions copyOptions)
+    {
+        return new BulkCopier(
+            _destinationTableName,
+            new FixedLengthDataReaderBuilder(_columns, RowFilter),
+            connectionString,
+            copyOptions);
+    }
 
-        public IFixedLengthBulkCopierBuilder AddColumnMapping(string dbColumnName, int offsetBytes, int lengthBytes)
-            => AddColumnMapping(dbColumnName, offsetBytes, lengthBytes, _ => { });
-
-        public IFixedLengthBulkCopierBuilder AddColumnMapping(string dbColumnName, int offsetBytes, int lengthBytes, Action<IColumnContext> c)
-        {
-            var columnContext = new FixedLengthColumnContext(_columns.Count, dbColumnName, offsetBytes, lengthBytes);
-            DefaultColumnContext(columnContext);
-            c(columnContext);
-            _columns.Add((FixedLengthColumn)columnContext.Build());
-            return this;
-        }
-        public IBulkCopier Build(SqlConnection connection)
-        {
-            return new BulkCopier(
-                _destinationTableName,
-                new FixedLengthDataReaderBuilder(_columns, RowFilter),
-                connection);
-        }
-
-        public IBulkCopier Build(string connectionString)
-        {
-            return new BulkCopier(
-                _destinationTableName,
-                new FixedLengthDataReaderBuilder(_columns, RowFilter),
-                connectionString);
-        }
-
-        public IBulkCopier Build(string connectionString, SqlBulkCopyOptions copyOptions)
-        {
-            return new BulkCopier(
-                _destinationTableName,
-                new FixedLengthDataReaderBuilder(_columns, RowFilter),
-                connectionString,
-                copyOptions);
-        }
-
-        public IBulkCopier Build(SqlConnection connection, SqlBulkCopyOptions copyOptions, SqlTransaction externalTransaction)
-        {
-            return new BulkCopier(
-                _destinationTableName,
-                new FixedLengthDataReaderBuilder(_columns, RowFilter),
-                connection,
-                copyOptions,
-                externalTransaction);
-        }
+    public IBulkCopier Build(SqlConnection connection, SqlBulkCopyOptions copyOptions, SqlTransaction externalTransaction)
+    {
+        return new BulkCopier(
+            _destinationTableName,
+            new FixedLengthDataReaderBuilder(_columns, RowFilter),
+            connection,
+            copyOptions,
+            externalTransaction);
     }
 }
