@@ -121,6 +121,105 @@ namespace SqlBulkCopier.Test.CsvHelper
         }
 
         [Fact]
+        public async Task WriteToServerAsync_WithTransaction()
+        {
+            // Arrange
+            const int count = 100;
+            var targets = GenerateBulkInsertTestTargetData(count);
+            using var stream = await CreateCsvAsync(targets);
+
+            // 例示のビルダーAPI。実際の実装に応じて修正してください。
+            var sqlBulkCopier = CsvBulkCopierBuilder
+                .Create("[dbo].[BulkInsertTestTarget]")
+                .SetDefaultColumnContext(c => c.TrimEnd().TreatEmptyStringAsNull())
+
+                // GUID
+                .AddColumnMapping("UniqueIdValue", c => c.AsUniqueIdentifier())
+
+                // XML → そのまま文字列で受け取れる
+                .AddColumnMapping("XmlValue")
+
+                // ■ int?, decimal?, float?, string? などは自動変換が期待できるので、変換指定なし
+                .AddColumnMapping("Id")
+                .AddColumnMapping("TinyInt")
+                .AddColumnMapping("SmallInt")
+                .AddColumnMapping("IntValue")
+                .AddColumnMapping("BigInt")
+
+                // bit列は "0" or "1" → bool に明示変換が必要
+                .AddColumnMapping("BitValue", c => c.AsBit())
+
+                // decimal や float なども標準的な数値文字列であれば自動変換が可能
+                .AddColumnMapping("DecimalValue")
+                .AddColumnMapping("NumericValue")
+                .AddColumnMapping("MoneyValue")
+                .AddColumnMapping("SmallMoneyValue")
+                .AddColumnMapping("FloatValue")
+                .AddColumnMapping("RealValue")
+
+                // 日付系：yyyyMMdd, yyyyMMddHHmmss などは SQLServer が自動認識しない場合が多い
+                // よって、パーサーを指定
+                .AddColumnMapping("DateValue", c => c.AsDate("yyyyMMdd"))
+                .AddColumnMapping("DateTimeValue", c => c.AsDateTime("yyyyMMddHHmmss"))
+                .AddColumnMapping("SmallDateTimeValue", c => c.AsSmallDateTime("yyyyMMddHHmmss"))
+                .AddColumnMapping("DateTime2Value", c => c.AsDateTime2("yyyyMMddHHmmss"))
+
+                // time: "HHmmss" として保存しているなら要手動パース
+                .AddColumnMapping("TimeValue", c => c.AsTime(@"hh\:mm\:ss"))
+
+                // datetimeoffset: "yyyyMMddHHmmss+09:00" など → 要パーサー
+                .AddColumnMapping("DateTimeOffsetValue", c => c.AsDateTimeOffset("yyyyMMddHHmmK"))
+
+                // 文字列系は何も指定しなければそのまま文字列としてマッピングされる（必要に応じて TrimEnd）
+                .AddColumnMapping("CharValue")
+                .AddColumnMapping("VarCharValue")
+                .AddColumnMapping("NCharValue")
+                .AddColumnMapping("NVarCharValue")
+
+                // バイナリを Base64 で書き出しているなら、Convert.FromBase64String が必要
+                // もし ASCII 文字列そのままなら変換不要
+                .AddColumnMapping("BinaryValue", c => c.AsBinary())
+                .AddColumnMapping("VarBinaryValue", c => c.AsVarBinary())
+
+                // ビルド
+                .Build();
+
+            using var connection = new SqlConnection(SqlBulkCopierConnectionString);
+            await connection.OpenAsync(CancellationToken.None);
+            using var transaction = connection.BeginTransaction();
+            await sqlBulkCopier.WriteToServerAsync(
+                connection,
+                transaction,
+                stream, 
+                Encoding.UTF8, 
+                TimeSpan.FromMinutes(30));
+
+            // Assert
+
+            var insertedRows = (await connection
+                .QueryAsync<BulkInsertTestTarget>(
+                    "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id",
+                    transaction: transaction))
+                .ToArray();
+
+            insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
+            insertedRows.Length.Should().Be(count);
+
+            // 先頭行などを必要に応じて検証
+            var expected = targets.First();
+            var actual = insertedRows.First();
+            ShouldBe(expected, actual);
+
+            transaction.Rollback();
+
+            using var newConnection = new SqlConnection(SqlBulkCopierConnectionString);
+            await newConnection.OpenAsync(CancellationToken.None);
+            (await newConnection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[BulkInsertTestTarget]"))
+                .Should().Be(0);
+
+        }
+
+        [Fact]
         public async Task WriteToServerWithRowFilter()
         {
             // Arrange
