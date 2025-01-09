@@ -103,7 +103,7 @@ namespace SqlBulkCopier.Test.CsvHelper
                 .AddColumnMapping("VarBinaryValue", c => c.AsVarBinary())
 
                 // ビルド
-                .Build();
+                .Build(sqlConnection);
 
             await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
@@ -127,6 +127,10 @@ namespace SqlBulkCopier.Test.CsvHelper
             const int count = 100;
             var targets = GenerateBulkInsertTestTargetData(count);
             using var stream = await CreateCsvAsync(targets);
+
+            using var connection = new SqlConnection(SqlBulkCopierConnectionString);
+            await connection.OpenAsync(CancellationToken.None);
+            using var transaction = connection.BeginTransaction();
 
             // 例示のビルダーAPI。実際の実装に応じて修正してください。
             var sqlBulkCopier = CsvBulkCopierBuilder
@@ -182,11 +186,8 @@ namespace SqlBulkCopier.Test.CsvHelper
                 .AddColumnMapping("VarBinaryValue", c => c.AsVarBinary())
 
                 // ビルド
-                .Build();
+                .Build(connection, SqlBulkCopyOptions.Default, transaction);
 
-            using var connection = new SqlConnection(SqlBulkCopierConnectionString);
-            await connection.OpenAsync(CancellationToken.None);
-            using var transaction = connection.BeginTransaction();
             await sqlBulkCopier.WriteToServerAsync(
                 connection,
                 transaction,
@@ -296,7 +297,7 @@ namespace SqlBulkCopier.Test.CsvHelper
                 .AddColumnMapping("VarBinaryValue", c => c.AsVarBinary())
 
                 // ビルド
-                .Build();
+                .Build(sqlConnection);
 
             await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
@@ -377,7 +378,7 @@ namespace SqlBulkCopier.Test.CsvHelper
                 .AddColumnMapping("VarBinaryValue", 23, c => c.AsVarBinary())
 
                 // ビルド
-                .Build();
+                .Build(sqlConnection);
 
             await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
@@ -470,7 +471,7 @@ namespace SqlBulkCopier.Test.CsvHelper
                 .AddColumnMapping("VarBinaryValue", 23, c => c.AsVarBinary())
 
                 // ビルド
-                .Build();
+                .Build(sqlConnection);
 
             await sqlBulkCopier.WriteToServerAsync(sqlConnection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
@@ -531,7 +532,7 @@ namespace SqlBulkCopier.Test.CsvHelper
                 //.AddColumnMapping("CreatedAt", c => c.AsDateTime("yyyyMMddHHmmss"))
                 //.AddColumnMapping("UpdatedAt", c => c.AsDateTime("yyyyMMddHHmmss"))
 
-                .Build();
+                .Build(connection);
 
             // CSV から SQL Server へ
             await sqlBulkCopier.WriteToServerAsync(connection, stream, Encoding.UTF8, TimeSpan.FromMinutes(30));

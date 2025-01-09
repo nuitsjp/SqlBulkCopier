@@ -99,7 +99,7 @@ public class CsvBenchmarks : BenchmarksBase
         await using Stream stream = File.OpenRead(CsvFile);
 
         // Bulk copy to the database
-        await bulkCopier.WriteToServerAsync(connection, stream, Encoding.UTF8, CommandTimeout);
+        await bulkCopier.Build(connection).WriteToServerAsync(connection, stream, Encoding.UTF8, CommandTimeout);
         AssertResultCount(connection);
 
     }

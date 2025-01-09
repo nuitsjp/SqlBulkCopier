@@ -41,7 +41,7 @@ namespace SqlBulkCopier.Test.CsvHelper.Hosting
             // Assert
             var provider = services.BuildServiceProvider();
             provider.GetService<SqlConnectionProvider>().Should().NotBeNull();
-            provider.GetService<IBulkCopier>().Should().NotBeNull();
+            provider.GetService<IBulkCopierBuilder>().Should().NotBeNull();
         }
 
         static IConfiguration BuildJsonConfig(string json)

@@ -5,7 +5,7 @@ namespace SqlBulkCopier.CsvHelper
     /// <summary>
     /// Interface for building a bulk copier with header
     /// </summary>
-    public interface ICsvBulkCopierBuilder
+    public interface ICsvBulkCopierBuilder : IBulkCopierBuilder
     {
         /// <summary>
         /// Setup default column context
@@ -35,11 +35,5 @@ namespace SqlBulkCopier.CsvHelper
         /// <param name="c"></param>
         /// <returns></returns>
         ICsvBulkCopierBuilder AddColumnMapping(string columnName, Action<IColumnContext> c);
-
-        /// <summary>
-        /// Build the bulk copier
-        /// </summary>
-        /// <returns></returns>
-        IBulkCopier Build();
     }
 }

@@ -9,13 +9,13 @@ namespace SqlBulkCopier.CsvHelper.Hosting
     {
         public const string DefaultSectionName = "SqlBulkCopier";
 
-        public static IBulkCopier Parse(IConfiguration configuration, string sectionName = DefaultSectionName)
+        public static IBulkCopierBuilder Parse(IConfiguration configuration, string sectionName = DefaultSectionName)
         {
             var sqlBulkCopier = configuration.GetRequiredSection(sectionName);
             var hasHeader = sqlBulkCopier.GetValue<bool>("HasHeader");
             return hasHeader
-                ? ParseHasHeaderBuilder(sqlBulkCopier).Build()
-                : ParseNoHeaderBuilder(sqlBulkCopier).Build();
+                ? ParseHasHeaderBuilder(sqlBulkCopier)
+                : ParseNoHeaderBuilder(sqlBulkCopier);
         }
 
         internal static ICsvBulkCopierBuilder ParseHasHeaderBuilder(IConfigurationSection sqlBulkCopier)

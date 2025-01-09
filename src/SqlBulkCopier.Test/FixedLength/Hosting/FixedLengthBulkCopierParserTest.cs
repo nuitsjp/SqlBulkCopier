@@ -12,6 +12,20 @@ namespace SqlBulkCopier.Test.FixedLength.Hosting
 {
     public class FixedLengthBulkCopierParserTest
     {
+        private SqlConnection OpenConnection()
+        {
+            var connection = new SqlConnection(
+                new SqlConnectionStringBuilder
+                {
+                    DataSource = ".",
+                    InitialCatalog = "master",
+                    IntegratedSecurity = true,
+                    TrustServerCertificate = true
+                }.ToString());
+            connection.Open();
+            return connection;
+        }
+
         [Fact]
         public void Parse()
         {
@@ -30,7 +44,8 @@ namespace SqlBulkCopier.Test.FixedLength.Hosting
             var bulkCopierBuilder = FixedLengthBulkCopierParser.Parse(configuration);
 
             // Assert
-            var bulkCopier = (BulkCopier)bulkCopierBuilder.Build((SqlConnection)null!);
+            using var connection = OpenConnection();
+            var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
             bulkCopier.DataReaderBuilder.Should().BeOfType<FixedLengthDataReaderBuilder>();
         }
 

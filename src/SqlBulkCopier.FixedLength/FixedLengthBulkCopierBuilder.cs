@@ -47,18 +47,12 @@ namespace SqlBulkCopier.FixedLength
             _columns.Add((FixedLengthColumn)columnContext.Build());
             return this;
         }
-        public IBulkCopier Build()
-        {
-            return new BulkCopier(
-                _destinationTableName,
-                new FixedLengthDataReaderBuilder(_columns, RowFilter));
-        }
-
         public IBulkCopier Build(SqlConnection connection)
         {
             return new BulkCopier(
                 _destinationTableName,
-                new FixedLengthDataReaderBuilder(_columns, RowFilter));
+                new FixedLengthDataReaderBuilder(_columns, RowFilter),
+                connection);
         }
 
         public IBulkCopier Build(string connectionString)

@@ -2,7 +2,7 @@
 
 namespace SqlBulkCopier.CsvHelper
 {
-    public interface ICsvBulkCopierNoHeaderBuilder
+    public interface ICsvBulkCopierNoHeaderBuilder : IBulkCopierBuilder
     {
         /// <summary>
         /// Setup default column context
@@ -19,6 +19,5 @@ namespace SqlBulkCopier.CsvHelper
 
         ICsvBulkCopierNoHeaderBuilder AddColumnMapping(string dbColumnName, int csvColumnOrdinal);
         ICsvBulkCopierNoHeaderBuilder AddColumnMapping(string dbColumnName, int csvColumnOrdinal, Action<IColumnContext> c);
-        IBulkCopier Build();
     }
 }

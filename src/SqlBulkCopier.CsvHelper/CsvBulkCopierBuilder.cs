@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using Microsoft.Data.SqlClient;
 
 namespace SqlBulkCopier.CsvHelper
 {
@@ -101,9 +102,39 @@ namespace SqlBulkCopier.CsvHelper
             return this;
         }
 
-        public IBulkCopier Build()
+        public IBulkCopier Build(SqlConnection connection)
         {
-            return new BulkCopier(_destinationTableName, new CsvDataReaderBuilder(_hasHeader, _columns, _rowFilter));
+            return new BulkCopier(
+                _destinationTableName, 
+                new CsvDataReaderBuilder(_hasHeader, _columns, _rowFilter),
+                connection);
+        }
+
+        public IBulkCopier Build(string connectionString)
+        {
+            return new BulkCopier(
+                _destinationTableName,
+                new CsvDataReaderBuilder(_hasHeader, _columns, _rowFilter),
+                connectionString);
+        }
+
+        public IBulkCopier Build(string connectionString, SqlBulkCopyOptions copyOptions)
+        {
+            return new BulkCopier(
+                _destinationTableName,
+                new CsvDataReaderBuilder(_hasHeader, _columns, _rowFilter),
+                connectionString,
+                copyOptions);
+        }
+
+        public IBulkCopier Build(SqlConnection connection, SqlBulkCopyOptions copyOptions, SqlTransaction externalTransaction)
+        {
+            return new BulkCopier(
+                _destinationTableName,
+                new CsvDataReaderBuilder(_hasHeader, _columns, _rowFilter),
+                connection,
+                copyOptions,
+                externalTransaction);
         }
     }
 }
