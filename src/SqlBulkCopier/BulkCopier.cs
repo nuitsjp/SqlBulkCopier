@@ -5,27 +5,24 @@ namespace SqlBulkCopier;
 
 public class BulkCopier : IBulkCopier
 {
+    public event SqlRowsCopiedEventHandler? SqlRowsCopied;
+
     private readonly SqlBulkCopy _sqlBulkCopy;
+
     public BulkCopier(
         string destinationTableName,
         IDataReaderBuilder dataReaderBuilder,
         SqlConnection connection)
+        : this(destinationTableName, new SqlBulkCopy(connection), dataReaderBuilder)
     {
-        DataReaderBuilder = dataReaderBuilder;
-        _sqlBulkCopy = new SqlBulkCopy(connection);
-        _sqlBulkCopy.DestinationTableName = destinationTableName;
-        DataReaderBuilder.SetupColumnMappings(_sqlBulkCopy);
     }
 
     public BulkCopier(
         string destinationTableName,
         IDataReaderBuilder dataReaderBuilder,
         string connectionString)
+        : this(destinationTableName, new SqlBulkCopy(connectionString), dataReaderBuilder)
     {
-        DataReaderBuilder = dataReaderBuilder;
-        _sqlBulkCopy = new SqlBulkCopy(connectionString);
-        _sqlBulkCopy.DestinationTableName = destinationTableName;
-        DataReaderBuilder.SetupColumnMappings(_sqlBulkCopy);
     }
 
     public BulkCopier(
@@ -33,11 +30,8 @@ public class BulkCopier : IBulkCopier
         IDataReaderBuilder dataReaderBuilder, 
         string connectionString, 
         SqlBulkCopyOptions copyOptions)
+        : this(destinationTableName, new SqlBulkCopy(connectionString, copyOptions), dataReaderBuilder)
     {
-        DataReaderBuilder = dataReaderBuilder;
-        _sqlBulkCopy = new SqlBulkCopy(connectionString, copyOptions);
-        _sqlBulkCopy.DestinationTableName = destinationTableName;
-        DataReaderBuilder.SetupColumnMappings(_sqlBulkCopy);
     }
 
     public BulkCopier(
@@ -46,14 +40,40 @@ public class BulkCopier : IBulkCopier
         SqlConnection connection, 
         SqlBulkCopyOptions copyOptions, 
         SqlTransaction externalTransaction)
+        : this(destinationTableName, new SqlBulkCopy(connection, copyOptions, externalTransaction), dataReaderBuilder)
     {
-        DataReaderBuilder = dataReaderBuilder;
-        _sqlBulkCopy = new SqlBulkCopy(connection, copyOptions, externalTransaction);
+    }
+
+    private BulkCopier(
+        string destinationTableName,
+        SqlBulkCopy sqlBulkCopy, IDataReaderBuilder dataReaderBuilder)
+    {
+        _sqlBulkCopy = sqlBulkCopy;
         _sqlBulkCopy.DestinationTableName = destinationTableName;
+        DataReaderBuilder = dataReaderBuilder;
         DataReaderBuilder.SetupColumnMappings(_sqlBulkCopy);
+
+        _sqlBulkCopy.SqlRowsCopied += SqlBulkCopyOnSqlRowsCopied;
     }
 
     public IDataReaderBuilder DataReaderBuilder { get; init; }
+
+    public int BatchSize
+    {
+        get => _sqlBulkCopy.BatchSize;
+        set => _sqlBulkCopy.BatchSize = value;
+    }
+
+    public string DestinationTableName => _sqlBulkCopy.DestinationTableName;
+
+    public int NotifyAfter
+    {
+        get => _sqlBulkCopy.NotifyAfter;
+        set => _sqlBulkCopy.NotifyAfter = value;
+    }
+
+    public int RowsCopied => _sqlBulkCopy.RowsCopied;
+    public long RowsCopied64 => _sqlBulkCopy.RowsCopied64;
 
     public async Task WriteToServerAsync(Stream stream, Encoding encoding, TimeSpan timeout)
     {
@@ -63,6 +83,11 @@ public class BulkCopier : IBulkCopier
 
     void IDisposable.Dispose()
     {
+        _sqlBulkCopy.SqlRowsCopied -= SqlBulkCopyOnSqlRowsCopied;
         ((IDisposable)_sqlBulkCopy).Dispose();
     }
+
+    private void SqlBulkCopyOnSqlRowsCopied(object sender, SqlRowsCopiedEventArgs e)
+        => SqlRowsCopied?.Invoke(sender, e);
+
 }
