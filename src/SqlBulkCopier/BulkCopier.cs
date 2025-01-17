@@ -169,21 +169,35 @@ public class BulkCopier : IBulkCopier
         if (_externalTransaction is not null)
         {
             // 外部トランザクションが設定されている場合、そのトランザクション内で実行
+#if NET8_0_OR_GREATER
             await using var command = new SqlCommand(query, _connection, _externalTransaction);
+#else
+            var command = new SqlCommand(query, _connection, _externalTransaction);
+#endif
             await command.ExecuteNonQueryAsync();
         }
         else if (_connection is not null)
         {
             // 外部コネクションが設定されている場合、そのコネクション内で実行
+#if NET8_0_OR_GREATER
             await using var command = new SqlCommand(query, _connection);
+#else
+            var command = new SqlCommand(query, _connection);
+#endif
             await command.ExecuteNonQueryAsync();
         }
         else
         {
             // それ以外の場合、新規コネクションを作成して実行
+#if NET8_0_OR_GREATER
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
             await using var command = new SqlCommand(query, connection);
+#else
+            var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+            using var command = new SqlCommand(query, connection);
+#endif
             await command.ExecuteNonQueryAsync();
         }
     }
