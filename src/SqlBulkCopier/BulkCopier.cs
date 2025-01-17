@@ -105,10 +105,22 @@ public class BulkCopier : IBulkCopier
     {
         _sqlBulkCopy.BulkCopyTimeout = (int)timeout.TotalSeconds;
 
+        // 外部トランザクションが設定されている場合、バルクインサート関連だけリトライしても適切な結果にならないため例外をスロー
         if (_externalTransaction is not null && 0 < MaxRetryCount)
         {
-            // 外部トランザクションが設定されている場合、バルクインサート関連だけリトライしても適切な結果にならないため例外をスロー
             throw new InvalidOperationException("Cannot retry with an external transaction.");
+        }
+
+        // 外部コネクションが設定されている場合、TransactionScopeと併用されている場合などに、バルクインサート関連だけリトライしても適切な結果にならないため例外をスロー
+        if (_connection is not null && 0 < MaxRetryCount)
+        {
+            throw new InvalidOperationException("Cannot retry with an external connection.");
+        }
+
+        // リトライが設定されている場合、テーブルのトランケートが無効だと、リトライ時にデータが重複してしまうため例外をスロー
+        if (0 < MaxRetryCount && !TruncateBeforeBulkInsert)
+        {
+            throw new InvalidOperationException("Cannot retry without truncating the table.");
         }
 
         var currentRetryCount = 0;
@@ -120,7 +132,7 @@ public class BulkCopier : IBulkCopier
                 if (TruncateBeforeBulkInsert)
                 {
                     // テーブルをトランケートする処理
-                    // 事前に外部で実装されたメソッドを呼び出す想定
+                    await TruncateTableAsync();
                 }
 
                 await _sqlBulkCopy.WriteToServerAsync(DataReaderBuilder.Build(stream, encoding));
@@ -147,12 +159,49 @@ public class BulkCopier : IBulkCopier
         }
     }
 
+    /// <summary>
+    /// Truncate table before bulk insert.
+    /// </summary>
+    /// <returns></returns>
+    private async Task TruncateTableAsync()
+    {
+        var query = $"TRUNCATE TABLE {_sqlBulkCopy.DestinationTableName}";
+        if (_externalTransaction is not null)
+        {
+            // 外部トランザクションが設定されている場合、そのトランザクション内で実行
+            await using var command = new SqlCommand(query, _connection, _externalTransaction);
+            await command.ExecuteNonQueryAsync();
+        }
+        else if (_connection is not null)
+        {
+            // 外部コネクションが設定されている場合、そのコネクション内で実行
+            await using var command = new SqlCommand(query, _connection);
+            await command.ExecuteNonQueryAsync();
+        }
+        else
+        {
+            // それ以外の場合、新規コネクションを作成して実行
+            await using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+            await using var command = new SqlCommand(query, connection);
+            await command.ExecuteNonQueryAsync();
+        }
+    }
+
+    /// <summary>
+    /// Dispose the object.
+    /// </summary>
     void IDisposable.Dispose()
     {
         _sqlBulkCopy.SqlRowsCopied -= SqlBulkCopyOnSqlRowsCopied;
         ((IDisposable)_sqlBulkCopy).Dispose();
     }
 
+    /// <summary>
+    /// Notify the event when rows copied.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void SqlBulkCopyOnSqlRowsCopied(object sender, SqlRowsCopiedEventArgs e)
         => SqlRowsCopied?.Invoke(sender, e);
 
