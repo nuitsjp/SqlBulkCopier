@@ -40,129 +40,70 @@ public class CsvBulkCopierBuilderTest
     {
         private const string DatabaseName = "CsvBulkCopierBuilderTest";
 
+        const int Count = 100;
+
+        private List<BulkInsertTestTarget> Targets { get; } = GenerateBulkInsertTestTargetData(Count);
+
         [Fact]
         public async Task ByConnection()
         {
             // Arrange
-            const int count = 100;
-            var targets = GenerateBulkInsertTestTargetData(count);
-            using var stream = await CreateCsvAsync(targets);
-
-            using var sqlConnection = new SqlConnection(SqlBulkCopierConnectionString);
-            await sqlConnection.OpenAsync(CancellationToken.None);
-
-            // 例示のビルダーAPI。実際の実装に応じて修正してください。
             var sqlBulkCopier = ProvideBuilder()
-                .Build(sqlConnection);
+                .Build(await OpenConnectionAsync());
 
-            await sqlBulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
+            // Act
+            await sqlBulkCopier.WriteToServerAsync(
+                await CreateCsvAsync(Targets), 
+                Encoding.UTF8, 
+                TimeSpan.FromMinutes(30));
 
             // Assert
-            var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
-                "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id")).ToArray();
-
-            insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
-            insertedRows.Length.Should().Be(count);
-
-            // 先頭行などを必要に応じて検証
-            var expected = targets.First();
-            var actual = insertedRows.First();
-            ShouldBe(expected, actual);
+            await AssertAsync();
         }
 
         [Fact]
         public async Task ByConnectionString()
         {
             // Arrange
-            const int count = 100;
-            var targets = GenerateBulkInsertTestTargetData(count);
-            using var stream = await CreateCsvAsync(targets);
-
-            // 例示のビルダーAPI。実際の実装に応じて修正してください。
             var sqlBulkCopier = ProvideBuilder()
                 .Build(SqlBulkCopierConnectionString);
 
             await sqlBulkCopier.WriteToServerAsync(
-                stream,
+                await CreateCsvAsync(Targets),
                 Encoding.UTF8,
                 TimeSpan.FromMinutes(30));
 
             // Assert
-            using var connection = new SqlConnection(SqlBulkCopierConnectionString);
-            await connection.OpenAsync(CancellationToken.None);
-            using var transaction = connection.BeginTransaction();
-
-            var insertedRows = (await connection
-                    .QueryAsync<BulkInsertTestTarget>(
-                        "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id",
-                        transaction: transaction))
-                .ToArray();
-
-            insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
-            insertedRows.Length.Should().Be(count);
-
-            // 先頭行などを必要に応じて検証
-            var expected = targets.First();
-            var actual = insertedRows.First();
-            ShouldBe(expected, actual);
+            await AssertAsync();
         }
 
         [Fact]
         public async Task ByConnectionStringAndOptions()
         {
             // Arrange
-            const int count = 100;
-            var targets = GenerateBulkInsertTestTargetData(count);
-            using var stream = await CreateCsvAsync(targets);
-
-            // 例示のビルダーAPI。実際の実装に応じて修正してください。
             var sqlBulkCopier = ProvideBuilder()
                 .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
 
             await sqlBulkCopier.WriteToServerAsync(
-                stream,
+                await CreateCsvAsync(Targets),
                 Encoding.UTF8,
                 TimeSpan.FromMinutes(30));
 
             // Assert
-            using var connection = new SqlConnection(SqlBulkCopierConnectionString);
-            await connection.OpenAsync(CancellationToken.None);
-            using var transaction = connection.BeginTransaction();
-
-            var insertedRows = (await connection
-                    .QueryAsync<BulkInsertTestTarget>(
-                        "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id",
-                        transaction: transaction))
-                .ToArray();
-
-            insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
-            insertedRows.Length.Should().Be(count);
-
-            // 先頭行などを必要に応じて検証
-            var expected = targets.First();
-            var actual = insertedRows.First();
-            ShouldBe(expected, actual);
+            await AssertAsync();
         }
-
 
         [Fact]
         public async Task WithTransaction()
         {
             // Arrange
-            const int count = 100;
-            var targets = GenerateBulkInsertTestTargetData(count);
-            using var stream = await CreateCsvAsync(targets);
-
-            using var connection = new SqlConnection(SqlBulkCopierConnectionString);
-            await connection.OpenAsync(CancellationToken.None);
+            using var connection = await OpenConnectionAsync();
             using var transaction = connection.BeginTransaction();
-
-            // 例示のビルダーAPI。実際の実装に応じて修正してください。
             var sqlBulkCopier = ProvideBuilder()
                 .Build(connection, SqlBulkCopyOptions.Default, transaction);
 
             await sqlBulkCopier.WriteToServerAsync(
-                stream,
+                await CreateCsvAsync(Targets),
                 Encoding.UTF8,
                 TimeSpan.FromMinutes(30));
 
@@ -175,10 +116,10 @@ public class CsvBulkCopierBuilderTest
                 .ToArray();
 
             insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
-            insertedRows.Length.Should().Be(count);
+            insertedRows.Length.Should().Be(Count);
 
             // 先頭行などを必要に応じて検証
-            var expected = targets.First();
+            var expected = Targets.First();
             var actual = insertedRows.First();
             ShouldBe(expected, actual);
 
@@ -194,14 +135,6 @@ public class CsvBulkCopierBuilderTest
         public async Task WithRowFilter()
         {
             // Arrange
-            const int count = 100;
-            var targets = GenerateBulkInsertTestTargetData(count);
-            using var stream = await CreateCsvAsync(targets, true);
-
-            using var sqlConnection = new SqlConnection(SqlBulkCopierConnectionString);
-            await sqlConnection.OpenAsync(CancellationToken.None);
-
-            // 例示のビルダーAPI。実際の実装に応じて修正してください。
             var sqlBulkCopier = ProvideBuilder()
                 .SetRowFilter(reader =>
                 {
@@ -215,49 +148,31 @@ public class CsvBulkCopierBuilderTest
                     }
                     return true;
                 })
-                .Build(sqlConnection);
+                .Build(await OpenConnectionAsync());
 
-            await sqlBulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
+            await sqlBulkCopier.WriteToServerAsync(
+                await CreateCsvAsync(Targets), 
+                Encoding.UTF8, 
+                TimeSpan.FromMinutes(30));
 
             // Assert
-            var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
-                "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id")).ToArray();
-
-            insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
-            insertedRows.Length.Should().Be(count);
-
-            // 先頭行などを必要に応じて検証
-            var expected = targets.First();
-            var actual = insertedRows.First();
-            ShouldBe(expected, actual);
+            await AssertAsync();
         }
 
         [Fact]
         public async Task FromNoHeaderCsvAsync()
         {
             // Arrange
-            var targets = GenerateBulkInsertTestTargetData(1);
-            using var stream = await CreateNoHeaderCsvAsync(targets);
-
-            using var sqlConnection = new SqlConnection(SqlBulkCopierConnectionString);
-            await sqlConnection.OpenAsync(CancellationToken.None);
-
-            // 例示のビルダーAPI。実際の実装に応じて修正してください。
             var sqlBulkCopier = ProvideNoHeaderBuilder()
-                .Build(sqlConnection);
+                .Build(await OpenConnectionAsync());
 
-            await sqlBulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
+            await sqlBulkCopier.WriteToServerAsync(
+                await CreateNoHeaderCsvAsync(Targets), 
+                Encoding.UTF8, 
+                TimeSpan.FromMinutes(30));
 
             // Assert
-            var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
-                "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id")).ToArray();
-
-            insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
-
-            // 先頭行などを必要に応じて検証
-            var expected = targets.First();
-            var actual = insertedRows.First();
-            ShouldBe(expected, actual);
+            await AssertAsync();
         }
 
 
@@ -265,13 +180,6 @@ public class CsvBulkCopierBuilderTest
         public async Task FromNoHeader_WithRowFilterCsvAsync()
         {
             // Arrange
-            var targets = GenerateBulkInsertTestTargetData(1);
-            using var stream = await CreateNoHeaderCsvAsync(targets, true);
-
-            using var sqlConnection = new SqlConnection(SqlBulkCopierConnectionString);
-            await sqlConnection.OpenAsync(CancellationToken.None);
-
-            // 例示のビルダーAPI。実際の実装に応じて修正してください。
             var sqlBulkCopier = ProvideNoHeaderBuilder()
                 .SetRowFilter(reader =>
                 {
@@ -285,20 +193,22 @@ public class CsvBulkCopierBuilderTest
                     }
                     return true;
                 })
-                .Build(sqlConnection);
+                .Build(await OpenConnectionAsync());
 
-            await sqlBulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
+            await sqlBulkCopier.WriteToServerAsync(
+                await CreateNoHeaderCsvAsync(Targets), 
+                Encoding.UTF8, 
+                TimeSpan.FromMinutes(30));
 
             // Assert
-            var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
-                "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id")).ToArray();
+            await AssertAsync();
+        }
 
-            insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
-
-            // 先頭行などを必要に応じて検証
-            var expected = targets.First();
-            var actual = insertedRows.First();
-            ShouldBe(expected, actual);
+        private async Task<SqlConnection> OpenConnectionAsync()
+        {
+            var sqlConnection = new SqlConnection(SqlBulkCopierConnectionString);
+            await sqlConnection.OpenAsync(CancellationToken.None);
+            return sqlConnection;
         }
 
         private static async Task<Stream> CreateCsvAsync(IEnumerable<BulkInsertTestTarget> targets, bool withHeaderAndFooter = false)
@@ -463,6 +373,23 @@ public class CsvBulkCopierBuilderTest
                 // もし ASCII 文字列そのままなら変換不要
                 .AddColumnMapping("BinaryValue", 22, c => c.AsBinary())
                 .AddColumnMapping("VarBinaryValue", 23, c => c.AsVarBinary());
+
+        private async Task AssertAsync()
+        {
+            using var connection = new SqlConnection(SqlBulkCopierConnectionString);
+            await connection.OpenAsync(CancellationToken.None);
+
+            var insertedRows = (await connection.QueryAsync<BulkInsertTestTarget>(
+                "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id")).ToArray();
+
+            insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
+            insertedRows.Length.Should().Be(Count);
+
+            // 先頭行などを必要に応じて検証
+            var expected = Targets.First();
+            var actual = insertedRows.First();
+            ShouldBe(expected, actual);
+        }
 
     }
 }
