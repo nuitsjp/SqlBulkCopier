@@ -129,31 +129,33 @@ public class BulkCopier : IBulkCopier
         {
             try
             {
+                // When truncate before bulk insert is enabled, truncate the table
                 if (TruncateBeforeBulkInsert)
                 {
-                    // テーブルをトランケートする処理
                     await TruncateTableAsync();
                 }
 
                 await _sqlBulkCopy.WriteToServerAsync(DataReaderBuilder.Build(stream, encoding));
-                break; // 成功したらループを抜ける
+
+                // Exit the loop when the process is successful
+                break;
             }
             catch (Exception ex)
             {
                 currentRetryCount++;
                 if (currentRetryCount > MaxRetryCount)
                 {
-                    // オプションに基づき最大回数を超えたら失敗扱い
+                    // When the retry count exceeds the maximum, throw an exception
                     throw new Exception($"BulkCopier failed after {currentRetryCount - 1} retries.", ex);
                 }
 
-                // 指数バックオフなら待機時間を増やす
+                // When use exponential backoff, double the delay time
                 if (UseExponentialBackoff && currentRetryCount > 1)
                 {
                     delay = TimeSpan.FromMilliseconds(delay.TotalMilliseconds * 2);
                 }
 
-                // リトライ前に待機
+                // Wait for the delay
                 await Task.Delay(delay);
             }
         }
@@ -168,7 +170,7 @@ public class BulkCopier : IBulkCopier
         var query = $"TRUNCATE TABLE {_sqlBulkCopy.DestinationTableName}";
         if (_externalTransaction is not null)
         {
-            // 外部トランザクションが設定されている場合、そのトランザクション内で実行
+            // External transaction is set, execute in that
 #if NET8_0_OR_GREATER
             await using var command = new SqlCommand(query, _connection, _externalTransaction);
 #else
@@ -178,7 +180,7 @@ public class BulkCopier : IBulkCopier
         }
         else if (_connection is not null)
         {
-            // 外部コネクションが設定されている場合、そのコネクション内で実行
+            // External connection is set, execute in that
 #if NET8_0_OR_GREATER
             await using var command = new SqlCommand(query, _connection);
 #else
@@ -188,7 +190,7 @@ public class BulkCopier : IBulkCopier
         }
         else
         {
-            // それ以外の場合、新規コネクションを作成して実行
+            // Otherwise, create a new connection and execute
 #if NET8_0_OR_GREATER
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
