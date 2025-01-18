@@ -1,7 +1,7 @@
 using Bogus;
 using Dapper;
-using FluentAssertions;
 using Microsoft.Data.SqlClient;
+using Shouldly;
 
 namespace SqlBulkCopier.Test;
 
@@ -236,31 +236,31 @@ public abstract class BulkCopierBuilderTestBase
 
     protected static void ShouldBe(BulkInsertTestTarget expected, BulkInsertTestTarget actual)
     {
-        actual.Id.Should().Be(expected.Id);
-        actual.TinyInt.Should().Be(expected.TinyInt);
-        actual.SmallInt.Should().Be(expected.SmallInt);
-        actual.IntValue.Should().Be(expected.IntValue);
-        actual.BigInt.Should().Be(expected.BigInt);
-        actual.BitValue.Should().Be(expected.BitValue);
-        actual.DecimalValue.Should().Be(expected.DecimalValue);
-        actual.NumericValue.Should().Be(expected.NumericValue);
-        actual.MoneyValue.Should().Be(expected.MoneyValue);
-        actual.SmallMoneyValue.Should().Be(expected.SmallMoneyValue);
-        actual.FloatValue.Should().BeApproximately(expected.FloatValue, 0.001f);
-        actual.RealValue.Should().BeApproximately(expected.RealValue, 0.001f);
-        actual.DateValue.Should().Be(new DateTime(expected.DateValue!.Value.Year, expected.DateValue!.Value.Month, expected.DateValue!.Value.Day));
-        actual.DateTimeValue.Should().Be(DateTime.Parse(expected.DateTimeValue!.Value.ToString("yyyy/MM/dd HH:mm:ss")));
-        Math.Abs((actual.SmallDateTimeValue!.Value - expected.SmallDateTimeValue!.Value).TotalMinutes).Should().BeLessThan(1);
-        actual.DateTime2Value.Should().Be(DateTime.Parse(expected.DateTime2Value!.Value.ToString("yyyy/MM/dd HH:mm:ss")));
-        actual.TimeValue.Should().Be(new TimeSpan(expected.TimeValue!.Value.Hours, expected.TimeValue!.Value.Minutes, expected.TimeValue!.Value.Seconds));
-        actual.DateTimeOffsetValue.Should().Be(DateTime.Parse(expected.DateTimeOffsetValue!.Value.ToString("yyyy/MM/dd HH:mm")));
-        actual.CharValue.Should().Be(expected.CharValue?.TrimEnd());
-        actual.VarCharValue.Should().Be(expected.VarCharValue?.TrimEnd());
-        actual.NCharValue.Should().Be(expected.NCharValue?.TrimEnd());
-        actual.BinaryValue.Should().BeEquivalentTo(expected.BinaryValue);
-        actual.VarBinaryValue.Should().BeEquivalentTo(expected.VarBinaryValue);
-        actual.UniqueIdValue.Should().Be(expected.UniqueIdValue);
-        actual.XmlValue.Should().Be(expected.XmlValue);
+        actual.Id.ShouldBe(expected.Id);
+        actual.TinyInt.ShouldBe(expected.TinyInt);
+        actual.SmallInt.ShouldBe(expected.SmallInt);
+        actual.IntValue.ShouldBe(expected.IntValue);
+        actual.BigInt.ShouldBe(expected.BigInt);
+        actual.BitValue.ShouldBe(expected.BitValue);
+        actual.DecimalValue.ShouldBe(expected.DecimalValue);
+        actual.NumericValue.ShouldBe(expected.NumericValue);
+        actual.MoneyValue.ShouldBe(expected.MoneyValue);
+        actual.SmallMoneyValue.ShouldBe(expected.SmallMoneyValue);
+        actual.FloatValue!.Value.ShouldBe(expected.FloatValue!.Value, 0.001d);
+        actual.RealValue!.Value.ShouldBe(expected.RealValue!.Value, 0.001d);
+        actual.DateValue.ShouldBe(new DateTime(expected.DateValue!.Value.Year, expected.DateValue!.Value.Month, expected.DateValue!.Value.Day));
+        actual.DateTimeValue.ShouldBe(DateTime.Parse(expected.DateTimeValue!.Value.ToString("yyyy/MM/dd HH:mm:ss")));
+        Math.Abs((actual.SmallDateTimeValue!.Value - expected.SmallDateTimeValue!.Value).TotalMinutes).ShouldBeLessThan(1);
+        actual.DateTime2Value.ShouldBe(DateTime.Parse(expected.DateTime2Value!.Value.ToString("yyyy/MM/dd HH:mm:ss")));
+        actual.TimeValue.ShouldBe(new TimeSpan(expected.TimeValue!.Value.Hours, expected.TimeValue!.Value.Minutes, expected.TimeValue!.Value.Seconds));
+        actual.DateTimeOffsetValue.ShouldBe(DateTime.Parse(expected.DateTimeOffsetValue!.Value.ToString("yyyy/MM/dd HH:mm")));
+        actual.CharValue.ShouldBe(expected.CharValue?.TrimEnd());
+        actual.VarCharValue.ShouldBe(expected.VarCharValue?.TrimEnd());
+        actual.NCharValue.ShouldBe(expected.NCharValue?.TrimEnd());
+        actual.BinaryValue.ShouldBeEquivalentTo(expected.BinaryValue);
+        actual.VarBinaryValue.ShouldBeEquivalentTo(expected.VarBinaryValue);
+        actual.UniqueIdValue.ShouldBe(expected.UniqueIdValue);
+        actual.XmlValue.ShouldBe(expected.XmlValue);
 
     }
 }

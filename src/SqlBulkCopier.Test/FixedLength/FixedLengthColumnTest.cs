@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using Shouldly;
 using SqlBulkCopier.FixedLength;
 
 namespace SqlBulkCopier.Test.FixedLength;
@@ -18,12 +18,12 @@ public class FixedLengthColumnTest : ColumnTest
         var column = (FixedLengthColumn)options.Build();
 
         // Assert
-        column.Ordinal.Should().Be(0);
-        column.Name.Should().Be("column");
-        column.OffsetBytes.Should().Be(1);
-        column.LengthBytes.Should().Be(2);
+        column.Ordinal.ShouldBe(0);
+        column.Name.ShouldBe("column");
+        column.OffsetBytes.ShouldBe(1);
+        column.LengthBytes.ShouldBe(2);
 
-        column.Convert("Hello").Should().Be("Hello");
+        column.Convert("Hello").ShouldBe("Hello");
     }
 
 }

@@ -1,7 +1,7 @@
 using System.Data;
 using System.Text;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
+using Shouldly;
 using SqlBulkCopier.Hosting;
 
 namespace SqlBulkCopier.Test.Hosting;
@@ -26,7 +26,7 @@ public class SqlConnectionProviderTests
         var connection = await provider.OpenAsync();
 
         // Assert
-        connection.Should().NotBeNull();
+        connection.ShouldNotBeNull();
         Assert.NotNull(connection);
         Assert.Equal(ConnectionState.Open, connection.State);
     }
@@ -49,7 +49,7 @@ public class SqlConnectionProviderTests
         var connection = await provider.OpenAsync("OriginalConnection");
 
         // Assert
-        connection.Should().NotBeNull();
+        connection.ShouldNotBeNull();
         Assert.NotNull(connection);
         Assert.Equal(ConnectionState.Open, connection.State);
     }
@@ -69,7 +69,7 @@ public class SqlConnectionProviderTests
 
         // Act & Assert
         var act = () => provider.OpenAsync();
-        await act.Should().ThrowAsync<InvalidOperationException>();
+        await act.ShouldThrowAsync<InvalidOperationException>();
     }
 
     static IConfiguration BuildJsonConfig(string json)

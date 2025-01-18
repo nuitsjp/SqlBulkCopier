@@ -1,8 +1,8 @@
 using System.Globalization;
 using System.Text;
 using Dapper;
-using FluentAssertions;
 using Microsoft.Data.SqlClient;
+using Shouldly;
 using SqlBulkCopier.FixedLength;
 
 // ReSharper disable UseAwaitUsing
@@ -29,8 +29,8 @@ public class FixedLengthBulkCopierBuilderTest()
         var second = builder.Columns.Last();
 
         // Act & Assert
-        first.Convert("1.234.567,89xy").Should().Be(expected);
-        second.Convert("1,234,567.89xy").Should().Be(expected);
+        first.Convert("1.234.567,89xy").ShouldBe(expected);
+        second.Convert("1,234,567.89xy").ShouldBe(expected);
     }
 
     public class WriteToServerAsync() : BulkCopierBuilderTestBase(DatabaseName)
@@ -165,8 +165,8 @@ public class FixedLengthBulkCopierBuilderTest()
             var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
                 "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id")).ToArray();
 
-            insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
-            insertedRows.Length.Should().Be(Count);
+            insertedRows.ShouldNotBeEmpty("書き出したデータが読み込まれるはず");
+            insertedRows.Length.ShouldBe(Count);
 
             // 先頭行などを必要に応じて検証
             var expected = Targets.First();

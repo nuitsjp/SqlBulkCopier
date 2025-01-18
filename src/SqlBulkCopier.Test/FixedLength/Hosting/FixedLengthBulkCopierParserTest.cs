@@ -2,9 +2,9 @@
 using System.Globalization;
 using System.Text;
 using FixedLengthHelper;
-using FluentAssertions;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Shouldly;
 using SqlBulkCopier.FixedLength;
 using SqlBulkCopier.FixedLength.Hosting;
 
@@ -46,7 +46,7 @@ public class FixedLengthBulkCopierParserTest
         // Assert
         using var connection = OpenConnection();
         var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
-        bulkCopier.DataReaderBuilder.Should().BeOfType<FixedLengthDataReaderBuilder>();
+        bulkCopier.DataReaderBuilder.ShouldBeOfType<FixedLengthDataReaderBuilder>();
     }
 
     public class BuildBuilder
@@ -68,7 +68,7 @@ public class FixedLengthBulkCopierParserTest
             var act = () => FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
 
             // Assert
-            act.Should().Throw<InvalidOperationException>();
+            act.ShouldThrow<InvalidOperationException>();
         }
 
         public class DefaultColumnContext
@@ -98,7 +98,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.TrimChars.Should().BeNull();
+                    column.TrimChars.ShouldBeNull();
                 }
 
                 [Fact]
@@ -126,7 +126,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.TrimChars.Should().BeEquivalentTo("chars".ToCharArray());
+                    column.TrimChars.ShouldBeEquivalentTo("chars".ToCharArray());
                 }
 
                 [Fact]
@@ -155,7 +155,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.TrimChars.Should().BeEquivalentTo("chars".ToCharArray());
+                    column.TrimChars.ShouldBeEquivalentTo("chars".ToCharArray());
                 }
 
                 [Fact]
@@ -184,7 +184,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.TrimChars.Should().BeEquivalentTo("chars".ToCharArray());
+                    column.TrimChars.ShouldBeEquivalentTo("chars".ToCharArray());
                 }
             }
 
@@ -213,7 +213,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.TrimMode.Should().Be(SqlBulkCopier.TrimMode.None);
+                    column.TrimMode.ShouldBe(SqlBulkCopier.TrimMode.None);
                 }
 
                 [Fact]
@@ -241,7 +241,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.TrimMode.Should().Be(SqlBulkCopier.TrimMode.None);
+                    column.TrimMode.ShouldBe(SqlBulkCopier.TrimMode.None);
                 }
 
                 [Fact]
@@ -269,7 +269,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.TrimMode.Should().Be(SqlBulkCopier.TrimMode.Trim);
+                    column.TrimMode.ShouldBe(SqlBulkCopier.TrimMode.Trim);
                 }
 
                 [Fact]
@@ -297,7 +297,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.TrimMode.Should().Be(SqlBulkCopier.TrimMode.TrimStart);
+                    column.TrimMode.ShouldBe(SqlBulkCopier.TrimMode.TrimStart);
                 }
 
                 [Fact]
@@ -325,7 +325,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.TrimMode.Should().Be(SqlBulkCopier.TrimMode.TrimEnd);
+                    column.TrimMode.ShouldBe(SqlBulkCopier.TrimMode.TrimEnd);
                 }
             }
 
@@ -355,7 +355,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.TreatEmptyStringAsNull.Should().BeTrue();
+                    column.TreatEmptyStringAsNull.ShouldBeTrue();
                 }
 
                 [Fact]
@@ -382,7 +382,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.TreatEmptyStringAsNull.Should().BeFalse();
+                    column.TreatEmptyStringAsNull.ShouldBeFalse();
                 }
 
                 [Fact]
@@ -408,7 +408,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.TreatEmptyStringAsNull.Should().BeFalse();
+                    column.TreatEmptyStringAsNull.ShouldBeFalse();
                 }
             }
 
@@ -438,7 +438,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.SqlDbType.Should().BeNull();
+                    column.SqlDbType.ShouldBeNull();
                 }
 
                 [Fact]
@@ -465,7 +465,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.SqlDbType.Should().BeNull();
+                    column.SqlDbType.ShouldBeNull();
                 }
 
                 [Fact]
@@ -492,7 +492,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.SqlDbType.Should().BeNull();
+                    column.SqlDbType.ShouldBeNull();
                 }
 
                 [Fact]
@@ -519,7 +519,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.SqlDbType.Should().BeNull();
+                    column.SqlDbType.ShouldBeNull();
                 }
 
                 [Fact]
@@ -546,7 +546,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.SqlDbType.Should().BeNull();
+                    column.SqlDbType.ShouldBeNull();
                 }
 
                 [Fact]
@@ -573,7 +573,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.SqlDbType.Should().BeNull();
+                    column.SqlDbType.ShouldBeNull();
                 }
 
                 [Fact]
@@ -600,7 +600,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.SqlDbType.Should().BeNull();
+                    column.SqlDbType.ShouldBeNull();
                 }
 
                 [Fact]
@@ -627,7 +627,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.SqlDbType.Should().BeNull();
+                    column.SqlDbType.ShouldBeNull();
                 }
 
                 [Fact]
@@ -654,7 +654,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.SqlDbType.Should().Be(System.Data.SqlDbType.Binary);
+                    column.SqlDbType.ShouldBe(System.Data.SqlDbType.Binary);
                 }
 
                 [Fact]
@@ -681,7 +681,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.SqlDbType.Should().Be(System.Data.SqlDbType.Bit);
+                    column.SqlDbType.ShouldBe(System.Data.SqlDbType.Bit);
                 }
 
                 [Fact]
@@ -708,7 +708,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.SqlDbType.Should().Be(System.Data.SqlDbType.Image);
+                    column.SqlDbType.ShouldBe(System.Data.SqlDbType.Image);
                 }
 
                 [Fact]
@@ -735,7 +735,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.SqlDbType.Should().Be(System.Data.SqlDbType.UniqueIdentifier);
+                    column.SqlDbType.ShouldBe(System.Data.SqlDbType.UniqueIdentifier);
                 }
 
                 [Fact]
@@ -762,7 +762,7 @@ public class FixedLengthBulkCopierParserTest
                     var column = context.Build();
 
                     // Assert
-                    column.SqlDbType.Should().Be(System.Data.SqlDbType.VarBinary);
+                    column.SqlDbType.ShouldBe(System.Data.SqlDbType.VarBinary);
                 }
 
                 public class BigInt
@@ -791,9 +791,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.BigInt);
-                        column.CultureInfo.Should().BeNull();
-                        column.NumberStyles.Should().Be(NumberStyles.None);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.BigInt);
+                        column.CultureInfo.ShouldBeNull();
+                        column.NumberStyles.ShouldBe(NumberStyles.None);
                     }
 
                     [Fact]
@@ -822,9 +822,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.BigInt);
-                        column.CultureInfo.Should().Be(CultureInfo.GetCultureInfo("en-US"));
-                        column.NumberStyles.Should().Be(NumberStyles.Any);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.BigInt);
+                        column.CultureInfo.ShouldBe(CultureInfo.GetCultureInfo("en-US"));
+                        column.NumberStyles.ShouldBe(NumberStyles.Any);
                     }
                 }
 
@@ -854,9 +854,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.Decimal);
-                        column.CultureInfo.Should().BeNull();
-                        column.NumberStyles.Should().Be(NumberStyles.None);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.Decimal);
+                        column.CultureInfo.ShouldBeNull();
+                        column.NumberStyles.ShouldBe(NumberStyles.None);
                     }
 
                     [Fact]
@@ -885,9 +885,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.Decimal);
-                        column.CultureInfo.Should().Be(CultureInfo.GetCultureInfo("en-US"));
-                        column.NumberStyles.Should().Be(NumberStyles.Any);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.Decimal);
+                        column.CultureInfo.ShouldBe(CultureInfo.GetCultureInfo("en-US"));
+                        column.NumberStyles.ShouldBe(NumberStyles.Any);
                     }
                 }
 
@@ -917,9 +917,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.Float);
-                        column.CultureInfo.Should().BeNull();
-                        column.NumberStyles.Should().Be(NumberStyles.None);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.Float);
+                        column.CultureInfo.ShouldBeNull();
+                        column.NumberStyles.ShouldBe(NumberStyles.None);
                     }
 
                     [Fact]
@@ -948,9 +948,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.Float);
-                        column.CultureInfo.Should().Be(CultureInfo.GetCultureInfo("en-US"));
-                        column.NumberStyles.Should().Be(NumberStyles.Any);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.Float);
+                        column.CultureInfo.ShouldBe(CultureInfo.GetCultureInfo("en-US"));
+                        column.NumberStyles.ShouldBe(NumberStyles.Any);
                     }
                 }
 
@@ -980,9 +980,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.Int);
-                        column.CultureInfo.Should().BeNull();
-                        column.NumberStyles.Should().Be(NumberStyles.None);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.Int);
+                        column.CultureInfo.ShouldBeNull();
+                        column.NumberStyles.ShouldBe(NumberStyles.None);
                     }
 
                     [Fact]
@@ -1011,9 +1011,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.Int);
-                        column.CultureInfo.Should().Be(CultureInfo.GetCultureInfo("en-US"));
-                        column.NumberStyles.Should().Be(NumberStyles.Any);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.Int);
+                        column.CultureInfo.ShouldBe(CultureInfo.GetCultureInfo("en-US"));
+                        column.NumberStyles.ShouldBe(NumberStyles.Any);
                     }
                 }
 
@@ -1043,9 +1043,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.Money);
-                        column.CultureInfo.Should().BeNull();
-                        column.NumberStyles.Should().Be(NumberStyles.None);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.Money);
+                        column.CultureInfo.ShouldBeNull();
+                        column.NumberStyles.ShouldBe(NumberStyles.None);
                     }
 
                     [Fact]
@@ -1074,9 +1074,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.Money);
-                        column.CultureInfo.Should().Be(CultureInfo.GetCultureInfo("en-US"));
-                        column.NumberStyles.Should().Be(NumberStyles.Any);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.Money);
+                        column.CultureInfo.ShouldBe(CultureInfo.GetCultureInfo("en-US"));
+                        column.NumberStyles.ShouldBe(NumberStyles.Any);
                     }
                 }
 
@@ -1106,9 +1106,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.Real);
-                        column.CultureInfo.Should().BeNull();
-                        column.NumberStyles.Should().Be(NumberStyles.None);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.Real);
+                        column.CultureInfo.ShouldBeNull();
+                        column.NumberStyles.ShouldBe(NumberStyles.None);
                     }
 
                     [Fact]
@@ -1137,9 +1137,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.Real);
-                        column.CultureInfo.Should().Be(CultureInfo.GetCultureInfo("en-US"));
-                        column.NumberStyles.Should().Be(NumberStyles.Any);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.Real);
+                        column.CultureInfo.ShouldBe(CultureInfo.GetCultureInfo("en-US"));
+                        column.NumberStyles.ShouldBe(NumberStyles.Any);
                     }
                 }
 
@@ -1169,9 +1169,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.SmallInt);
-                        column.CultureInfo.Should().BeNull();
-                        column.NumberStyles.Should().Be(NumberStyles.None);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.SmallInt);
+                        column.CultureInfo.ShouldBeNull();
+                        column.NumberStyles.ShouldBe(NumberStyles.None);
                     }
 
                     [Fact]
@@ -1200,9 +1200,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.SmallInt);
-                        column.CultureInfo.Should().Be(CultureInfo.GetCultureInfo("en-US"));
-                        column.NumberStyles.Should().Be(NumberStyles.Any);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.SmallInt);
+                        column.CultureInfo.ShouldBe(CultureInfo.GetCultureInfo("en-US"));
+                        column.NumberStyles.ShouldBe(NumberStyles.Any);
                     }
                 }
 
@@ -1232,9 +1232,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.SmallMoney);
-                        column.CultureInfo.Should().BeNull();
-                        column.NumberStyles.Should().Be(NumberStyles.None);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.SmallMoney);
+                        column.CultureInfo.ShouldBeNull();
+                        column.NumberStyles.ShouldBe(NumberStyles.None);
                     }
 
                     [Fact]
@@ -1263,9 +1263,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.SmallMoney);
-                        column.CultureInfo.Should().Be(CultureInfo.GetCultureInfo("en-US"));
-                        column.NumberStyles.Should().Be(NumberStyles.Any);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.SmallMoney);
+                        column.CultureInfo.ShouldBe(CultureInfo.GetCultureInfo("en-US"));
+                        column.NumberStyles.ShouldBe(NumberStyles.Any);
                     }
                 }
 
@@ -1295,9 +1295,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.TinyInt);
-                        column.CultureInfo.Should().BeNull();
-                        column.NumberStyles.Should().Be(NumberStyles.None);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.TinyInt);
+                        column.CultureInfo.ShouldBeNull();
+                        column.NumberStyles.ShouldBe(NumberStyles.None);
                     }
 
                     [Fact]
@@ -1326,9 +1326,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.TinyInt);
-                        column.CultureInfo.Should().Be(CultureInfo.GetCultureInfo("en-US"));
-                        column.NumberStyles.Should().Be(NumberStyles.Any);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.TinyInt);
+                        column.CultureInfo.ShouldBe(CultureInfo.GetCultureInfo("en-US"));
+                        column.NumberStyles.ShouldBe(NumberStyles.Any);
                     }
                 }
 
@@ -1358,9 +1358,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.Date);
-                        column.CultureInfo.Should().BeNull();
-                        column.DateTimeStyle.Should().Be(DateTimeStyles.None);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.Date);
+                        column.CultureInfo.ShouldBeNull();
+                        column.DateTimeStyle.ShouldBe(DateTimeStyles.None);
                     }
 
                     [Fact]
@@ -1389,9 +1389,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.Date);
-                        column.CultureInfo.Should().Be(CultureInfo.GetCultureInfo("en-US"));
-                        column.DateTimeStyle.Should().Be(DateTimeStyles.AllowWhiteSpaces);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.Date);
+                        column.CultureInfo.ShouldBe(CultureInfo.GetCultureInfo("en-US"));
+                        column.DateTimeStyle.ShouldBe(DateTimeStyles.AllowWhiteSpaces);
                     }
                 }
 
@@ -1421,9 +1421,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.DateTime);
-                        column.CultureInfo.Should().BeNull();
-                        column.DateTimeStyle.Should().Be(DateTimeStyles.None);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.DateTime);
+                        column.CultureInfo.ShouldBeNull();
+                        column.DateTimeStyle.ShouldBe(DateTimeStyles.None);
                     }
 
                     [Fact]
@@ -1452,9 +1452,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.DateTime);
-                        column.CultureInfo.Should().Be(CultureInfo.GetCultureInfo("en-US"));
-                        column.DateTimeStyle.Should().Be(DateTimeStyles.AllowWhiteSpaces);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.DateTime);
+                        column.CultureInfo.ShouldBe(CultureInfo.GetCultureInfo("en-US"));
+                        column.DateTimeStyle.ShouldBe(DateTimeStyles.AllowWhiteSpaces);
                     }
                 }
 
@@ -1484,9 +1484,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.DateTime2);
-                        column.CultureInfo.Should().BeNull();
-                        column.DateTimeStyle.Should().Be(DateTimeStyles.None);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.DateTime2);
+                        column.CultureInfo.ShouldBeNull();
+                        column.DateTimeStyle.ShouldBe(DateTimeStyles.None);
                     }
 
                     [Fact]
@@ -1515,9 +1515,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.DateTime2);
-                        column.CultureInfo.Should().Be(CultureInfo.GetCultureInfo("en-US"));
-                        column.DateTimeStyle.Should().Be(DateTimeStyles.AllowWhiteSpaces);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.DateTime2);
+                        column.CultureInfo.ShouldBe(CultureInfo.GetCultureInfo("en-US"));
+                        column.DateTimeStyle.ShouldBe(DateTimeStyles.AllowWhiteSpaces);
                     }
                 }
 
@@ -1547,9 +1547,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.DateTimeOffset);
-                        column.CultureInfo.Should().BeNull();
-                        column.DateTimeStyle.Should().Be(DateTimeStyles.None);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.DateTimeOffset);
+                        column.CultureInfo.ShouldBeNull();
+                        column.DateTimeStyle.ShouldBe(DateTimeStyles.None);
                     }
 
                     [Fact]
@@ -1578,9 +1578,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.DateTimeOffset);
-                        column.CultureInfo.Should().Be(CultureInfo.GetCultureInfo("en-US"));
-                        column.DateTimeStyle.Should().Be(DateTimeStyles.AllowWhiteSpaces);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.DateTimeOffset);
+                        column.CultureInfo.ShouldBe(CultureInfo.GetCultureInfo("en-US"));
+                        column.DateTimeStyle.ShouldBe(DateTimeStyles.AllowWhiteSpaces);
                     }
                 }
 
@@ -1610,9 +1610,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.SmallDateTime);
-                        column.CultureInfo.Should().BeNull();
-                        column.DateTimeStyle.Should().Be(DateTimeStyles.None);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.SmallDateTime);
+                        column.CultureInfo.ShouldBeNull();
+                        column.DateTimeStyle.ShouldBe(DateTimeStyles.None);
                     }
 
                     [Fact]
@@ -1641,9 +1641,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.SmallDateTime);
-                        column.CultureInfo.Should().Be(CultureInfo.GetCultureInfo("en-US"));
-                        column.DateTimeStyle.Should().Be(DateTimeStyles.AllowWhiteSpaces);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.SmallDateTime);
+                        column.CultureInfo.ShouldBe(CultureInfo.GetCultureInfo("en-US"));
+                        column.DateTimeStyle.ShouldBe(DateTimeStyles.AllowWhiteSpaces);
                     }
                 }
 
@@ -1673,9 +1673,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.Time);
-                        column.CultureInfo.Should().BeNull();
-                        column.DateTimeStyle.Should().Be(DateTimeStyles.None);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.Time);
+                        column.CultureInfo.ShouldBeNull();
+                        column.DateTimeStyle.ShouldBe(DateTimeStyles.None);
                     }
 
                     [Fact]
@@ -1704,9 +1704,9 @@ public class FixedLengthBulkCopierParserTest
                         var column = context.Build();
 
                         // Assert
-                        column.SqlDbType.Should().Be(System.Data.SqlDbType.Time);
-                        column.CultureInfo.Should().Be(CultureInfo.GetCultureInfo("en-US"));
-                        column.DateTimeStyle.Should().Be(DateTimeStyles.AllowWhiteSpaces);
+                        column.SqlDbType.ShouldBe(System.Data.SqlDbType.Time);
+                        column.CultureInfo.ShouldBe(CultureInfo.GetCultureInfo("en-US"));
+                        column.DateTimeStyle.ShouldBe(DateTimeStyles.AllowWhiteSpaces);
                     }
                 }
             }
@@ -1747,9 +1747,9 @@ public class FixedLengthBulkCopierParserTest
                     """));
                 using var fixedLengthReader = new FixedLengthReader(stream, encoding);
                 FixedLengthDataReader reader = new(fixedLengthReader, [], builder.RowFilter);
-                reader.Read().Should().BeTrue();
-                encoding.GetString(fixedLengthReader.CurrentRow).Should().Be("12345A");
-                reader.Read().Should().BeFalse();
+                reader.Read().ShouldBeTrue();
+                encoding.GetString(fixedLengthReader.CurrentRow).ShouldBe("12345A");
+                reader.Read().ShouldBeFalse();
 
             }
 
@@ -1785,9 +1785,9 @@ public class FixedLengthBulkCopierParserTest
                     """));
                 using var fixedLengthReader = new FixedLengthReader(stream, encoding);
                 FixedLengthDataReader reader = new(fixedLengthReader, [], builder.RowFilter);
-                reader.Read().Should().BeTrue();
-                encoding.GetString(fixedLengthReader.CurrentRow).Should().Be("A12345B");
-                reader.Read().Should().BeFalse();
+                reader.Read().ShouldBeTrue();
+                encoding.GetString(fixedLengthReader.CurrentRow).ShouldBe("A12345B");
+                reader.Read().ShouldBeFalse();
 
             }
 
@@ -1823,9 +1823,9 @@ public class FixedLengthBulkCopierParserTest
                     """));
                 using var fixedLengthReader = new FixedLengthReader(stream, encoding);
                 FixedLengthDataReader reader = new(fixedLengthReader, [], builder.RowFilter);
-                reader.Read().Should().BeTrue();
-                encoding.GetString(fixedLengthReader.CurrentRow).Should().Be("12345");
-                reader.Read().Should().BeFalse();
+                reader.Read().ShouldBeTrue();
+                encoding.GetString(fixedLengthReader.CurrentRow).ShouldBe("12345");
+                reader.Read().ShouldBeFalse();
 
             }
         }
@@ -1860,18 +1860,18 @@ public class FixedLengthBulkCopierParserTest
             context.Build();
 
             // Assert
-            builder.Columns.Should().HaveCount(2);
+            builder.Columns.Count.ShouldBe(2);
             var customerId = builder.Columns.SingleOrDefault(x => x.Name == "CustomerId");
-            customerId.Should().NotBeNull();
-            customerId!.OffsetBytes.Should().Be(0);
-            customerId.LengthBytes.Should().Be(10);
+            customerId.ShouldNotBeNull();
+            customerId!.OffsetBytes.ShouldBe(0);
+            customerId.LengthBytes.ShouldBe(10);
 
             var birthDate = builder.Columns.SingleOrDefault(x => x.Name == "BirthDate");
-            birthDate.Should().NotBeNull();
-            birthDate!.OffsetBytes.Should().Be(10);
-            birthDate.LengthBytes.Should().Be(8);
-            birthDate.SqlDbType.Should().Be(SqlDbType.Date);
-            birthDate.Format.Should().Be("yyyyMMdd");
+            birthDate.ShouldNotBeNull();
+            birthDate!.OffsetBytes.ShouldBe(10);
+            birthDate.LengthBytes.ShouldBe(8);
+            birthDate.SqlDbType.ShouldBe(SqlDbType.Date);
+            birthDate.Format.ShouldBe("yyyyMMdd");
         }
     }
 

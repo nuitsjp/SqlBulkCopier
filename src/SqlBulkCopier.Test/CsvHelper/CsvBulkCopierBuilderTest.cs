@@ -3,8 +3,8 @@ using System.Text;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Dapper;
-using FluentAssertions;
 using Microsoft.Data.SqlClient;
+using Shouldly;
 using SqlBulkCopier.CsvHelper;
 using SqlBulkCopier.Test.CsvHelper.Util;
 
@@ -32,8 +32,8 @@ public class CsvBulkCopierBuilderTest
         var second = builder.Columns.Last();
 
         // Act & Assert
-        first.Convert("1.234.567,89xy").Should().Be(expected);
-        second.Convert("1,234,567.89xy").Should().Be(expected);
+        first.Convert("1.234.567,89xy").ShouldBe(expected);
+        second.Convert("1,234,567.89xy").ShouldBe(expected);
     }
 
     public class WriteToServerAsync() : BulkCopierBuilderTestBase(DatabaseName)
@@ -115,8 +115,8 @@ public class CsvBulkCopierBuilderTest
                         transaction: transaction))
                 .ToArray();
 
-            insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
-            insertedRows.Length.Should().Be(Count);
+            insertedRows.ShouldNotBeEmpty("書き出したデータが読み込まれるはず");
+            insertedRows.Length.ShouldBe(Count);
 
             // 先頭行などを必要に応じて検証
             var expected = Targets.First();
@@ -128,7 +128,7 @@ public class CsvBulkCopierBuilderTest
             using var newConnection = new SqlConnection(SqlBulkCopierConnectionString);
             await newConnection.OpenAsync(CancellationToken.None);
             (await newConnection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[BulkInsertTestTarget]"))
-                .Should().Be(0);
+                .ShouldBe(0);
         }
 
         [Fact]
@@ -382,8 +382,8 @@ public class CsvBulkCopierBuilderTest
             var insertedRows = (await connection.QueryAsync<BulkInsertTestTarget>(
                 "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id")).ToArray();
 
-            insertedRows.Should().NotBeEmpty("書き出したデータが読み込まれるはず");
-            insertedRows.Length.Should().Be(Count);
+            insertedRows.ShouldNotBeEmpty("書き出したデータが読み込まれるはず");
+            insertedRows.Length.ShouldBe(Count);
 
             // 先頭行などを必要に応じて検証
             var expected = Targets.First();

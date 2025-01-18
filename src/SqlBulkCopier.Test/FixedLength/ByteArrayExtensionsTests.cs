@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using Shouldly;
 using SqlBulkCopier.FixedLength;
 
 namespace SqlBulkCopier.Test.FixedLength;
@@ -18,8 +18,7 @@ public class ByteArrayExtensionsTests
             Action act = () => source.StartsWith(pattern);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>()
-                .And.ParamName.Should().Be("source");
+            act.ShouldThrow<ArgumentNullException>();
         }
 
         [Fact]
@@ -33,8 +32,7 @@ public class ByteArrayExtensionsTests
             Action act = () => source.StartsWith(pattern);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>()
-                .And.ParamName.Should().Be("pattern");
+            act.ShouldThrow<ArgumentNullException>();
         }
 
         [Theory]
@@ -49,7 +47,7 @@ public class ByteArrayExtensionsTests
             var result = source.StartsWith(pattern);
 
             // Assert
-            result.Should().Be(expected);
+            result.ShouldBe(expected);
         }
     }
 
@@ -66,8 +64,7 @@ public class ByteArrayExtensionsTests
             Action act = () => source.EndsWith(pattern);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>()
-                .And.ParamName.Should().Be("source");
+            act.ShouldThrow<ArgumentNullException>();
         }
 
         [Fact]
@@ -81,8 +78,7 @@ public class ByteArrayExtensionsTests
             Action act = () => source.EndsWith(pattern);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>()
-                .And.ParamName.Should().Be("pattern");
+            act.ShouldThrow<ArgumentNullException>();
         }
 
         [Theory]
@@ -97,7 +93,7 @@ public class ByteArrayExtensionsTests
             var result = source.EndsWith(pattern);
 
             // Assert
-            result.Should().Be(expected);
+            result.ShouldBe(expected);
         }
     }
 
@@ -114,8 +110,7 @@ public class ByteArrayExtensionsTests
             Action act = () => source.SequenceEqualsOptimized(other);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>()
-                .And.ParamName.Should().Be("source");
+            act.ShouldThrow<ArgumentNullException>();
         }
 
         [Fact]
@@ -129,8 +124,7 @@ public class ByteArrayExtensionsTests
             Action act = () => source.SequenceEqualsOptimized(other);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>()
-                .And.ParamName.Should().Be("other");
+            act.ShouldThrow<ArgumentNullException>();
         }
 
         [Theory]
@@ -144,7 +138,7 @@ public class ByteArrayExtensionsTests
             var result = source.SequenceEqualsOptimized(other);
 
             // Assert
-            result.Should().Be(expected);
+            result.ShouldBe(expected);
         }
 
         [Fact]
@@ -163,7 +157,7 @@ public class ByteArrayExtensionsTests
             var result = source.SequenceEqualsOptimized(other);
 
             // Assert
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
     }
 }

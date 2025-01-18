@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using Shouldly;
 using SqlBulkCopier.CsvHelper;
 
 namespace SqlBulkCopier.Test.CsvHelper;
@@ -18,10 +18,10 @@ public class CsvColumnTest : ColumnTest
         var column = (CsvColumn)options.Build();
 
         // Assert
-        column.Ordinal.Should().Be(0);
-        column.Name.Should().Be("column");
+        column.Ordinal.ShouldBe(0);
+        column.Name.ShouldBe("column");
 
-        column.Convert("Hello").Should().Be("Hello");
+        column.Convert("Hello").ShouldBe("Hello");
     }
 
 }

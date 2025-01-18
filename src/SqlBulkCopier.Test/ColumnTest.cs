@@ -1,5 +1,5 @@
 ﻿using System.Globalization;
-using FluentAssertions;
+using Shouldly;
 
 // ReSharper disable UnusedMember.Global
 
@@ -21,7 +21,7 @@ public abstract class ColumnTest
         var actual = column.Convert("  Hello  ");
 
         // Assert
-        actual.Should().Be("Hello");
+        actual.ShouldBe("Hello");
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public abstract class ColumnTest
         var actual = column.Convert("012Hello012");
 
         // Assert
-        actual.Should().Be("Hello");
+        actual.ShouldBe("Hello");
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public abstract class ColumnTest
         var actual = column.Convert("  Hello  ");
 
         // Assert
-        actual.Should().Be("Hello  ");
+        actual.ShouldBe("Hello  ");
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public abstract class ColumnTest
         var actual = column.Convert("012Hello012");
 
         // Assert
-        actual.Should().Be("Hello012");
+        actual.ShouldBe("Hello012");
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("  Hello  ");
         // Assert
-        actual.Should().Be("  Hello");
+        actual.ShouldBe("  Hello");
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("012Hello012");
         // Assert
-        actual.Should().Be("012Hello");
+        actual.ShouldBe("012Hello");
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public abstract class ColumnTest
         var actual = column.Convert(string.Empty);
 
         // Assert
-        actual.Should().Be(DBNull.Value);
+        actual.ShouldBe(DBNull.Value);
     }
 
     [Fact]
@@ -119,7 +119,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert(long.MaxValue.ToString());
         // Assert
-        actual.Should().Be(long.MaxValue);
+        actual.ShouldBe(long.MaxValue);
     }
 
     [Fact]
@@ -133,7 +133,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("1.234.567");
         // Assert
-        actual.Should().Be((long)1234567);
+        actual.ShouldBe((long)1234567);
     }
 
     [Fact]
@@ -146,7 +146,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("6qj7n+AIUvDxNw==");
         // Assert
-        actual.Should().BeEquivalentTo(System.Convert.FromBase64String("6qj7n+AIUvDxNw=="));
+        actual.ShouldBeEquivalentTo(System.Convert.FromBase64String("6qj7n+AIUvDxNw=="));
     }
 
     [Fact]
@@ -157,17 +157,17 @@ public abstract class ColumnTest
         var column = options.Build();
 
         // Act & Assert
-        column.Convert("1").Should().Be(true);
-        column.Convert("0").Should().Be(false);
-        column.Convert("true").Should().Be(true);
-        column.Convert("false").Should().Be(false);
-        column.Convert("True").Should().Be(true);
-        column.Convert("False").Should().Be(false);
-        column.Convert("TRUE").Should().Be(true);
-        column.Convert("FALSE").Should().Be(false);
-        column.Convert("").Should().Be(DBNull.Value);
+        column.Convert("1").ShouldBe(true);
+        column.Convert("0").ShouldBe(false);
+        column.Convert("true").ShouldBe(true);
+        column.Convert("false").ShouldBe(false);
+        column.Convert("True").ShouldBe(true);
+        column.Convert("False").ShouldBe(false);
+        column.Convert("TRUE").ShouldBe(true);
+        column.Convert("FALSE").ShouldBe(false);
+        column.Convert("").ShouldBe(DBNull.Value);
         var act = () => column.Convert("Hello");
-        act.Should().Throw<InvalidCastException>();
+        act.ShouldThrow<InvalidCastException>();
     }
 
 
@@ -181,7 +181,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("20210101");
         // Assert
-        actual.Should().Be(new DateTime(2021, 1, 1));
+        actual.ShouldBe(new DateTime(2021, 1, 1));
     }
 
     [Fact]
@@ -194,7 +194,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("2021-01-01");
         // Assert
-        actual.Should().Be(new DateTime(2021, 1, 1));
+        actual.ShouldBe(new DateTime(2021, 1, 1));
     }
 
     [Fact]
@@ -209,7 +209,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert(numberString);
         // Assert
-        actual.Should().Be(number);
+        actual.ShouldBe(number);
     }
 
     [Fact]
@@ -228,7 +228,7 @@ public abstract class ColumnTest
         var actual = column.Convert(numberString);
 
         // Assert
-        actual.Should().Be(number);
+        actual.ShouldBe(number);
     }
     
     [Fact]
@@ -245,7 +245,7 @@ public abstract class ColumnTest
         var actual = (float)column.Convert(numberString);
         
         // Assert
-        actual.Should().BeApproximately(expectedNumber, 0.0001f);
+        actual.ShouldBe(expectedNumber, 0.0001f);
     }
 
     [Fact]
@@ -265,7 +265,7 @@ public abstract class ColumnTest
         var actual = (float)column.Convert(numberString);
 
         // Assert
-        actual.Should().BeApproximately(expectedNumber, 0.0001f);
+        actual.ShouldBe(expectedNumber, 0.0001f);
     }
     
     [Fact]
@@ -282,7 +282,7 @@ public abstract class ColumnTest
         var actual = column.Convert(numberString);
         
         // Assert
-        actual.Should().Be(expectedNumber);
+        actual.ShouldBe(expectedNumber);
     }
 
     [Fact]
@@ -302,7 +302,7 @@ public abstract class ColumnTest
         var actual = column.Convert(numberString);
 
         // Assert
-        actual.Should().Be(expectedNumber);
+        actual.ShouldBe(expectedNumber);
     }
     
     [Fact]
@@ -319,7 +319,7 @@ public abstract class ColumnTest
         var actual = column.Convert(numberString);
         
         // Assert
-        actual.Should().Be(expectedNumber);
+        actual.ShouldBe(expectedNumber);
     }
 
     [Fact]
@@ -339,7 +339,7 @@ public abstract class ColumnTest
         var actual = column.Convert(numberString);
 
         // Assert
-        actual.Should().Be(expectedNumber);
+        actual.ShouldBe(expectedNumber);
     }
     
     [Fact]
@@ -356,7 +356,7 @@ public abstract class ColumnTest
         var actual = (double)column.Convert(numberString);
         
         // Assert
-        actual.Should().BeApproximately(expectedNumber, 0.0001);
+        actual.ShouldBe(expectedNumber, 0.0001);
     }
 
     [Fact]
@@ -376,7 +376,7 @@ public abstract class ColumnTest
         var actual = (double)column.Convert(numberString);
 
         // Assert
-        actual.Should().BeApproximately(expectedNumber, 0.0001);
+        actual.ShouldBe(expectedNumber, 0.0001);
     }
 
     [Fact]
@@ -389,7 +389,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("12345678-1234-1234-1234-123456789012");
         // Assert
-        actual.Should().Be(new Guid("12345678-1234-1234-1234-123456789012"));
+        actual.ShouldBe(new Guid("12345678-1234-1234-1234-123456789012"));
     }
 
     [Fact]
@@ -402,7 +402,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("20210101");
         // Assert
-        actual.Should().Be(new DateTime(2021, 1, 1));
+        actual.ShouldBe(new DateTime(2021, 1, 1));
     }
 
     [Fact]
@@ -415,7 +415,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("2021-01-01");
         // Assert
-        actual.Should().Be(new DateTime(2021, 1, 1));
+        actual.ShouldBe(new DateTime(2021, 1, 1));
     }
     
     [Fact]
@@ -432,7 +432,7 @@ public abstract class ColumnTest
         var actual = column.Convert(numberString);
         
         // Assert
-        actual.Should().Be(expectedNumber);
+        actual.ShouldBe(expectedNumber);
     }
 
     [Fact]
@@ -452,7 +452,7 @@ public abstract class ColumnTest
         var actual = column.Convert(numberString);
 
         // Assert
-        actual.Should().Be(expectedNumber);
+        actual.ShouldBe(expectedNumber);
     }
 
     [Fact]
@@ -469,7 +469,7 @@ public abstract class ColumnTest
         var actual = column.Convert(numberString);
         
         // Assert
-        actual.Should().Be(expectedNumber);
+        actual.ShouldBe(expectedNumber);
     }
 
     [Fact]
@@ -489,7 +489,7 @@ public abstract class ColumnTest
         var actual = column.Convert(numberString);
 
         // Assert
-        actual.Should().Be(expectedNumber);
+        actual.ShouldBe(expectedNumber);
     }
     
     [Fact]
@@ -506,7 +506,7 @@ public abstract class ColumnTest
         var actual = column.Convert(timestampString);
         
         // Assert
-        actual.Should().Be(expectedDateTime);
+        actual.ShouldBe(expectedDateTime);
     }
 
     [Fact]
@@ -526,7 +526,7 @@ public abstract class ColumnTest
         var actual = column.Convert(timestampString);
 
         // Assert
-        actual.Should().Be(expectedDateTime);
+        actual.ShouldBe(expectedDateTime);
     }
     
     [Fact]
@@ -543,7 +543,7 @@ public abstract class ColumnTest
         var actual = column.Convert(numberString);
         
         // Assert
-        actual.Should().Be(expectedNumber);
+        actual.ShouldBe(expectedNumber);
     }
 
     [Fact]
@@ -563,7 +563,7 @@ public abstract class ColumnTest
         var actual = column.Convert(numberString);
 
         // Assert
-        actual.Should().Be(expectedNumber);
+        actual.ShouldBe(expectedNumber);
     }
 
     [Fact]
@@ -576,7 +576,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("6qj7n+AIUvDxNw==");
         // Assert
-        actual.Should().BeEquivalentTo(System.Convert.FromBase64String("6qj7n+AIUvDxNw=="));
+        actual.ShouldBeEquivalentTo(System.Convert.FromBase64String("6qj7n+AIUvDxNw=="));
     }
 
 
@@ -590,7 +590,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("20210101");
         // Assert
-        actual.Should().Be(new DateTime(2021, 1, 1));
+        actual.ShouldBe(new DateTime(2021, 1, 1));
     }
 
     [Fact]
@@ -605,7 +605,7 @@ public abstract class ColumnTest
         var actual = column.Convert("2021-01-01");
 
         // Assert
-        actual.Should().Be(new DateTime(2021, 1, 1));
+        actual.ShouldBe(new DateTime(2021, 1, 1));
     }
 
     [Fact]
@@ -618,7 +618,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("123456");
         // Assert
-        actual.Should().Be(new TimeSpan(12, 34, 56));
+        actual.ShouldBe(new TimeSpan(12, 34, 56));
     }
 
     [Fact]
@@ -631,7 +631,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("12:34:56");
         // Assert
-        actual.Should().Be(new TimeSpan(12, 34, 56));
+        actual.ShouldBe(new TimeSpan(12, 34, 56));
     }
 
     [Fact]
@@ -644,7 +644,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("20210101");
         // Assert
-        actual.Should().Be(new DateTime(2021, 1, 1));
+        actual.ShouldBe(new DateTime(2021, 1, 1));
     }
 
     [Fact]
@@ -657,7 +657,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("2021-01-01");
         // Assert
-        actual.Should().Be(new DateTime(2021, 1, 1));
+        actual.ShouldBe(new DateTime(2021, 1, 1));
     }
 
     [Fact]
@@ -670,7 +670,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("202412210904+09:00");
         // Assert
-        actual.Should().Be(DateTimeOffset.ParseExact("202412210904+09:00", "yyyyMMddHHmmK", null));
+        actual.ShouldBe(DateTimeOffset.ParseExact("202412210904+09:00", "yyyyMMddHHmmK", null));
     }
 
     [Fact]
@@ -683,7 +683,7 @@ public abstract class ColumnTest
         // Act
         var actual = column.Convert("2021-01-01+09:00");
         // Assert
-        actual.Should().Be(DateTimeOffset.Parse("2021-01-01+09:00"));
+        actual.ShouldBe(DateTimeOffset.Parse("2021-01-01+09:00"));
     }
 
     [Fact]
@@ -698,7 +698,7 @@ public abstract class ColumnTest
         var actual = column.Convert("hello");
 
         // Assert
-        actual.Should().Be("HELLO");
+        actual.ShouldBe("HELLO");
     }
 
     [Fact]
@@ -716,6 +716,6 @@ public abstract class ColumnTest
         var actual = column.Convert(" a ");
 
         // Assert
-        actual.Should().Be("A");
+        actual.ShouldBe("A");
     }
 }
