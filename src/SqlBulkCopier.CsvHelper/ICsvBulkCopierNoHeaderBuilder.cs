@@ -5,11 +5,47 @@ namespace SqlBulkCopier.CsvHelper;
 public interface ICsvBulkCopierNoHeaderBuilder : IBulkCopierBuilder
 {
     /// <summary>
-    /// Set options
+    /// Set max retry count
     /// </summary>
-    /// <param name="setOptions"></param>
+    /// <param name="value"></param>
     /// <returns></returns>
-    ICsvBulkCopierNoHeaderBuilder SetOptions(Action<BulkCopierOptions> setOptions);
+    ICsvBulkCopierNoHeaderBuilder SetMaxRetryCount(int value);
+
+    /// <summary>
+    /// Set retry delay
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    ICsvBulkCopierNoHeaderBuilder SetInitialDelay(TimeSpan value);
+
+    /// <summary>
+    /// Set truncate before bulk insert
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    ICsvBulkCopierNoHeaderBuilder SetTruncateBeforeBulkInsert(bool value);
+
+    /// <summary>
+    /// Set use exponential backoff
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    ICsvBulkCopierNoHeaderBuilder SetUseExponentialBackoff(bool value);
+
+    /// <summary>
+    /// Set batch size
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    ICsvBulkCopierNoHeaderBuilder SetBatchSize(int value);
+
+    /// <summary>
+    /// Set notify after
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    ICsvBulkCopierNoHeaderBuilder SetNotifyAfter(int value);
+
     /// <summary>
     /// Setup default column context
     /// </summary>

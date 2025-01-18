@@ -13,14 +13,12 @@ public class BulkCopier : IBulkCopier
     private readonly SqlConnection? _connection;
     private readonly SqlTransaction? _externalTransaction;
     private readonly SqlBulkCopyOptions _copyOptions;
-    private readonly BulkCopierOptions _bulkCopierOptions;
 
     public BulkCopier(
         string destinationTableName,
         IDataReaderBuilder dataReaderBuilder,
-        SqlConnection connection, 
-        BulkCopierOptions bulkCopierOptions)
-        : this(destinationTableName, new SqlBulkCopy(connection), bulkCopierOptions, dataReaderBuilder)
+        SqlConnection connection)
+        : this(destinationTableName, new SqlBulkCopy(connection), dataReaderBuilder)
     {
         _connectionString = null;
         _connection = connection;
@@ -31,9 +29,8 @@ public class BulkCopier : IBulkCopier
     public BulkCopier(
         string destinationTableName,
         IDataReaderBuilder dataReaderBuilder,
-        string connectionString, 
-        BulkCopierOptions bulkCopierOptions)
-        : this(destinationTableName, new SqlBulkCopy(connectionString), bulkCopierOptions, dataReaderBuilder)
+        string connectionString)
+        : this(destinationTableName, new SqlBulkCopy(connectionString), dataReaderBuilder)
     {
         _connectionString = connectionString;
         _connection = null;
@@ -45,9 +42,8 @@ public class BulkCopier : IBulkCopier
         string destinationTableName,
         IDataReaderBuilder dataReaderBuilder, 
         string connectionString, 
-        SqlBulkCopyOptions copyOptions, 
-        BulkCopierOptions bulkCopierOptions)
-        : this(destinationTableName, new SqlBulkCopy(connectionString, copyOptions), bulkCopierOptions, dataReaderBuilder)
+        SqlBulkCopyOptions copyOptions)
+        : this(destinationTableName, new SqlBulkCopy(connectionString, copyOptions), dataReaderBuilder)
     {
         _connectionString = connectionString;
         _connection = null;
@@ -60,9 +56,8 @@ public class BulkCopier : IBulkCopier
         IDataReaderBuilder dataReaderBuilder, 
         SqlConnection connection, 
         SqlBulkCopyOptions copyOptions,
-        BulkCopierOptions bulkCopierOptions, 
         SqlTransaction externalTransaction)
-        : this(destinationTableName, new SqlBulkCopy(connection, copyOptions, externalTransaction), bulkCopierOptions, dataReaderBuilder)
+        : this(destinationTableName, new SqlBulkCopy(connection, copyOptions, externalTransaction), dataReaderBuilder)
     {
         _connectionString = null;
         _connection = connection;
@@ -73,15 +68,11 @@ public class BulkCopier : IBulkCopier
     private BulkCopier(
         string destinationTableName,
         SqlBulkCopy sqlBulkCopy,
-        BulkCopierOptions bulkCopierOptions, 
         IDataReaderBuilder dataReaderBuilder)
     {
         _sqlBulkCopy = sqlBulkCopy;
         _sqlBulkCopy.DestinationTableName = destinationTableName;
-        _sqlBulkCopy.BatchSize = bulkCopierOptions.BatchSize;
-        _sqlBulkCopy.NotifyAfter = bulkCopierOptions.NotifyAfter;
         DataReaderBuilder = dataReaderBuilder;
-        _bulkCopierOptions = bulkCopierOptions;
         DataReaderBuilder.SetupColumnMappings(_sqlBulkCopy);
 
         _sqlBulkCopy.SqlRowsCopied += SqlBulkCopyOnSqlRowsCopied;
@@ -89,13 +80,18 @@ public class BulkCopier : IBulkCopier
 
     public IDataReaderBuilder DataReaderBuilder { get; init; }
 
+    public string DestinationTableName => _sqlBulkCopy.DestinationTableName;
+
+    public int MaxRetryCount { get; set; }
+    public bool TruncateBeforeBulkInsert { get; set; }
+    public bool UseExponentialBackoff { get; set; }
+    public TimeSpan InitialDelay { get; set; }
+
     public int BatchSize
     {
         get => _sqlBulkCopy.BatchSize;
         set => _sqlBulkCopy.BatchSize = value;
     }
-
-    public string DestinationTableName => _sqlBulkCopy.DestinationTableName;
 
     public int NotifyAfter
     {
@@ -111,31 +107,31 @@ public class BulkCopier : IBulkCopier
         _sqlBulkCopy.BulkCopyTimeout = (int)timeout.TotalSeconds;
 
         // 外部トランザクションが設定されている場合、バルクインサート関連だけリトライしても適切な結果にならないため例外をスロー
-        if (_externalTransaction is not null && 0 < _bulkCopierOptions.MaxRetryCount)
+        if (_externalTransaction is not null && 0 < MaxRetryCount)
         {
             throw new InvalidOperationException("Cannot retry with an external transaction.");
         }
 
         // 外部コネクションが設定されている場合、TransactionScopeと併用されている場合などに、バルクインサート関連だけリトライしても適切な結果にならないため例外をスロー
-        if (_connection is not null && 0 < _bulkCopierOptions.MaxRetryCount)
+        if (_connection is not null && 0 < MaxRetryCount)
         {
             throw new InvalidOperationException("Cannot retry with an external connection.");
         }
 
         // リトライが設定されている場合、テーブルのトランケートが無効だと、リトライ時にデータが重複してしまうため例外をスロー
-        if (_bulkCopierOptions is { MaxRetryCount: > 0, TruncateBeforeBulkInsert: false })
+        if (0 < MaxRetryCount && TruncateBeforeBulkInsert is false)
         {
             throw new InvalidOperationException("Cannot retry without truncating the table.");
         }
 
         var currentRetryCount = 0;
-        var delay = _bulkCopierOptions.InitialDelay;
+        var delay = InitialDelay;
         while (true)
         {
             try
             {
                 // When truncate before bulk insert is enabled, truncate the table
-                if (_bulkCopierOptions.TruncateBeforeBulkInsert)
+                if (TruncateBeforeBulkInsert)
                 {
                     await TruncateTableAsync();
                 }
@@ -148,14 +144,14 @@ public class BulkCopier : IBulkCopier
             catch (Exception ex)
             {
                 currentRetryCount++;
-                if (currentRetryCount > _bulkCopierOptions.MaxRetryCount)
+                if (currentRetryCount > MaxRetryCount)
                 {
                     // When the retry count exceeds the maximum, throw an exception
                     throw new Exception($"BulkCopier failed after {currentRetryCount - 1} retries.", ex);
                 }
 
                 // When use exponential backoff, double the delay time
-                if (_bulkCopierOptions.UseExponentialBackoff && currentRetryCount > 1)
+                if (UseExponentialBackoff && currentRetryCount > 1)
                 {
                     delay = TimeSpan.FromMilliseconds(delay.TotalMilliseconds * 2);
                 }

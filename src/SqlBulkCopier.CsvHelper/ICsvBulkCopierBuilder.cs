@@ -8,11 +8,46 @@ namespace SqlBulkCopier.CsvHelper;
 public interface ICsvBulkCopierBuilder : IBulkCopierBuilder
 {
     /// <summary>
-    /// Set options
+    /// Set max retry count
     /// </summary>
-    /// <param name="setOptions"></param>
+    /// <param name="value"></param>
     /// <returns></returns>
-    ICsvBulkCopierBuilder SetOptions(Action<BulkCopierOptions> setOptions);
+    ICsvBulkCopierBuilder SetMaxRetryCount(int value);
+
+    /// <summary>
+    /// Set retry delay
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    ICsvBulkCopierBuilder SetInitialDelay(TimeSpan value);
+
+    /// <summary>
+    /// Set truncate before bulk insert
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    ICsvBulkCopierBuilder SetTruncateBeforeBulkInsert(bool value);
+
+    /// <summary>
+    /// Set use exponential backoff
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    ICsvBulkCopierBuilder SetUseExponentialBackoff(bool value);
+
+    /// <summary>
+    /// Set batch size
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    ICsvBulkCopierBuilder SetBatchSize(int value);
+
+    /// <summary>
+    /// Set notify after
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    ICsvBulkCopierBuilder SetNotifyAfter(int value);
 
     /// <summary>
     /// Setup default column context

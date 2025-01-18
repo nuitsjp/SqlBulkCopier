@@ -18,16 +18,51 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
     public List<FixedLengthColumn> Columns => _columns;
     public Predicate<IFixedLengthReader> RowFilter { get; private set; } = _ => true;
     private readonly string _destinationTableName;
-    private readonly BulkCopierOptions _bulkCopierOptions = new BulkCopierOptions();
+    private int _maxRetryCount = 0;
+    private TimeSpan _initialDelay = TimeSpan.FromSeconds(1);
+    private bool _truncateBeforeBulkInsert = false;
+    private bool _useExponentialBackoff = true;
+    private int _batchSize = 0;
+    private int _notifyAfter = 0;
 
     private FixedLengthBulkCopierBuilder(string destinationTableName)
     {
         _destinationTableName = destinationTableName;
     }
 
-    public IFixedLengthBulkCopierBuilder SetOptions(Action<BulkCopierOptions> setOptions)
+    public IFixedLengthBulkCopierBuilder SetMaxRetryCount(int value)
     {
-        setOptions(_bulkCopierOptions);
+        _maxRetryCount = value;
+        return this;
+    }
+
+    public IFixedLengthBulkCopierBuilder SetInitialDelay(TimeSpan value)
+    {
+        _initialDelay = value;
+        return this;
+    }
+
+    public IFixedLengthBulkCopierBuilder SetTruncateBeforeBulkInsert(bool value)
+    {
+        _truncateBeforeBulkInsert = value;
+        return this;
+    }
+
+    public IFixedLengthBulkCopierBuilder SetUseExponentialBackoff(bool value)
+    {
+        _useExponentialBackoff = value;
+        return this;
+    }
+
+    public IFixedLengthBulkCopierBuilder SetBatchSize(int value)
+    {
+        _batchSize = value;
+        return this;
+    }
+
+    public IFixedLengthBulkCopierBuilder SetNotifyAfter(int value)
+    {
+        _notifyAfter = value;
         return this;
     }
 
@@ -59,8 +94,15 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
         return new BulkCopier(
             _destinationTableName,
             new FixedLengthDataReaderBuilder(_columns, RowFilter),
-            connection,
-            _bulkCopierOptions);
+            connection)
+        {
+            MaxRetryCount = _maxRetryCount,
+            InitialDelay = _initialDelay,
+            TruncateBeforeBulkInsert = _truncateBeforeBulkInsert,
+            UseExponentialBackoff = _useExponentialBackoff,
+            BatchSize = _batchSize,
+            NotifyAfter = _notifyAfter
+        };
     }
 
     public IBulkCopier Build(string connectionString)
@@ -68,8 +110,15 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
         return new BulkCopier(
             _destinationTableName,
             new FixedLengthDataReaderBuilder(_columns, RowFilter),
-            connectionString,
-            _bulkCopierOptions);
+            connectionString)
+        {
+            MaxRetryCount = _maxRetryCount,
+            InitialDelay = _initialDelay,
+            TruncateBeforeBulkInsert = _truncateBeforeBulkInsert,
+            UseExponentialBackoff = _useExponentialBackoff,
+            BatchSize = _batchSize,
+            NotifyAfter = _notifyAfter
+        };
     }
 
     public IBulkCopier Build(string connectionString, SqlBulkCopyOptions copyOptions)
@@ -78,8 +127,15 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
             _destinationTableName,
             new FixedLengthDataReaderBuilder(_columns, RowFilter),
             connectionString,
-            copyOptions,
-            _bulkCopierOptions);
+            copyOptions)
+        {
+            MaxRetryCount = _maxRetryCount,
+            InitialDelay = _initialDelay,
+            TruncateBeforeBulkInsert = _truncateBeforeBulkInsert,
+            UseExponentialBackoff = _useExponentialBackoff,
+            BatchSize = _batchSize,
+            NotifyAfter = _notifyAfter
+        };
     }
 
     public IBulkCopier Build(SqlConnection connection, SqlBulkCopyOptions copyOptions, SqlTransaction externalTransaction)
@@ -89,7 +145,14 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
             new FixedLengthDataReaderBuilder(_columns, RowFilter),
             connection,
             copyOptions,
-            _bulkCopierOptions,
-            externalTransaction);
+            externalTransaction)
+        {
+            MaxRetryCount = _maxRetryCount,
+            InitialDelay = _initialDelay,
+            TruncateBeforeBulkInsert = _truncateBeforeBulkInsert,
+            UseExponentialBackoff = _useExponentialBackoff,
+            BatchSize = _batchSize,
+            NotifyAfter = _notifyAfter
+        };
     }
 }

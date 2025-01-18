@@ -204,11 +204,8 @@ public class CsvBulkCopierBuilderTest
             {
                 // Arrange
                 using var sqlBulkCopier = ProvideBuilder()
-                    .SetOptions(options =>
-                    {
-                        options.MaxRetryCount = 3;
-                        options.TruncateBeforeBulkInsert = true;
-                    })
+                    .SetMaxRetryCount(3)
+                    .SetTruncateBeforeBulkInsert(true)
                     .Build(await OpenConnectionAsync());
 
                 // Act
@@ -252,13 +249,12 @@ public class CsvBulkCopierBuilderTest
                 using var sqlBulkCopier = new BulkCopier(
                     "[dbo].[BulkInsertTestTarget]",
                     csvDataReaderBuilderMock.Object,
-                    SqlBulkCopierConnectionString,
-                    new BulkCopierOptions
-                    {
-                        MaxRetryCount = maxRetryCount,
-                        TruncateBeforeBulkInsert = true,
-                        InitialDelay = TimeSpan.FromMilliseconds(1)
-                    });
+                    SqlBulkCopierConnectionString)
+                {
+                    MaxRetryCount = maxRetryCount,
+                    TruncateBeforeBulkInsert = true, 
+                    InitialDelay = TimeSpan.FromMilliseconds(1)
+                };
 
                 var stream = await CreateCsvAsync(Targets);
                 // Move to the end of the stream to check that the stream position is correctly returned to the beginning on retry
@@ -287,11 +283,8 @@ public class CsvBulkCopierBuilderTest
             {
                 // Arrange
                 using var sqlBulkCopier = ProvideBuilder()
-                    .SetOptions(options =>
-                    {
-                        options.MaxRetryCount = 3;
-                        options.TruncateBeforeBulkInsert = true;
-                    })
+                    .SetMaxRetryCount(3)
+                    .SetTruncateBeforeBulkInsert(true)
                     .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
 
                 await sqlBulkCopier.WriteToServerAsync(
@@ -310,11 +303,8 @@ public class CsvBulkCopierBuilderTest
                 using var connection = await OpenConnectionAsync();
                 using var transaction = connection.BeginTransaction();
                 using var sqlBulkCopier = ProvideBuilder()
-                    .SetOptions(options =>
-                    {
-                        options.MaxRetryCount = 3;
-                        options.TruncateBeforeBulkInsert = true;
-                    })
+                    .SetMaxRetryCount(3)
+                    .SetTruncateBeforeBulkInsert(true)
                     .Build(connection, SqlBulkCopyOptions.Default, transaction);
 
                 // Act
@@ -334,11 +324,8 @@ public class CsvBulkCopierBuilderTest
             {
                 // Arrange
                 using var sqlBulkCopier = ProvideBuilder()
-                    .SetOptions(options =>
-                    {
-                        options.MaxRetryCount = 3;
-                        options.TruncateBeforeBulkInsert = true;
-                    })
+                    .SetMaxRetryCount(3)
+                    .SetTruncateBeforeBulkInsert(true)
                     .SetRowFilter(reader =>
                     {
                         if (reader.Parser.RawRecord.StartsWith("Header"))
@@ -370,11 +357,8 @@ public class CsvBulkCopierBuilderTest
             {
                 // Arrange
                 using var sqlBulkCopier = ProvideNoHeaderBuilder()
-                    .SetOptions(options =>
-                    {
-                        options.MaxRetryCount = 3;
-                        options.TruncateBeforeBulkInsert = true;
-                    })
+                    .SetMaxRetryCount(3)
+                    .SetTruncateBeforeBulkInsert(true)
                     .Build(await OpenConnectionAsync());
 
                 // Act
@@ -395,11 +379,8 @@ public class CsvBulkCopierBuilderTest
             {
                 // Arrange
                 using var sqlBulkCopier = ProvideNoHeaderBuilder()
-                    .SetOptions(options =>
-                    {
-                        options.MaxRetryCount = 3;
-                        options.TruncateBeforeBulkInsert = true;
-                    })
+                    .SetMaxRetryCount(3)
+                    .SetTruncateBeforeBulkInsert(true)
                     .SetRowFilter(reader =>
                     {
                         if (reader.Parser.RawRecord.StartsWith("Header"))

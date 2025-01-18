@@ -66,10 +66,7 @@ public class FixedLengthBulkCopierBuilderTest()
             {
                 // Arrange
                 using var sqlBulkCopier = ProvideBuilder()
-                    .SetOptions(options =>
-                    {
-                        options.TruncateBeforeBulkInsert = true;
-                    })
+                    .SetTruncateBeforeBulkInsert(true)
                     .Build(await OpenConnectionAsync());
 
                 await sqlBulkCopier.WriteToServerAsync(
@@ -195,10 +192,7 @@ public class FixedLengthBulkCopierBuilderTest()
             {
                 // Arrange
                 using var sqlBulkCopier = ProvideBuilder()
-                    .SetOptions(options =>
-                    {
-                        options.MaxRetryCount = 3;
-                    })
+                    .SetMaxRetryCount(3)
                     .Build(await OpenConnectionAsync());
 
                 // ファイルを開いて実行
@@ -218,11 +212,8 @@ public class FixedLengthBulkCopierBuilderTest()
             {
                 // Arrange
                 using var sqlBulkCopier = ProvideBuilder()
-                    .SetOptions(options =>
-                    {
-                        options.MaxRetryCount = 3;
-                        options.TruncateBeforeBulkInsert = true;
-                    })
+                    .SetMaxRetryCount(3)
+                    .SetTruncateBeforeBulkInsert(true)
                     .Build(SqlBulkCopierConnectionString);
 
                 // ファイルを開いて実行
@@ -240,10 +231,7 @@ public class FixedLengthBulkCopierBuilderTest()
             {
                 // Arrange
                 using var sqlBulkCopier = ProvideBuilder()
-                    .SetOptions(options =>
-                    {
-                        options.MaxRetryCount = 3;
-                    })
+                    .SetMaxRetryCount(3)
                     .Build(SqlBulkCopierConnectionString);
 
                 // ファイルを開いて実行
@@ -263,11 +251,8 @@ public class FixedLengthBulkCopierBuilderTest()
             {
                 // Arrange
                 using var sqlBulkCopier = ProvideBuilder()
-                    .SetOptions(options =>
-                    {
-                        options.MaxRetryCount = 3;
-                        options.TruncateBeforeBulkInsert = true;
-                    })
+                    .SetMaxRetryCount(3)
+                    .SetTruncateBeforeBulkInsert(true)
                     .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
 
                 // ファイルを開いて実行
@@ -288,10 +273,7 @@ public class FixedLengthBulkCopierBuilderTest()
                 using var transaction = connection.BeginTransaction();
 
                 using var sqlBulkCopier = ProvideBuilder()
-                    .SetOptions(options =>
-                    {
-                        options.MaxRetryCount = 3;
-                    })
+                    .SetMaxRetryCount(3)
                     .Build(connection, SqlBulkCopyOptions.Default, transaction);
 
                 // Act & Assert
