@@ -48,7 +48,7 @@ public class FixedLengthBulkCopierBuilderTest()
             public async Task ByConnection()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .Build(await OpenConnectionAsync());
 
                 // ファイルを開いて実行
@@ -65,7 +65,7 @@ public class FixedLengthBulkCopierBuilderTest()
             public async Task ByConnection_WithTruncateTable()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .SetOptions(options =>
                     {
                         options.TruncateBeforeBulkInsert = true;
@@ -93,7 +93,7 @@ public class FixedLengthBulkCopierBuilderTest()
             public async Task ByConnectionString()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .Build(SqlBulkCopierConnectionString);
 
                 // ファイルを開いて実行
@@ -110,7 +110,7 @@ public class FixedLengthBulkCopierBuilderTest()
             public async Task ByConnectionStringAndOptions()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
 
                 // ファイルを開いて実行
@@ -130,7 +130,7 @@ public class FixedLengthBulkCopierBuilderTest()
                 using var connection = await OpenConnectionAsync();
                 using var transaction = connection.BeginTransaction();
 
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .Build(connection, SqlBulkCopyOptions.Default, transaction);
 
                 // ファイルを開いて実行
@@ -157,7 +157,7 @@ public class FixedLengthBulkCopierBuilderTest()
                 // Arrange
                 Encoding encoding = new UTF8Encoding(false);
 
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .SetRowFilter(reader =>
                     {
                         if (reader.CurrentRow.Length == 0)
@@ -194,7 +194,7 @@ public class FixedLengthBulkCopierBuilderTest()
             public async Task ByConnection()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .SetOptions(options =>
                     {
                         options.MaxRetryCount = 3;
@@ -217,7 +217,7 @@ public class FixedLengthBulkCopierBuilderTest()
             public async Task ByConnectionString()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .SetOptions(options =>
                     {
                         options.MaxRetryCount = 3;
@@ -239,7 +239,7 @@ public class FixedLengthBulkCopierBuilderTest()
             public async Task ByConnectionString_NotTruncateTable()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .SetOptions(options =>
                     {
                         options.MaxRetryCount = 3;
@@ -262,7 +262,7 @@ public class FixedLengthBulkCopierBuilderTest()
             public async Task ByConnectionStringAndOptions()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .SetOptions(options =>
                     {
                         options.MaxRetryCount = 3;
@@ -287,7 +287,7 @@ public class FixedLengthBulkCopierBuilderTest()
                 using var connection = await OpenConnectionAsync();
                 using var transaction = connection.BeginTransaction();
 
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .SetOptions(options =>
                     {
                         options.MaxRetryCount = 3;

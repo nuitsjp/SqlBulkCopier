@@ -51,7 +51,7 @@ public class CsvBulkCopierBuilderTest
             public async Task ByConnection()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .Build(await OpenConnectionAsync());
 
                 // Act
@@ -68,7 +68,7 @@ public class CsvBulkCopierBuilderTest
             public async Task ByConnectionString()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .Build(SqlBulkCopierConnectionString);
 
                 await sqlBulkCopier.WriteToServerAsync(
@@ -84,7 +84,7 @@ public class CsvBulkCopierBuilderTest
             public async Task ByConnectionStringAndOptions()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
 
                 await sqlBulkCopier.WriteToServerAsync(
@@ -102,7 +102,7 @@ public class CsvBulkCopierBuilderTest
                 // Arrange
                 using var connection = await OpenConnectionAsync();
                 using var transaction = connection.BeginTransaction();
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .Build(connection, SqlBulkCopyOptions.Default, transaction);
 
                 await sqlBulkCopier.WriteToServerAsync(
@@ -125,7 +125,7 @@ public class CsvBulkCopierBuilderTest
             public async Task WithRowFilter()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .SetRowFilter(reader =>
                     {
                         if (reader.Parser.RawRecord.StartsWith("Header"))
@@ -153,7 +153,7 @@ public class CsvBulkCopierBuilderTest
             public async Task FromNoHeaderCsvAsync()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideNoHeaderBuilder()
+                using var sqlBulkCopier = ProvideNoHeaderBuilder()
                     .Build(await OpenConnectionAsync());
 
                 await sqlBulkCopier.WriteToServerAsync(
@@ -170,7 +170,7 @@ public class CsvBulkCopierBuilderTest
             public async Task FromNoHeader_WithRowFilterCsvAsync()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideNoHeaderBuilder()
+                using var sqlBulkCopier = ProvideNoHeaderBuilder()
                     .SetRowFilter(reader =>
                     {
                         if (reader.Parser.RawRecord.StartsWith("Header"))
@@ -203,7 +203,7 @@ public class CsvBulkCopierBuilderTest
             public async Task ByConnection()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .SetOptions(options =>
                     {
                         options.MaxRetryCount = 3;
@@ -249,7 +249,7 @@ public class CsvBulkCopierBuilderTest
                         return csvDataReaderBuilder.Build(stream, encoding);
                     });
 
-                var sqlBulkCopier = new BulkCopier(
+                using var sqlBulkCopier = new BulkCopier(
                     "[dbo].[BulkInsertTestTarget]",
                     csvDataReaderBuilderMock.Object,
                     SqlBulkCopierConnectionString,
@@ -282,7 +282,7 @@ public class CsvBulkCopierBuilderTest
             public async Task ByConnectionStringAndOptions()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .SetOptions(options =>
                     {
                         options.MaxRetryCount = 3;
@@ -305,7 +305,7 @@ public class CsvBulkCopierBuilderTest
                 // Arrange
                 using var connection = await OpenConnectionAsync();
                 using var transaction = connection.BeginTransaction();
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .SetOptions(options =>
                     {
                         options.MaxRetryCount = 3;
@@ -329,7 +329,7 @@ public class CsvBulkCopierBuilderTest
             public async Task WithRowFilter()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
+                using var sqlBulkCopier = ProvideBuilder()
                     .SetOptions(options =>
                     {
                         options.MaxRetryCount = 3;
@@ -365,7 +365,7 @@ public class CsvBulkCopierBuilderTest
             public async Task FromNoHeaderCsvAsync()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideNoHeaderBuilder()
+                using var sqlBulkCopier = ProvideNoHeaderBuilder()
                     .SetOptions(options =>
                     {
                         options.MaxRetryCount = 3;
@@ -390,7 +390,7 @@ public class CsvBulkCopierBuilderTest
             public async Task FromNoHeader_WithRowFilterCsvAsync()
             {
                 // Arrange
-                var sqlBulkCopier = ProvideNoHeaderBuilder()
+                using var sqlBulkCopier = ProvideNoHeaderBuilder()
                     .SetOptions(options =>
                     {
                         options.MaxRetryCount = 3;
