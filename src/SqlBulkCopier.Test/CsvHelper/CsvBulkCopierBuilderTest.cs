@@ -52,8 +52,22 @@ public class CsvBulkCopierBuilderTest
             {
                 // Arrange
                 using var sqlBulkCopier = ProvideBuilder()
+                    .SetBatchSize(10)
                     .SetTruncateBeforeBulkInsert(true)
                     .Build(await OpenConnectionAsync());
+                var callbackCount = 0;
+                sqlBulkCopier.NotifyAfter = 10;
+                sqlBulkCopier.SqlRowsCopied += (_, args) =>
+                {
+                    callbackCount++;
+                    args.RowsCopied.ShouldBeGreaterThanOrEqualTo(0);
+                };
+
+                sqlBulkCopier.BatchSize.ShouldBe(10);
+                sqlBulkCopier.RowsCopied.ShouldBe(0);
+                sqlBulkCopier.RowsCopied64.ShouldBe(0);
+                sqlBulkCopier.NotifyAfter.ShouldBe(10);
+                sqlBulkCopier.DestinationTableName.ShouldBe("[dbo].[BulkInsertTestTarget]");
 
                 // Act
                 await sqlBulkCopier.WriteToServerAsync(
@@ -68,6 +82,7 @@ public class CsvBulkCopierBuilderTest
 
                 // Assert
                 await AssertAsync();
+                callbackCount.ShouldBe(Count * 2 / 10);
             }
 
             [Fact]
@@ -273,7 +288,8 @@ public class CsvBulkCopierBuilderTest
                 {
                     MaxRetryCount = maxRetryCount,
                     TruncateBeforeBulkInsert = true, 
-                    InitialDelay = TimeSpan.FromMilliseconds(1)
+                    InitialDelay = TimeSpan.FromMilliseconds(1),
+                    UseExponentialBackoff = true
                 };
 
                 var stream = await CreateCsvAsync(Targets);
@@ -297,6 +313,56 @@ public class CsvBulkCopierBuilderTest
                     x => x.Build(It.IsAny<Stream>(), It.IsAny<Encoding>()), 
                     Times.Exactly(maxRetryCount + 1));
             }
+
+            [Fact]
+            public async Task ByConnectionString_RetryOver()
+            {
+                //////////////////////////////////////////////////////////////////////////////////
+                // Arrange
+                //////////////////////////////////////////////////////////////////////////////////
+                var maxRetryCount = 3;
+                var builder = (CsvBulkCopierBuilder)ProvideBuilder();
+                var csvDataReaderBuilder = new CsvDataReaderBuilder(true, builder.Columns, reader => true);
+                var csvDataReaderBuilderMock = new Mock<IDataReaderBuilder>();
+                csvDataReaderBuilderMock
+                    .Setup(x => x.SetupColumnMappings(It.IsAny<SqlBulkCopy>()))
+                    .Callback<SqlBulkCopy>(sqlBulkCopy => csvDataReaderBuilder.SetupColumnMappings(sqlBulkCopy));
+                // csvDataReaderBuilderMockのBuildが呼ばれたら、csvDataReaderBuilderのBuildを呼ぶ
+                var callCount = 0;
+                csvDataReaderBuilderMock
+                    .Setup(x => x.Build(It.IsAny<Stream>(), It.IsAny<Encoding>()))
+                    .Returns<Stream, Encoding>((stream, encoding) => throw new InvalidOperationException("Simulate failure"));
+
+                using var sqlBulkCopier = new BulkCopier(
+                    "[dbo].[BulkInsertTestTarget]",
+                    csvDataReaderBuilderMock.Object,
+                    SqlBulkCopierConnectionString)
+                {
+                    MaxRetryCount = maxRetryCount,
+                    TruncateBeforeBulkInsert = true,
+                    InitialDelay = TimeSpan.FromMilliseconds(1),
+                    UseExponentialBackoff = false
+                };
+
+                var stream = await CreateCsvAsync(Targets);
+                // Move to the end of the stream to check that the stream position is correctly returned to the beginning on retry
+                stream.Seek(0, SeekOrigin.End);
+
+                //////////////////////////////////////////////////////////////////////////////////
+                // Act
+                //////////////////////////////////////////////////////////////////////////////////
+                // ReSharper disable once AccessToDisposedClosure
+                Func<Task> func = () => sqlBulkCopier.WriteToServerAsync(
+                    stream,
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
+
+                //////////////////////////////////////////////////////////////////////////////////
+                // Assert
+                //////////////////////////////////////////////////////////////////////////////////
+                func.ShouldThrow<Exception>();
+            }
+
 
             [Fact]
             public async Task ByConnectionStringAndOptions()

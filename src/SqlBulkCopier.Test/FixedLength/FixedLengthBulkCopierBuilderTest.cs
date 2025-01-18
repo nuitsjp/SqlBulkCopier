@@ -49,6 +49,8 @@ public class FixedLengthBulkCopierBuilderTest()
             {
                 // Arrange
                 using var sqlBulkCopier = ProvideBuilder()
+                    .SetBatchSize(Count / 10)
+                    .SetNotifyAfter(Count / 10)
                     .Build(await OpenConnectionAsync());
 
                 // ファイルを開いて実行
@@ -214,6 +216,8 @@ public class FixedLengthBulkCopierBuilderTest()
                 using var sqlBulkCopier = ProvideBuilder()
                     .SetMaxRetryCount(3)
                     .SetTruncateBeforeBulkInsert(true)
+                    .SetInitialDelay(TimeSpan.FromMilliseconds(1))
+                    .SetUseExponentialBackoff(false)
                     .Build(SqlBulkCopierConnectionString);
 
                 // ファイルを開いて実行
