@@ -162,6 +162,9 @@ public class BulkCopier : IBulkCopier
 
                 // Wait for the delay
                 await Task.Delay(delay);
+
+                // Reset the stream position
+                stream.Position = 0;
             }
         }
     }

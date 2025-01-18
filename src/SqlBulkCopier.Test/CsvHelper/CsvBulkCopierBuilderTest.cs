@@ -260,11 +260,15 @@ public class CsvBulkCopierBuilderTest
                         InitialDelay = TimeSpan.FromMilliseconds(1)
                     });
 
+                var stream = await CreateCsvAsync(Targets);
+                // Move to the end of the stream to check that the stream position is correctly returned to the beginning on retry
+                stream.Seek(0, SeekOrigin.End);
+
                 //////////////////////////////////////////////////////////////////////////////////
                 // Act
                 //////////////////////////////////////////////////////////////////////////////////
                 await sqlBulkCopier.WriteToServerAsync(
-                    await CreateCsvAsync(Targets),
+                    stream,
                     Encoding.UTF8,
                     TimeSpan.FromMinutes(30));
 
