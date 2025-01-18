@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using System.Transactions;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Shouldly;
@@ -126,23 +127,28 @@ public class FixedLengthBulkCopierBuilderTest()
             public async Task ByConnection_WithTransaction()
             {
                 // Arrange
-                using (var connection = await OpenConnectionAsync())
-                {
-                    using var transaction = connection.BeginTransaction();
+                using var connection = await OpenConnectionAsync();
+                using var transaction = connection.BeginTransaction();
 
-                    var sqlBulkCopier = ProvideBuilder()
-                        .Build(connection, SqlBulkCopyOptions.Default, transaction);
+                var sqlBulkCopier = ProvideBuilder()
+                    .Build(connection, SqlBulkCopyOptions.Default, transaction);
 
-                    // ファイルを開いて実行
-                    await sqlBulkCopier.WriteToServerAsync(
-                        await CreateFixedLengthAsync(Targets),
-                        new UTF8Encoding(false),
-                        TimeSpan.FromMinutes(30));
-                    transaction.Commit();
-                }
+                // ファイルを開いて実行
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets),
+                    new UTF8Encoding(false),
+                    TimeSpan.FromMinutes(30));
 
                 // Assert
                 await AssertAsync();
+
+
+                transaction.Rollback();
+
+                using var newConnection = new SqlConnection(SqlBulkCopierConnectionString);
+                await newConnection.OpenAsync(CancellationToken.None);
+                (await newConnection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[BulkInsertTestTarget]"))
+                    .ShouldBe(0);
             }
 
             [Fact]
@@ -311,7 +317,7 @@ public class FixedLengthBulkCopierBuilderTest()
             using var sqlConnection = await OpenConnectionAsync();
 
             var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
-                "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id")).ToArray();
+                "SELECT * FROM [dbo].[BulkInsertTestTarget] with(nolock) order by Id")).ToArray();
 
             insertedRows.ShouldNotBeEmpty("書き出したデータが読み込まれるはず");
             insertedRows.Length.ShouldBe(Count);

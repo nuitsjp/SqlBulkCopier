@@ -45,12 +45,14 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierBuilder, ICsvBulkCopierNoHeade
 
     ICsvBulkCopierBuilder ICsvBulkCopierBuilder.SetOptions(Action<BulkCopierOptions> setOptions)
     {
-        throw new NotImplementedException();
+        setOptions(_bulkCopierOptions);
+        return this;
     }
 
     ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetOptions(Action<BulkCopierOptions> setOptions)
     {
-        throw new NotImplementedException();
+        setOptions(_bulkCopierOptions);
+        return this;
     }
 
     /// <summary>

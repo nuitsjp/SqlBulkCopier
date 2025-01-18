@@ -36,7 +36,7 @@ public class CsvBulkCopierBuilderTest
         second.Convert("1,234,567.89xy").ShouldBe(expected);
     }
 
-    public class WriteToServerAsync() : BulkCopierBuilderTestBase(DatabaseName)
+    public abstract class WriteToServerAsync() : BulkCopierBuilderTestBase(DatabaseName)
     {
         private const string DatabaseName = "CsvBulkCopierBuilderTest";
 
@@ -44,165 +44,352 @@ public class CsvBulkCopierBuilderTest
 
         private List<BulkInsertTestTarget> Targets { get; } = GenerateBulkInsertTestTargetData(Count);
 
-        [Fact]
-        public async Task ByConnection()
+        public class WithoutRetry : WriteToServerAsync
         {
-            // Arrange
-            var sqlBulkCopier = ProvideBuilder()
-                .Build(await OpenConnectionAsync());
+            [Fact]
+            public async Task ByConnection()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .Build(await OpenConnectionAsync());
 
-            // Act
-            await sqlBulkCopier.WriteToServerAsync(
-                await CreateCsvAsync(Targets), 
-                Encoding.UTF8, 
-                TimeSpan.FromMinutes(30));
+                // Act
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateCsvAsync(Targets),
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
 
-            // Assert
-            await AssertAsync();
-        }
+                // Assert
+                await AssertAsync();
+            }
 
-        [Fact]
-        public async Task ByConnectionString()
-        {
-            // Arrange
-            var sqlBulkCopier = ProvideBuilder()
-                .Build(SqlBulkCopierConnectionString);
+            [Fact]
+            public async Task ByConnectionString()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .Build(SqlBulkCopierConnectionString);
 
-            await sqlBulkCopier.WriteToServerAsync(
-                await CreateCsvAsync(Targets),
-                Encoding.UTF8,
-                TimeSpan.FromMinutes(30));
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateCsvAsync(Targets),
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
 
-            // Assert
-            await AssertAsync();
-        }
+                // Assert
+                await AssertAsync();
+            }
 
-        [Fact]
-        public async Task ByConnectionStringAndOptions()
-        {
-            // Arrange
-            var sqlBulkCopier = ProvideBuilder()
-                .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
+            [Fact]
+            public async Task ByConnectionStringAndOptions()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
 
-            await sqlBulkCopier.WriteToServerAsync(
-                await CreateCsvAsync(Targets),
-                Encoding.UTF8,
-                TimeSpan.FromMinutes(30));
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateCsvAsync(Targets),
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
 
-            // Assert
-            await AssertAsync();
-        }
+                // Assert
+                await AssertAsync();
+            }
 
-        [Fact]
-        public async Task WithTransaction()
-        {
-            // Arrange
-            using var connection = await OpenConnectionAsync();
-            using var transaction = connection.BeginTransaction();
-            var sqlBulkCopier = ProvideBuilder()
-                .Build(connection, SqlBulkCopyOptions.Default, transaction);
+            [Fact]
+            public async Task WithTransaction()
+            {
+                // Arrange
+                using var connection = await OpenConnectionAsync();
+                using var transaction = connection.BeginTransaction();
+                var sqlBulkCopier = ProvideBuilder()
+                    .Build(connection, SqlBulkCopyOptions.Default, transaction);
 
-            await sqlBulkCopier.WriteToServerAsync(
-                await CreateCsvAsync(Targets),
-                Encoding.UTF8,
-                TimeSpan.FromMinutes(30));
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateCsvAsync(Targets),
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
 
-            // Assert
+                // Assert
+                await AssertAsync();
 
-            var insertedRows = (await connection
-                    .QueryAsync<BulkInsertTestTarget>(
-                        "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id",
-                        transaction: transaction))
-                .ToArray();
+                transaction.Rollback();
 
-            insertedRows.ShouldNotBeEmpty("書き出したデータが読み込まれるはず");
-            insertedRows.Length.ShouldBe(Count);
+                using var newConnection = new SqlConnection(SqlBulkCopierConnectionString);
+                await newConnection.OpenAsync(CancellationToken.None);
+                (await newConnection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[BulkInsertTestTarget]"))
+                    .ShouldBe(0);
+            }
 
-            // 先頭行などを必要に応じて検証
-            var expected = Targets.First();
-            var actual = insertedRows.First();
-            ShouldBe(expected, actual);
-
-            transaction.Rollback();
-
-            using var newConnection = new SqlConnection(SqlBulkCopierConnectionString);
-            await newConnection.OpenAsync(CancellationToken.None);
-            (await newConnection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[BulkInsertTestTarget]"))
-                .ShouldBe(0);
-        }
-
-        [Fact]
-        public async Task WithRowFilter()
-        {
-            // Arrange
-            var sqlBulkCopier = ProvideBuilder()
-                .SetRowFilter(reader =>
-                {
-                    if (reader.Parser.RawRecord.StartsWith("Header"))
+            [Fact]
+            public async Task WithRowFilter()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .SetRowFilter(reader =>
                     {
-                        return false;
-                    }
-                    if (reader.Parser.RawRecord.StartsWith("Footer"))
+                        if (reader.Parser.RawRecord.StartsWith("Header"))
+                        {
+                            return false;
+                        }
+                        if (reader.Parser.RawRecord.StartsWith("Footer"))
+                        {
+                            return false;
+                        }
+                        return true;
+                    })
+                    .Build(await OpenConnectionAsync());
+
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateCsvAsync(Targets),
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                await AssertAsync();
+            }
+
+            [Fact]
+            public async Task FromNoHeaderCsvAsync()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideNoHeaderBuilder()
+                    .Build(await OpenConnectionAsync());
+
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateNoHeaderCsvAsync(Targets),
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                await AssertAsync();
+            }
+
+
+            [Fact]
+            public async Task FromNoHeader_WithRowFilterCsvAsync()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideNoHeaderBuilder()
+                    .SetRowFilter(reader =>
                     {
-                        return false;
-                    }
-                    return true;
-                })
-                .Build(await OpenConnectionAsync());
+                        if (reader.Parser.RawRecord.StartsWith("Header"))
+                        {
+                            return false;
+                        }
+                        if (reader.Parser.RawRecord.StartsWith("Footer"))
+                        {
+                            return false;
+                        }
+                        return true;
+                    })
+                    .Build(await OpenConnectionAsync());
 
-            await sqlBulkCopier.WriteToServerAsync(
-                await CreateCsvAsync(Targets), 
-                Encoding.UTF8, 
-                TimeSpan.FromMinutes(30));
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateNoHeaderCsvAsync(Targets),
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
 
-            // Assert
-            await AssertAsync();
+                // Assert
+                await AssertAsync();
+            }
+
+
         }
 
-        [Fact]
-        public async Task FromNoHeaderCsvAsync()
+        public class WithRetry : WriteToServerAsync
         {
-            // Arrange
-            var sqlBulkCopier = ProvideNoHeaderBuilder()
-                .Build(await OpenConnectionAsync());
+            [Fact]
+            public async Task ByConnection()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .SetOptions(options =>
+                    {
+                        options.MaxRetryCount = 3;
+                        options.TruncateBeforeBulkInsert = true;
+                    })
+                    .Build(await OpenConnectionAsync());
 
-            await sqlBulkCopier.WriteToServerAsync(
-                await CreateNoHeaderCsvAsync(Targets), 
-                Encoding.UTF8, 
-                TimeSpan.FromMinutes(30));
+                // Act
+                using var stream = await CreateCsvAsync(Targets);
+                Func<Task> func = () => sqlBulkCopier.WriteToServerAsync(
+                    // ReSharper disable once AccessToDisposedClosure
+                    stream,
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
 
-            // Assert
-            await AssertAsync();
+                // Assert
+                func.ShouldThrow<InvalidOperationException>();
+            }
+
+            [Fact]
+            public async Task ByConnectionString()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .SetOptions(options =>
+                    {
+                        options.MaxRetryCount = 3;
+                        options.TruncateBeforeBulkInsert = true;
+                    })
+                    .Build(SqlBulkCopierConnectionString);
+
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateCsvAsync(Targets),
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                await AssertAsync();
+            }
+
+            [Fact]
+            public async Task ByConnectionStringAndOptions()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .SetOptions(options =>
+                    {
+                        options.MaxRetryCount = 3;
+                        options.TruncateBeforeBulkInsert = true;
+                    })
+                    .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
+
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateCsvAsync(Targets),
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                await AssertAsync();
+            }
+
+            [Fact]
+            public async Task WithTransaction()
+            {
+                // Arrange
+                using var connection = await OpenConnectionAsync();
+                using var transaction = connection.BeginTransaction();
+                var sqlBulkCopier = ProvideBuilder()
+                    .SetOptions(options =>
+                    {
+                        options.MaxRetryCount = 3;
+                        options.TruncateBeforeBulkInsert = true;
+                    })
+                    .Build(connection, SqlBulkCopyOptions.Default, transaction);
+
+                // Act
+                using var stream = await CreateCsvAsync(Targets);
+                Func<Task> func = () => sqlBulkCopier.WriteToServerAsync(
+                    // ReSharper disable once AccessToDisposedClosure
+                    stream,
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                func.ShouldThrow<InvalidOperationException>();
+            }
+
+            [Fact]
+            public async Task WithRowFilter()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .SetOptions(options =>
+                    {
+                        options.MaxRetryCount = 3;
+                        options.TruncateBeforeBulkInsert = true;
+                    })
+                    .SetRowFilter(reader =>
+                    {
+                        if (reader.Parser.RawRecord.StartsWith("Header"))
+                        {
+                            return false;
+                        }
+                        if (reader.Parser.RawRecord.StartsWith("Footer"))
+                        {
+                            return false;
+                        }
+                        return true;
+                    })
+                    .Build(await OpenConnectionAsync());
+
+                // Act
+                using var stream = await CreateCsvAsync(Targets);
+                Func<Task> func = () => sqlBulkCopier.WriteToServerAsync(
+                    // ReSharper disable once AccessToDisposedClosure
+                    stream,
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                func.ShouldThrow<InvalidOperationException>();
+            }
+
+            [Fact]
+            public async Task FromNoHeaderCsvAsync()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideNoHeaderBuilder()
+                    .SetOptions(options =>
+                    {
+                        options.MaxRetryCount = 3;
+                        options.TruncateBeforeBulkInsert = true;
+                    })
+                    .Build(await OpenConnectionAsync());
+
+                // Act
+                using var stream = await CreateCsvAsync(Targets);
+                Func<Task> func = () => sqlBulkCopier.WriteToServerAsync(
+                    // ReSharper disable once AccessToDisposedClosure
+                    stream,
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                func.ShouldThrow<InvalidOperationException>();
+            }
+
+
+            [Fact]
+            public async Task FromNoHeader_WithRowFilterCsvAsync()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideNoHeaderBuilder()
+                    .SetOptions(options =>
+                    {
+                        options.MaxRetryCount = 3;
+                        options.TruncateBeforeBulkInsert = true;
+                    })
+                    .SetRowFilter(reader =>
+                    {
+                        if (reader.Parser.RawRecord.StartsWith("Header"))
+                        {
+                            return false;
+                        }
+                        if (reader.Parser.RawRecord.StartsWith("Footer"))
+                        {
+                            return false;
+                        }
+                        return true;
+                    })
+                    .Build(await OpenConnectionAsync());
+
+                // Act
+                using var stream = await CreateCsvAsync(Targets);
+                Func<Task> func = () => sqlBulkCopier.WriteToServerAsync(
+                    // ReSharper disable once AccessToDisposedClosure
+                    stream,
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                func.ShouldThrow<InvalidOperationException>();
+            }
+
+
         }
 
-
-        [Fact]
-        public async Task FromNoHeader_WithRowFilterCsvAsync()
-        {
-            // Arrange
-            var sqlBulkCopier = ProvideNoHeaderBuilder()
-                .SetRowFilter(reader =>
-                {
-                    if (reader.Parser.RawRecord.StartsWith("Header"))
-                    {
-                        return false;
-                    }
-                    if (reader.Parser.RawRecord.StartsWith("Footer"))
-                    {
-                        return false;
-                    }
-                    return true;
-                })
-                .Build(await OpenConnectionAsync());
-
-            await sqlBulkCopier.WriteToServerAsync(
-                await CreateNoHeaderCsvAsync(Targets), 
-                Encoding.UTF8, 
-                TimeSpan.FromMinutes(30));
-
-            // Assert
-            await AssertAsync();
-        }
 
         private async Task<SqlConnection> OpenConnectionAsync()
         {
@@ -380,7 +567,7 @@ public class CsvBulkCopierBuilderTest
             await connection.OpenAsync(CancellationToken.None);
 
             var insertedRows = (await connection.QueryAsync<BulkInsertTestTarget>(
-                "SELECT * FROM [dbo].[BulkInsertTestTarget] order by Id")).ToArray();
+                "SELECT * FROM [dbo].[BulkInsertTestTarget] with(nolock) order by Id")).ToArray();
 
             insertedRows.ShouldNotBeEmpty("書き出したデータが読み込まれるはず");
             insertedRows.Length.ShouldBe(Count);
