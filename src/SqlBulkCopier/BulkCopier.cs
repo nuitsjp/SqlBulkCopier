@@ -87,11 +87,6 @@ public class BulkCopier : IBulkCopier
 
     public IDataReaderBuilder DataReaderBuilder { get; init; }
 
-    public int MaxRetryCount { get; set; } = 0;
-    public TimeSpan InitialDelay { get; set; } = TimeSpan.FromSeconds(2);
-    public bool TruncateBeforeBulkInsert { get; set; } = false;
-    public bool UseExponentialBackoff { get; set; } = true;
-
     public int BatchSize
     {
         get => _sqlBulkCopy.BatchSize;
@@ -114,31 +109,31 @@ public class BulkCopier : IBulkCopier
         _sqlBulkCopy.BulkCopyTimeout = (int)timeout.TotalSeconds;
 
         // 外部トランザクションが設定されている場合、バルクインサート関連だけリトライしても適切な結果にならないため例外をスロー
-        if (_externalTransaction is not null && 0 < MaxRetryCount)
+        if (_externalTransaction is not null && 0 < _bulkCopierOptions.MaxRetryCount)
         {
             throw new InvalidOperationException("Cannot retry with an external transaction.");
         }
 
         // 外部コネクションが設定されている場合、TransactionScopeと併用されている場合などに、バルクインサート関連だけリトライしても適切な結果にならないため例外をスロー
-        if (_connection is not null && 0 < MaxRetryCount)
+        if (_connection is not null && 0 < _bulkCopierOptions.MaxRetryCount)
         {
             throw new InvalidOperationException("Cannot retry with an external connection.");
         }
 
         // リトライが設定されている場合、テーブルのトランケートが無効だと、リトライ時にデータが重複してしまうため例外をスロー
-        if (0 < MaxRetryCount && !TruncateBeforeBulkInsert)
+        if (_bulkCopierOptions is { MaxRetryCount: > 0, TruncateBeforeBulkInsert: false })
         {
             throw new InvalidOperationException("Cannot retry without truncating the table.");
         }
 
         var currentRetryCount = 0;
-        var delay = InitialDelay;
+        var delay = _bulkCopierOptions.InitialDelay;
         while (true)
         {
             try
             {
                 // When truncate before bulk insert is enabled, truncate the table
-                if (TruncateBeforeBulkInsert)
+                if (_bulkCopierOptions.TruncateBeforeBulkInsert)
                 {
                     await TruncateTableAsync();
                 }
@@ -151,14 +146,14 @@ public class BulkCopier : IBulkCopier
             catch (Exception ex)
             {
                 currentRetryCount++;
-                if (currentRetryCount > MaxRetryCount)
+                if (currentRetryCount > _bulkCopierOptions.MaxRetryCount)
                 {
                     // When the retry count exceeds the maximum, throw an exception
                     throw new Exception($"BulkCopier failed after {currentRetryCount - 1} retries.", ex);
                 }
 
                 // When use exponential backoff, double the delay time
-                if (UseExponentialBackoff && currentRetryCount > 1)
+                if (_bulkCopierOptions.UseExponentialBackoff && currentRetryCount > 1)
                 {
                     delay = TimeSpan.FromMilliseconds(delay.TotalMilliseconds * 2);
                 }

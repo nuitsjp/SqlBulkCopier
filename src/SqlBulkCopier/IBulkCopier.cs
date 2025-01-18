@@ -7,7 +7,6 @@ public interface IBulkCopier : IDisposable
 {
     event SqlRowsCopiedEventHandler SqlRowsCopied;
 
-    int MaxRetryCount { get; set; }
     int BatchSize { get; set; }
     string DestinationTableName { get; }
     int NotifyAfter { get; set; }

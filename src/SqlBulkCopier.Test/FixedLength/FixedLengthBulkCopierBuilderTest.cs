@@ -168,13 +168,15 @@ public class FixedLengthBulkCopierBuilderTest()
                     .Build(await OpenConnectionAsync());
 
                 // ファイルを開いて実行
-                await sqlBulkCopier.WriteToServerAsync(
-                    await CreateFixedLengthAsync(Targets),
+                using var stream = await CreateFixedLengthAsync(Targets);
+                var func = () => sqlBulkCopier.WriteToServerAsync(
+                    // ReSharper disable once AccessToDisposedClosure
+                    stream,
                     new UTF8Encoding(false),
                     TimeSpan.FromMinutes(30));
 
                 // Assert
-                await AssertAsync();
+                func.ShouldThrow<InvalidOperationException>();
             }
 
             [Fact]
@@ -182,6 +184,11 @@ public class FixedLengthBulkCopierBuilderTest()
             {
                 // Arrange
                 var sqlBulkCopier = ProvideBuilder()
+                    .SetOptions(options =>
+                    {
+                        options.MaxRetryCount = 3;
+                        options.TruncateBeforeBulkInsert = true;
+                    })
                     .Build(SqlBulkCopierConnectionString);
 
                 // ファイルを開いて実行
@@ -195,10 +202,38 @@ public class FixedLengthBulkCopierBuilderTest()
             }
 
             [Fact]
+            public async Task ByConnectionString_NotTruncateTable()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .SetOptions(options =>
+                    {
+                        options.MaxRetryCount = 3;
+                    })
+                    .Build(SqlBulkCopierConnectionString);
+
+                // ファイルを開いて実行
+                using var stream = await CreateFixedLengthAsync(Targets);
+                var func = () => sqlBulkCopier.WriteToServerAsync(
+                    // ReSharper disable once AccessToDisposedClosure
+                    stream,
+                    new UTF8Encoding(false),
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                func.ShouldThrow<InvalidOperationException>();
+            }
+
+            [Fact]
             public async Task ByConnectionStringAndOptions()
             {
                 // Arrange
                 var sqlBulkCopier = ProvideBuilder()
+                    .SetOptions(options =>
+                    {
+                        options.MaxRetryCount = 3;
+                        options.TruncateBeforeBulkInsert = true;
+                    })
                     .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
 
                 // ファイルを開いて実行
@@ -215,59 +250,24 @@ public class FixedLengthBulkCopierBuilderTest()
             public async Task ByConnection_WithTransaction()
             {
                 // Arrange
-                using (var connection = await OpenConnectionAsync())
-                {
-                    using var transaction = connection.BeginTransaction();
-
-                    var sqlBulkCopier = ProvideBuilder()
-                        .Build(connection, SqlBulkCopyOptions.Default, transaction);
-
-                    // ファイルを開いて実行
-                    await sqlBulkCopier.WriteToServerAsync(
-                        await CreateFixedLengthAsync(Targets),
-                        new UTF8Encoding(false),
-                        TimeSpan.FromMinutes(30));
-                    transaction.Commit();
-                }
-
-                // Assert
-                await AssertAsync();
-            }
-
-            [Fact]
-            public async Task WithHeaderAndFooterAsync()
-            {
-                // Arrange
-                Encoding encoding = new UTF8Encoding(false);
+                using var connection = await OpenConnectionAsync();
+                using var transaction = connection.BeginTransaction();
 
                 var sqlBulkCopier = ProvideBuilder()
-                    .SetRowFilter(reader =>
+                    .SetOptions(options =>
                     {
-                        if (reader.CurrentRow.Length == 0)
-                        {
-                            return false;
-                        }
-                        if (reader.GetField(0, "Header".Length) == "Header")
-                        {
-                            return false;
-                        }
-                        if (reader.GetField(0, "Footer".Length) == "Footer")
-                        {
-                            return false;
-                        }
-                        return true;
+                        options.MaxRetryCount = 3;
                     })
-                    // ビルド
-                    .Build(await OpenConnectionAsync());
+                    .Build(connection, SqlBulkCopyOptions.Default, transaction);
 
-                // ファイルを開いて実行
-                await sqlBulkCopier.WriteToServerAsync(
-                    await CreateFixedLengthAsync(Targets),
-                    encoding,
+                // Act & Assert
+                using var stream = await CreateFixedLengthAsync(Targets);
+                var func = () => sqlBulkCopier.WriteToServerAsync(
+                    // ReSharper disable once AccessToDisposedClosure
+                    stream,
+                    new UTF8Encoding(false),
                     TimeSpan.FromMinutes(30));
-
-                // Assert
-                await AssertAsync();
+                func.ShouldThrow<InvalidOperationException>();
             }
         }
 
