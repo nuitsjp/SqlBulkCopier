@@ -78,6 +78,8 @@ public class BulkCopier : IBulkCopier
     {
         _sqlBulkCopy = sqlBulkCopy;
         _sqlBulkCopy.DestinationTableName = destinationTableName;
+        _sqlBulkCopy.BatchSize = bulkCopierOptions.BatchSize;
+        _sqlBulkCopy.NotifyAfter = bulkCopierOptions.NotifyAfter;
         DataReaderBuilder = dataReaderBuilder;
         _bulkCopierOptions = bulkCopierOptions;
         DataReaderBuilder.SetupColumnMappings(_sqlBulkCopy);

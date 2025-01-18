@@ -4,6 +4,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using Dapper;
 using Microsoft.Data.SqlClient;
+using Moq;
 using Shouldly;
 using SqlBulkCopier.CsvHelper;
 using SqlBulkCopier.Test.CsvHelper.Util;
@@ -225,22 +226,56 @@ public class CsvBulkCopierBuilderTest
             [Fact]
             public async Task ByConnectionString()
             {
+                //////////////////////////////////////////////////////////////////////////////////
                 // Arrange
-                var sqlBulkCopier = ProvideBuilder()
-                    .SetOptions(options =>
+                //////////////////////////////////////////////////////////////////////////////////
+                var maxRetryCount = 3;
+                var builder = (CsvBulkCopierBuilder)ProvideBuilder();
+                var csvDataReaderBuilder = new CsvDataReaderBuilder(true, builder.Columns, reader => true);
+                var csvDataReaderBuilderMock = new Mock<IDataReaderBuilder>();
+                csvDataReaderBuilderMock
+                    .Setup(x => x.SetupColumnMappings(It.IsAny<SqlBulkCopy>()))
+                    .Callback<SqlBulkCopy>(sqlBulkCopy => csvDataReaderBuilder.SetupColumnMappings(sqlBulkCopy));
+                // csvDataReaderBuilderMockのBuildが呼ばれたら、csvDataReaderBuilderのBuildを呼ぶ
+                var callCount = 0;
+                csvDataReaderBuilderMock
+                    .Setup(x => x.Build(It.IsAny<Stream>(), It.IsAny<Encoding>()))
+                    .Returns<Stream, Encoding>((stream, encoding) =>
                     {
-                        options.MaxRetryCount = 3;
-                        options.TruncateBeforeBulkInsert = true;
-                    })
-                    .Build(SqlBulkCopierConnectionString);
+                        if (callCount++ < maxRetryCount)
+                        {
+                            throw new InvalidOperationException("Simulate failure");
+                        }
+                        return csvDataReaderBuilder.Build(stream, encoding);
+                    });
 
+                var sqlBulkCopier = new BulkCopier(
+                    "[dbo].[BulkInsertTestTarget]",
+                    csvDataReaderBuilderMock.Object,
+                    SqlBulkCopierConnectionString,
+                    new BulkCopierOptions
+                    {
+                        MaxRetryCount = maxRetryCount,
+                        TruncateBeforeBulkInsert = true,
+                        InitialDelay = TimeSpan.FromMilliseconds(1)
+                    });
+
+                //////////////////////////////////////////////////////////////////////////////////
+                // Act
+                //////////////////////////////////////////////////////////////////////////////////
                 await sqlBulkCopier.WriteToServerAsync(
                     await CreateCsvAsync(Targets),
                     Encoding.UTF8,
                     TimeSpan.FromMinutes(30));
 
+                //////////////////////////////////////////////////////////////////////////////////
                 // Assert
+                //////////////////////////////////////////////////////////////////////////////////
                 await AssertAsync();
+                // csvDataReaderBuilderMockのBuildが(maxRetryCount + 1)呼ばれている事を確認
+                csvDataReaderBuilderMock.Verify(
+                    x => x.Build(It.IsAny<Stream>(), It.IsAny<Encoding>()), 
+                    Times.Exactly(maxRetryCount + 1));
             }
 
             [Fact]
