@@ -41,7 +41,7 @@ public class FixedLengthBulkCopierBuilderTest()
 
         private List<BulkInsertTestTarget> Targets { get; } = GenerateBulkInsertTestTargetData(Count);
 
-        public class WithOutRetry : WriteToServerAsync
+        public class WithoutRetry : WriteToServerAsync
         {
             [Fact]
             public async Task ByConnection()
@@ -51,6 +51,34 @@ public class FixedLengthBulkCopierBuilderTest()
                     .Build(await OpenConnectionAsync());
 
                 // ファイルを開いて実行
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets),
+                    new UTF8Encoding(false),
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                await AssertAsync();
+            }
+
+            [Fact]
+            public async Task ByConnection_WithTruncateTable()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .SetOptions(options =>
+                    {
+                        options.TruncateBeforeBulkInsert = true;
+                    })
+                    .Build(await OpenConnectionAsync());
+
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets),
+                    new UTF8Encoding(false),
+                    TimeSpan.FromMinutes(30));
+
+                await AssertAsync();
+
+                // Act
                 await sqlBulkCopier.WriteToServerAsync(
                     await CreateFixedLengthAsync(Targets),
                     new UTF8Encoding(false),
