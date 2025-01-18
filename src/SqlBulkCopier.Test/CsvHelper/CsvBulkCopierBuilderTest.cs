@@ -52,9 +52,15 @@ public class CsvBulkCopierBuilderTest
             {
                 // Arrange
                 using var sqlBulkCopier = ProvideBuilder()
+                    .SetTruncateBeforeBulkInsert(true)
                     .Build(await OpenConnectionAsync());
 
                 // Act
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateCsvAsync(Targets),
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
+
                 await sqlBulkCopier.WriteToServerAsync(
                     await CreateCsvAsync(Targets),
                     Encoding.UTF8,
@@ -69,7 +75,14 @@ public class CsvBulkCopierBuilderTest
             {
                 // Arrange
                 using var sqlBulkCopier = ProvideBuilder()
+                    .SetTruncateBeforeBulkInsert(true)
                     .Build(SqlBulkCopierConnectionString);
+
+                // Act
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateCsvAsync(Targets),
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
 
                 await sqlBulkCopier.WriteToServerAsync(
                     await CreateCsvAsync(Targets),
@@ -103,6 +116,7 @@ public class CsvBulkCopierBuilderTest
                 using var connection = await OpenConnectionAsync();
                 using var transaction = connection.BeginTransaction();
                 using var sqlBulkCopier = ProvideBuilder()
+                    .SetTruncateBeforeBulkInsert(true)
                     .Build(connection, SqlBulkCopyOptions.Default, transaction);
 
                 await sqlBulkCopier.WriteToServerAsync(
@@ -110,8 +124,13 @@ public class CsvBulkCopierBuilderTest
                     Encoding.UTF8,
                     TimeSpan.FromMinutes(30));
 
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateCsvAsync(Targets),
+                    Encoding.UTF8,
+                    TimeSpan.FromMinutes(30));
+
                 // Assert
-                await AssertAsync();
+                await AssertAsync(connection, transaction);
 
                 transaction.Rollback();
 
@@ -210,6 +229,7 @@ public class CsvBulkCopierBuilderTest
 
                 // Act
                 using var stream = await CreateCsvAsync(Targets);
+                // ReSharper disable once AccessToDisposedClosure
                 Func<Task> func = () => sqlBulkCopier.WriteToServerAsync(
                     // ReSharper disable once AccessToDisposedClosure
                     stream,
@@ -586,8 +606,17 @@ public class CsvBulkCopierBuilderTest
             using var connection = new SqlConnection(SqlBulkCopierConnectionString);
             await connection.OpenAsync(CancellationToken.None);
 
-            var insertedRows = (await connection.QueryAsync<BulkInsertTestTarget>(
-                "SELECT * FROM [dbo].[BulkInsertTestTarget] with(nolock) order by Id")).ToArray();
+            await AssertAsync(connection);
+        }
+
+        private async Task AssertAsync(SqlConnection connection, SqlTransaction? transaction = null)
+        {
+            var insertedRows = 
+                transaction is not null
+                    ? (await connection.QueryAsync<BulkInsertTestTarget>(
+                        "SELECT * FROM [dbo].[BulkInsertTestTarget] with(nolock) order by Id", transaction: transaction)).ToArray()
+                    : (await connection.QueryAsync<BulkInsertTestTarget>(
+                        "SELECT * FROM [dbo].[BulkInsertTestTarget] with(nolock) order by Id")).ToArray();
 
             insertedRows.ShouldNotBeEmpty("書き出したデータが読み込まれるはず");
             insertedRows.Length.ShouldBe(Count);
