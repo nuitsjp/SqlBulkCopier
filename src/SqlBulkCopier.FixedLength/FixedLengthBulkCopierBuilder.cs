@@ -18,10 +18,17 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
     public List<FixedLengthColumn> Columns => _columns;
     public Predicate<IFixedLengthReader> RowFilter { get; private set; } = _ => true;
     private readonly string _destinationTableName;
+    private readonly BulkCopierOptions _bulkCopierOptions = new BulkCopierOptions();
 
     private FixedLengthBulkCopierBuilder(string destinationTableName)
     {
         _destinationTableName = destinationTableName;
+    }
+
+    public IFixedLengthBulkCopierBuilder SetOptions(Action<BulkCopierOptions> setOptions)
+    {
+        setOptions(_bulkCopierOptions);
+        return this;
     }
 
     public IFixedLengthBulkCopierBuilder SetDefaultColumnContext(Action<IColumnContext> c)
@@ -52,7 +59,8 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
         return new BulkCopier(
             _destinationTableName,
             new FixedLengthDataReaderBuilder(_columns, RowFilter),
-            connection);
+            connection,
+            _bulkCopierOptions);
     }
 
     public IBulkCopier Build(string connectionString)
@@ -60,7 +68,8 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
         return new BulkCopier(
             _destinationTableName,
             new FixedLengthDataReaderBuilder(_columns, RowFilter),
-            connectionString);
+            connectionString,
+            _bulkCopierOptions);
     }
 
     public IBulkCopier Build(string connectionString, SqlBulkCopyOptions copyOptions)
@@ -69,7 +78,8 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
             _destinationTableName,
             new FixedLengthDataReaderBuilder(_columns, RowFilter),
             connectionString,
-            copyOptions);
+            copyOptions,
+            _bulkCopierOptions);
     }
 
     public IBulkCopier Build(SqlConnection connection, SqlBulkCopyOptions copyOptions, SqlTransaction externalTransaction)
@@ -79,6 +89,7 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
             new FixedLengthDataReaderBuilder(_columns, RowFilter),
             connection,
             copyOptions,
+            _bulkCopierOptions,
             externalTransaction);
     }
 }

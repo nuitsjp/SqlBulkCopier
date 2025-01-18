@@ -41,114 +41,234 @@ public class FixedLengthBulkCopierBuilderTest()
 
         private List<BulkInsertTestTarget> Targets { get; } = GenerateBulkInsertTestTargetData(Count);
 
-        [Fact]
-        public async Task ByConnection()
+        public class WithOutRetry : WriteToServerAsync
         {
-            // Arrange
-            var sqlBulkCopier = ProvideBuilder()
-                .Build(await OpenConnectionAsync());
-
-            // ファイルを開いて実行
-            await sqlBulkCopier.WriteToServerAsync(
-                await CreateFixedLengthAsync(Targets), 
-                new UTF8Encoding(false), 
-                TimeSpan.FromMinutes(30));
-
-            // Assert
-            await AssertAsync();
-        }
-
-        [Fact]
-        public async Task ByConnectionString()
-        {
-            // Arrange
-            var sqlBulkCopier = ProvideBuilder()
-                .Build(SqlBulkCopierConnectionString);
-
-            // ファイルを開いて実行
-            await sqlBulkCopier.WriteToServerAsync(
-                await CreateFixedLengthAsync(Targets),
-                new UTF8Encoding(false),
-                TimeSpan.FromMinutes(30));
-
-            // Assert
-            await AssertAsync();
-        }
-
-        [Fact]
-        public async Task ByConnectionStringAndOptions()
-        {
-            // Arrange
-            var sqlBulkCopier = ProvideBuilder()
-                .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
-
-            // ファイルを開いて実行
-            await sqlBulkCopier.WriteToServerAsync(
-                await CreateFixedLengthAsync(Targets),
-                new UTF8Encoding(false),
-                TimeSpan.FromMinutes(30));
-
-            // Assert
-            await AssertAsync();
-        }
-
-        [Fact]
-        public async Task ByConnection_WithTransaction()
-        {
-            // Arrange
-            using (var connection = await OpenConnectionAsync())
+            [Fact]
+            public async Task ByConnection()
             {
-                using var transaction = connection.BeginTransaction();
-
+                // Arrange
                 var sqlBulkCopier = ProvideBuilder()
-                    .Build(connection, SqlBulkCopyOptions.Default, transaction);
+                    .Build(await OpenConnectionAsync());
 
                 // ファイルを開いて実行
                 await sqlBulkCopier.WriteToServerAsync(
                     await CreateFixedLengthAsync(Targets),
                     new UTF8Encoding(false),
                     TimeSpan.FromMinutes(30));
-                transaction.Commit();
+
+                // Assert
+                await AssertAsync();
             }
 
-            // Assert
-            await AssertAsync();
+            [Fact]
+            public async Task ByConnectionString()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .Build(SqlBulkCopierConnectionString);
+
+                // ファイルを開いて実行
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets),
+                    new UTF8Encoding(false),
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                await AssertAsync();
+            }
+
+            [Fact]
+            public async Task ByConnectionStringAndOptions()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
+
+                // ファイルを開いて実行
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets),
+                    new UTF8Encoding(false),
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                await AssertAsync();
+            }
+
+            [Fact]
+            public async Task ByConnection_WithTransaction()
+            {
+                // Arrange
+                using (var connection = await OpenConnectionAsync())
+                {
+                    using var transaction = connection.BeginTransaction();
+
+                    var sqlBulkCopier = ProvideBuilder()
+                        .Build(connection, SqlBulkCopyOptions.Default, transaction);
+
+                    // ファイルを開いて実行
+                    await sqlBulkCopier.WriteToServerAsync(
+                        await CreateFixedLengthAsync(Targets),
+                        new UTF8Encoding(false),
+                        TimeSpan.FromMinutes(30));
+                    transaction.Commit();
+                }
+
+                // Assert
+                await AssertAsync();
+            }
+
+            [Fact]
+            public async Task WithHeaderAndFooterAsync()
+            {
+                // Arrange
+                Encoding encoding = new UTF8Encoding(false);
+
+                var sqlBulkCopier = ProvideBuilder()
+                    .SetRowFilter(reader =>
+                    {
+                        if (reader.CurrentRow.Length == 0)
+                        {
+                            return false;
+                        }
+                        if (reader.GetField(0, "Header".Length) == "Header")
+                        {
+                            return false;
+                        }
+                        if (reader.GetField(0, "Footer".Length) == "Footer")
+                        {
+                            return false;
+                        }
+                        return true;
+                    })
+                    // ビルド
+                    .Build(await OpenConnectionAsync());
+
+                // ファイルを開いて実行
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets),
+                    encoding,
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                await AssertAsync();
+            }
         }
 
-        [Fact]
-        public async Task WithHeaderAndFooterAsync()
+        public class WithRetry : WriteToServerAsync
         {
-            // Arrange
-            Encoding encoding = new UTF8Encoding(false);
+            [Fact]
+            public async Task ByConnection()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .SetOptions(options =>
+                    {
+                        options.MaxRetryCount = 3;
+                    })
+                    .Build(await OpenConnectionAsync());
 
-            var sqlBulkCopier = ProvideBuilder()
-                .SetRowFilter(reader =>
+                // ファイルを開いて実行
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets),
+                    new UTF8Encoding(false),
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                await AssertAsync();
+            }
+
+            [Fact]
+            public async Task ByConnectionString()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .Build(SqlBulkCopierConnectionString);
+
+                // ファイルを開いて実行
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets),
+                    new UTF8Encoding(false),
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                await AssertAsync();
+            }
+
+            [Fact]
+            public async Task ByConnectionStringAndOptions()
+            {
+                // Arrange
+                var sqlBulkCopier = ProvideBuilder()
+                    .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
+
+                // ファイルを開いて実行
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets),
+                    new UTF8Encoding(false),
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                await AssertAsync();
+            }
+
+            [Fact]
+            public async Task ByConnection_WithTransaction()
+            {
+                // Arrange
+                using (var connection = await OpenConnectionAsync())
                 {
-                    if (reader.CurrentRow.Length == 0)
-                    {
-                        return false;
-                    }
-                    if (reader.GetField(0, "Header".Length) == "Header")
-                    {
-                        return false;
-                    }
-                    if (reader.GetField(0, "Footer".Length) == "Footer")
-                    {
-                        return false;
-                    }
-                    return true;
-                })
-                // ビルド
-                .Build(await OpenConnectionAsync());
+                    using var transaction = connection.BeginTransaction();
 
-            // ファイルを開いて実行
-            await sqlBulkCopier.WriteToServerAsync(
-                await CreateFixedLengthAsync(Targets), 
-                encoding, 
-                TimeSpan.FromMinutes(30));
+                    var sqlBulkCopier = ProvideBuilder()
+                        .Build(connection, SqlBulkCopyOptions.Default, transaction);
 
-            // Assert
-            await AssertAsync();
+                    // ファイルを開いて実行
+                    await sqlBulkCopier.WriteToServerAsync(
+                        await CreateFixedLengthAsync(Targets),
+                        new UTF8Encoding(false),
+                        TimeSpan.FromMinutes(30));
+                    transaction.Commit();
+                }
+
+                // Assert
+                await AssertAsync();
+            }
+
+            [Fact]
+            public async Task WithHeaderAndFooterAsync()
+            {
+                // Arrange
+                Encoding encoding = new UTF8Encoding(false);
+
+                var sqlBulkCopier = ProvideBuilder()
+                    .SetRowFilter(reader =>
+                    {
+                        if (reader.CurrentRow.Length == 0)
+                        {
+                            return false;
+                        }
+                        if (reader.GetField(0, "Header".Length) == "Header")
+                        {
+                            return false;
+                        }
+                        if (reader.GetField(0, "Footer".Length) == "Footer")
+                        {
+                            return false;
+                        }
+                        return true;
+                    })
+                    // ビルド
+                    .Build(await OpenConnectionAsync());
+
+                // ファイルを開いて実行
+                await sqlBulkCopier.WriteToServerAsync(
+                    await CreateFixedLengthAsync(Targets),
+                    encoding,
+                    TimeSpan.FromMinutes(30));
+
+                // Assert
+                await AssertAsync();
+            }
         }
 
         private async Task<SqlConnection> OpenConnectionAsync()

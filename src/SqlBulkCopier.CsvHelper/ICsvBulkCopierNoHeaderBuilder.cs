@@ -5,6 +5,12 @@ namespace SqlBulkCopier.CsvHelper;
 public interface ICsvBulkCopierNoHeaderBuilder : IBulkCopierBuilder
 {
     /// <summary>
+    /// Set options
+    /// </summary>
+    /// <param name="setOptions"></param>
+    /// <returns></returns>
+    ICsvBulkCopierNoHeaderBuilder SetOptions(Action<BulkCopierOptions> setOptions);
+    /// <summary>
     /// Setup default column context
     /// </summary>
     /// <param name="c"></param>

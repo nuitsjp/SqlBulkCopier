@@ -8,6 +8,13 @@ namespace SqlBulkCopier.CsvHelper;
 public interface ICsvBulkCopierBuilder : IBulkCopierBuilder
 {
     /// <summary>
+    /// Set options
+    /// </summary>
+    /// <param name="setOptions"></param>
+    /// <returns></returns>
+    ICsvBulkCopierBuilder SetOptions(Action<BulkCopierOptions> setOptions);
+
+    /// <summary>
     /// Setup default column context
     /// </summary>
     /// <param name="c"></param>

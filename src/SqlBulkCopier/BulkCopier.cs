@@ -13,12 +13,14 @@ public class BulkCopier : IBulkCopier
     private readonly SqlConnection? _connection;
     private readonly SqlTransaction? _externalTransaction;
     private readonly SqlBulkCopyOptions _copyOptions;
+    private readonly BulkCopierOptions _bulkCopierOptions;
 
     public BulkCopier(
         string destinationTableName,
         IDataReaderBuilder dataReaderBuilder,
-        SqlConnection connection)
-        : this(destinationTableName, new SqlBulkCopy(connection), dataReaderBuilder)
+        SqlConnection connection, 
+        BulkCopierOptions bulkCopierOptions)
+        : this(destinationTableName, new SqlBulkCopy(connection), bulkCopierOptions, dataReaderBuilder)
     {
         _connectionString = null;
         _connection = connection;
@@ -29,8 +31,9 @@ public class BulkCopier : IBulkCopier
     public BulkCopier(
         string destinationTableName,
         IDataReaderBuilder dataReaderBuilder,
-        string connectionString)
-        : this(destinationTableName, new SqlBulkCopy(connectionString), dataReaderBuilder)
+        string connectionString, 
+        BulkCopierOptions bulkCopierOptions)
+        : this(destinationTableName, new SqlBulkCopy(connectionString), bulkCopierOptions, dataReaderBuilder)
     {
         _connectionString = connectionString;
         _connection = null;
@@ -42,8 +45,9 @@ public class BulkCopier : IBulkCopier
         string destinationTableName,
         IDataReaderBuilder dataReaderBuilder, 
         string connectionString, 
-        SqlBulkCopyOptions copyOptions)
-        : this(destinationTableName, new SqlBulkCopy(connectionString, copyOptions), dataReaderBuilder)
+        SqlBulkCopyOptions copyOptions, 
+        BulkCopierOptions bulkCopierOptions)
+        : this(destinationTableName, new SqlBulkCopy(connectionString, copyOptions), bulkCopierOptions, dataReaderBuilder)
     {
         _connectionString = connectionString;
         _connection = null;
@@ -55,9 +59,10 @@ public class BulkCopier : IBulkCopier
         string destinationTableName,
         IDataReaderBuilder dataReaderBuilder, 
         SqlConnection connection, 
-        SqlBulkCopyOptions copyOptions, 
+        SqlBulkCopyOptions copyOptions,
+        BulkCopierOptions bulkCopierOptions, 
         SqlTransaction externalTransaction)
-        : this(destinationTableName, new SqlBulkCopy(connection, copyOptions, externalTransaction), dataReaderBuilder)
+        : this(destinationTableName, new SqlBulkCopy(connection, copyOptions, externalTransaction), bulkCopierOptions, dataReaderBuilder)
     {
         _connectionString = null;
         _connection = connection;
@@ -67,11 +72,14 @@ public class BulkCopier : IBulkCopier
 
     private BulkCopier(
         string destinationTableName,
-        SqlBulkCopy sqlBulkCopy, IDataReaderBuilder dataReaderBuilder)
+        SqlBulkCopy sqlBulkCopy,
+        BulkCopierOptions bulkCopierOptions, 
+        IDataReaderBuilder dataReaderBuilder)
     {
         _sqlBulkCopy = sqlBulkCopy;
         _sqlBulkCopy.DestinationTableName = destinationTableName;
         DataReaderBuilder = dataReaderBuilder;
+        _bulkCopierOptions = bulkCopierOptions;
         DataReaderBuilder.SetupColumnMappings(_sqlBulkCopy);
 
         _sqlBulkCopy.SqlRowsCopied += SqlBulkCopyOnSqlRowsCopied;
