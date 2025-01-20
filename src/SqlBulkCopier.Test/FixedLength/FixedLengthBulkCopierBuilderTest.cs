@@ -10,8 +10,7 @@ using SqlBulkCopier.FixedLength;
 
 namespace SqlBulkCopier.Test.FixedLength;
 
-[Collection("CsvBulkCopierNoHeaderBuilderTest")]
-public class CsvBulkCopierNoHeaderBuilderTest : WriteToServerAsync<IFixedLengthBulkCopierBuilder>
+public class FixedLengthBulkCopierBuilderTest : WriteToServerAsync<IFixedLengthBulkCopierBuilder>
 {
     public override void SetDefaultColumnContext()
     {
@@ -34,34 +33,11 @@ public class CsvBulkCopierNoHeaderBuilderTest : WriteToServerAsync<IFixedLengthB
         second.Convert("1,234,567.89xy").ShouldBe(expected);
     }
 
-    protected override void SetRowFilter(IFixedLengthBulkCopierBuilder builder)
+    protected override IFixedLengthBulkCopierBuilder ProvideBuilder(bool withRowFilter = false)
     {
-        builder.SetRowFilter(reader =>
-        {
-            if (reader.CurrentRow.Length == 0)
-            {
-                return false;
-            }
-
-            if (reader.GetField(0, "Header".Length) == "Header")
-            {
-                return false;
-            }
-
-            if (reader.GetField(0, "Footer".Length) == "Footer")
-            {
-                return false;
-            }
-
-            return true;
-        });
-    }
-
-    protected override IFixedLengthBulkCopierBuilder ProvideBuilder() =>
-        FixedLengthBulkCopierBuilder
+        var builder = FixedLengthBulkCopierBuilder
             .Create("[dbo].[BulkInsertTestTarget]")
             .SetDefaultColumnContext(c => c.TrimEnd().TreatEmptyStringAsNull())
-
             .AddColumnMapping("Id", 0, 10)
             .AddColumnMapping("TinyInt", 10, 3)
             .AddColumnMapping("SmallInt", 13, 6)
@@ -108,6 +84,31 @@ public class CsvBulkCopierNoHeaderBuilderTest : WriteToServerAsync<IFixedLengthB
 
             // XML → そのまま文字列で受け取れる
             .AddColumnMapping("XmlValue", 512, 100);
+
+        if (withRowFilter)
+        {
+            builder.SetRowFilter(reader =>
+            {
+                if (reader.CurrentRow.Length == 0)
+                {
+                    return false;
+                }
+
+                if (reader.GetField(0, "Header".Length) == "Header")
+                {
+                    return false;
+                }
+
+                if (reader.GetField(0, "Footer".Length) == "Footer")
+                {
+                    return false;
+                }
+
+                return true;
+            });
+        }
+        return builder;
+    }
 
     /// <summary>
     /// 生成したデータを固定長でファイル出力(バイト数でパディング)する

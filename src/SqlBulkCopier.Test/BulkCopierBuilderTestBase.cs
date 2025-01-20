@@ -10,114 +10,28 @@ namespace SqlBulkCopier.Test;
 
 public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierBuilder<TBuilder>
 {
-    protected List<BulkInsertTestTarget> Targets { get; } = GenerateBulkInsertTestTargetData(Count);
+    protected const int RowNumber = 100;
 
-    private string DatabaseName => this.GetType().Name;
+    protected List<BulkInsertTestTarget> Targets { get; } = GenerateTestData(RowNumber);
+
+    private string DatabaseName => GetType().Name;
+
+    protected string SqlBulkCopierConnectionString => new SqlConnectionStringBuilder
+    {
+        DataSource = ".",
+        InitialCatalog = DatabaseName,
+        IntegratedSecurity = true,
+        TrustServerCertificate = true
+    }.ToString();
 
     protected WriteToServerAsync()
     {
-        using SqlConnection mainConnection = new(MasterConnectionString);
-        mainConnection.Open();
-
-        mainConnection.Execute(
-            // ReSharper disable StringLiteralTypo
-            $"""
-             -- 自分自身の接続を除いたユーザープロセスを対象にした接続の強制切断
-             DECLARE @kill varchar(8000) = '';
-             DECLARE @spid int;
-
-             -- 自分自身のプロセスIDを取得
-             SET @spid = @@SPID;
-
-             SELECT @kill = @kill + 'kill ' + CONVERT(varchar(5), spid) + ';'
-             FROM master.dbo.sysprocesses 
-             WHERE DB_NAME(dbid) = '{DatabaseName}'
-             AND spid <> @spid
-             AND spid > 50;  -- システムプロセスを除外するため、spid が 50 より大きいものを対象
-
-             EXEC(@kill);
-             """);
-        mainConnection.Execute($"DROP DATABASE IF EXISTS [{DatabaseName}]");
-        mainConnection.Execute($"CREATE DATABASE [{DatabaseName}]");
-        mainConnection.Close();
-
-        using SqlConnection sqlConnection = new(SqlBulkCopierConnectionString);
-        sqlConnection.Open();
-
-        sqlConnection.Execute(
-            """
-            CREATE TABLE dbo.BulkInsertTestTarget
-            (
-                -- 一意に識別するための主キー
-                Id INT NOT NULL PRIMARY KEY,
-            
-                -- 数値系 (Exact Numerics)
-                TinyInt TINYINT,
-                SmallInt SMALLINT,
-                IntValue INT,
-                BigInt BIGINT,
-                BitValue BIT,
-                DecimalValue DECIMAL(11, 2),
-                NumericValue NUMERIC(11, 2),
-                MoneyValue MONEY,
-                SmallMoneyValue SMALLMONEY,
-            
-                -- 数値系 (Approximate Numerics)
-                FloatValue FLOAT,
-                RealValue REAL,
-            
-                -- 日付・時刻系
-                DateValue DATE,
-                TimeValue TIME(7),
-                DateTimeValue DATETIME,
-                SmallDateTimeValue SMALLDATETIME,
-                DateTime2Value DATETIME2(7),
-                DateTimeOffsetValue DATETIMEOFFSET(7),
-            
-                -- 文字列系
-                CharValue CHAR(10),
-                VarCharValue VARCHAR(50),
-                NCharValue NCHAR(10),
-                NVarCharValue NVARCHAR(50),
-            
-                -- バイナリ系
-                BinaryValue BINARY(10),
-                VarBinaryValue VARBINARY(50),
-            
-                -- その他（一般的に使用されるもの）
-                UniqueIdValue UNIQUEIDENTIFIER,
-                XmlValue XML
-            );
-            """);
-
-        sqlConnection.Execute(
-            """
-            -- テーブルの作成
-            CREATE TABLE dbo.Customer (
-                CustomerId INT PRIMARY KEY,
-                FirstName NVARCHAR(50),
-                LastName NVARCHAR(50),
-                Email NVARCHAR(100),
-                PhoneNumber NVARCHAR(20),
-                AddressLine1 NVARCHAR(100),
-                AddressLine2 NVARCHAR(100),
-                City NVARCHAR(50),
-                State NVARCHAR(50),
-                PostalCode NVARCHAR(10),
-                Country NVARCHAR(50),
-                BirthDate DATE,
-                Gender NVARCHAR(10),
-                Occupation NVARCHAR(50),
-                Income DECIMAL(18,2),
-                RegistrationDate DATETIME,
-                LastLogin DATETIME,
-                IsActive BIT,
-                Notes NVARCHAR(MAX),
-                CreatedAt DATETIME DEFAULT GETDATE(),  -- デフォルト値として GetDate() を設定
-                UpdatedAt DATETIME DEFAULT GETDATE()   -- デフォルト値として GetDate() を設定
-            )
-            """);
+        InitDatabase();
     }
+
+    protected abstract TBuilder ProvideBuilder(bool withRowFilter = false);
+
+    protected abstract Task<Stream> CreateBulkInsertStreamAsync(List<BulkInsertTestTarget> dataList, bool withHeaderAndFooter = false);
 
     [Fact]
     public abstract void SetDefaultColumnContext();
@@ -127,8 +41,8 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
     {
         // Arrange
         using var sqlBulkCopier = ProvideBuilder()
-            .SetBatchSize(Count / 10)
-            .SetNotifyAfter(Count / 10)
+            .SetBatchSize(RowNumber / 10)
+            .SetNotifyAfter(RowNumber / 10)
             .Build(await OpenConnectionAsync());
 
         // ファイルを開いて実行
@@ -234,10 +148,8 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
         // Arrange
         Encoding encoding = new UTF8Encoding(false);
 
-        var builder = ProvideBuilder();
-        SetRowFilter(builder);
-            // ビルド
-        using var sqlBulkCopier =    builder.Build(await OpenConnectionAsync());
+        using var sqlBulkCopier = ProvideBuilder(true)
+            .Build(await OpenConnectionAsync());
 
         // ファイルを開いて実行
         await sqlBulkCopier.WriteToServerAsync(
@@ -350,12 +262,116 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
         func.ShouldThrow<InvalidOperationException>();
     }
 
+    private void InitDatabase()
+    {
+        using SqlConnection mainConnection = new(new SqlConnectionStringBuilder
+        {
+            DataSource = ".",
+            InitialCatalog = "master",
+            IntegratedSecurity = true,
+            TrustServerCertificate = true
+        }.ToString());
+        mainConnection.Open();
 
-    protected abstract TBuilder ProvideBuilder();
+        mainConnection.Execute(
+            // ReSharper disable StringLiteralTypo
+            $"""
+             -- 自分自身の接続を除いたユーザープロセスを対象にした接続の強制切断
+             DECLARE @kill varchar(8000) = '';
+             DECLARE @spid int;
 
-    protected abstract Task<Stream> CreateBulkInsertStreamAsync(List<BulkInsertTestTarget> dataList, bool withHeaderAndFooter = false);
+             -- 自分自身のプロセスIDを取得
+             SET @spid = @@SPID;
 
-    protected abstract void SetRowFilter(TBuilder builder);
+             SELECT @kill = @kill + 'kill ' + CONVERT(varchar(5), spid) + ';'
+             FROM master.dbo.sysprocesses 
+             WHERE DB_NAME(dbid) = '{DatabaseName}'
+             AND spid <> @spid
+             AND spid > 50;  -- システムプロセスを除外するため、spid が 50 より大きいものを対象
+
+             EXEC(@kill);
+             """);
+        mainConnection.Execute($"DROP DATABASE IF EXISTS [{DatabaseName}]");
+        mainConnection.Execute($"CREATE DATABASE [{DatabaseName}]");
+        mainConnection.Close();
+
+        using SqlConnection sqlConnection = new(SqlBulkCopierConnectionString);
+        sqlConnection.Open();
+
+        sqlConnection.Execute(
+            """
+            CREATE TABLE dbo.BulkInsertTestTarget
+            (
+                -- 一意に識別するための主キー
+                Id INT NOT NULL PRIMARY KEY,
+            
+                -- 数値系 (Exact Numerics)
+                TinyInt TINYINT,
+                SmallInt SMALLINT,
+                IntValue INT,
+                BigInt BIGINT,
+                BitValue BIT,
+                DecimalValue DECIMAL(11, 2),
+                NumericValue NUMERIC(11, 2),
+                MoneyValue MONEY,
+                SmallMoneyValue SMALLMONEY,
+            
+                -- 数値系 (Approximate Numerics)
+                FloatValue FLOAT,
+                RealValue REAL,
+            
+                -- 日付・時刻系
+                DateValue DATE,
+                TimeValue TIME(7),
+                DateTimeValue DATETIME,
+                SmallDateTimeValue SMALLDATETIME,
+                DateTime2Value DATETIME2(7),
+                DateTimeOffsetValue DATETIMEOFFSET(7),
+            
+                -- 文字列系
+                CharValue CHAR(10),
+                VarCharValue VARCHAR(50),
+                NCharValue NCHAR(10),
+                NVarCharValue NVARCHAR(50),
+            
+                -- バイナリ系
+                BinaryValue BINARY(10),
+                VarBinaryValue VARBINARY(50),
+            
+                -- その他（一般的に使用されるもの）
+                UniqueIdValue UNIQUEIDENTIFIER,
+                XmlValue XML
+            );
+            """);
+
+        sqlConnection.Execute(
+            """
+            -- テーブルの作成
+            CREATE TABLE dbo.Customer (
+                CustomerId INT PRIMARY KEY,
+                FirstName NVARCHAR(50),
+                LastName NVARCHAR(50),
+                Email NVARCHAR(100),
+                PhoneNumber NVARCHAR(20),
+                AddressLine1 NVARCHAR(100),
+                AddressLine2 NVARCHAR(100),
+                City NVARCHAR(50),
+                State NVARCHAR(50),
+                PostalCode NVARCHAR(10),
+                Country NVARCHAR(50),
+                BirthDate DATE,
+                Gender NVARCHAR(10),
+                Occupation NVARCHAR(50),
+                Income DECIMAL(18,2),
+                RegistrationDate DATETIME,
+                LastLogin DATETIME,
+                IsActive BIT,
+                Notes NVARCHAR(MAX),
+                CreatedAt DATETIME DEFAULT GETDATE(),  -- デフォルト値として GetDate() を設定
+                UpdatedAt DATETIME DEFAULT GETDATE()   -- デフォルト値として GetDate() を設定
+            )
+            """);
+    }
 
     protected async Task<SqlConnection> OpenConnectionAsync()
     {
@@ -372,12 +388,37 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
             "SELECT * FROM [dbo].[BulkInsertTestTarget] with(nolock) order by Id")).ToArray();
 
         insertedRows.ShouldNotBeEmpty("書き出したデータが読み込まれるはず");
-        insertedRows.Length.ShouldBe(Count);
+        insertedRows.Length.ShouldBe(RowNumber);
 
         // 先頭行などを必要に応じて検証
         var expected = Targets.First();
         var actual = insertedRows.First();
-        ShouldBe(expected, actual);
+
+        actual.Id.ShouldBe(expected.Id);
+        actual.TinyInt.ShouldBe(expected.TinyInt);
+        actual.SmallInt.ShouldBe(expected.SmallInt);
+        actual.IntValue.ShouldBe(expected.IntValue);
+        actual.BigInt.ShouldBe(expected.BigInt);
+        actual.BitValue.ShouldBe(expected.BitValue);
+        actual.DecimalValue.ShouldBe(expected.DecimalValue);
+        actual.NumericValue.ShouldBe(expected.NumericValue);
+        actual.MoneyValue.ShouldBe(expected.MoneyValue);
+        actual.SmallMoneyValue.ShouldBe(expected.SmallMoneyValue);
+        actual.FloatValue!.Value.ShouldBe(expected.FloatValue!.Value, 0.001d);
+        actual.RealValue!.Value.ShouldBe(expected.RealValue!.Value, 0.001d);
+        actual.DateValue.ShouldBe(new DateTime(expected.DateValue!.Value.Year, expected.DateValue!.Value.Month, expected.DateValue!.Value.Day));
+        actual.DateTimeValue.ShouldBe(DateTime.Parse(expected.DateTimeValue!.Value.ToString("yyyy/MM/dd HH:mm:ss")));
+        Math.Abs((actual.SmallDateTimeValue!.Value - expected.SmallDateTimeValue!.Value).TotalMinutes).ShouldBeLessThan(1);
+        actual.DateTime2Value.ShouldBe(DateTime.Parse(expected.DateTime2Value!.Value.ToString("yyyy/MM/dd HH:mm:ss")));
+        actual.TimeValue.ShouldBe(new TimeSpan(expected.TimeValue!.Value.Hours, expected.TimeValue!.Value.Minutes, expected.TimeValue!.Value.Seconds));
+        actual.DateTimeOffsetValue.ShouldBe(DateTime.Parse(expected.DateTimeOffsetValue!.Value.ToString("yyyy/MM/dd HH:mm")));
+        actual.CharValue.ShouldBe(expected.CharValue?.TrimEnd());
+        actual.VarCharValue.ShouldBe(expected.VarCharValue?.TrimEnd());
+        actual.NCharValue.ShouldBe(expected.NCharValue?.TrimEnd());
+        actual.BinaryValue.ShouldBeEquivalentTo(expected.BinaryValue);
+        actual.VarBinaryValue.ShouldBeEquivalentTo(expected.VarBinaryValue);
+        actual.UniqueIdValue.ShouldBe(expected.UniqueIdValue);
+        actual.XmlValue.ShouldBe(expected.XmlValue);
     }
 
     /// <summary>
@@ -402,29 +443,11 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
         return str + new string(' ', paddingBytes);
     }
 
-    protected const int Count = 100;
-
-    private static readonly string MasterConnectionString = new SqlConnectionStringBuilder
-    {
-        DataSource = ".",
-        InitialCatalog = "master",
-        IntegratedSecurity = true,
-        TrustServerCertificate = true
-    }.ToString();
-
-    protected string SqlBulkCopierConnectionString => new SqlConnectionStringBuilder
-    {
-        DataSource = ".",
-        InitialCatalog = DatabaseName,
-        IntegratedSecurity = true,
-        TrustServerCertificate = true
-    }.ToString();
-
     /// <summary>
     /// Bogusを使ってテスト用データを生成
     /// </summary>
     // ReSharper disable once UnusedMember.Local
-    protected static List<BulkInsertTestTarget> GenerateBulkInsertTestTargetData(int rowCount)
+    private static List<BulkInsertTestTarget> GenerateTestData(int rowCount)
     {
         var idSeed = 0;
 
@@ -489,67 +512,4 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
 
         return faker.Generate(rowCount);
     }
-
-    public static List<Customer> GenerateCustomers(int count)
-    {
-        var idSeed = 0;
-        var faker = new Faker<Customer>("ja")
-            .RuleFor(x => x.CustomerId, _ => ++idSeed)
-            .RuleFor(x => x.FirstName, f => f.Name.FirstName())
-            .RuleFor(x => x.LastName, f => f.Name.LastName())
-            .RuleFor(x => x.Email, f => f.Internet.Email())
-            .RuleFor(x => x.PhoneNumber, f => f.Phone.PhoneNumber())
-            .RuleFor(x => x.AddressLine1, f => f.Address.StreetAddress())
-            .RuleFor(x => x.AddressLine2, f => f.Address.SecondaryAddress())
-            .RuleFor(x => x.City, f => f.Address.City())
-            .RuleFor(x => x.State, f => f.Address.StateAbbr())
-            .RuleFor(x => x.PostalCode, f => f.Address.ZipCode())
-            .RuleFor(x => x.Country, f => f.Address.Country().Truncate(50))
-            .RuleFor(x => x.BirthDate, f => f.Date.Past(40, DateTime.Now.AddYears(-20))) // 20〜60歳ぐらい
-            .RuleFor(x => x.Gender, f => f.PickRandom("Male", "Female", "Other"))
-            .RuleFor(x => x.Occupation, f => f.Name.JobTitle())
-            .RuleFor(x => x.Income, f => f.Finance.Amount(1000, 1000000))  // 年収を大まかに
-            .RuleFor(x => x.RegistrationDate, f => f.Date.Past(3))         // 過去3年ぐらい
-            .RuleFor(x => x.LastLogin, f => f.Date.Recent(30))             // 過去1ヶ月
-            .RuleFor(x => x.IsActive, f => f.Random.Bool(0.8f))            // 80% を true
-            .RuleFor(x => x.Notes, f => f.Lorem.Sentence())
-
-            // テーブル上は DEFAULT GETDATE() のため本来必須ではない
-            // 例として現在時刻を設定しておく
-            .RuleFor(x => x.CreatedAt, DateTime.Now)
-            .RuleFor(x => x.UpdatedAt, DateTime.Now);
-
-        return faker.Generate(count);
-    }
-
-    protected static void ShouldBe(BulkInsertTestTarget expected, BulkInsertTestTarget actual)
-    {
-        actual.Id.ShouldBe(expected.Id);
-        actual.TinyInt.ShouldBe(expected.TinyInt);
-        actual.SmallInt.ShouldBe(expected.SmallInt);
-        actual.IntValue.ShouldBe(expected.IntValue);
-        actual.BigInt.ShouldBe(expected.BigInt);
-        actual.BitValue.ShouldBe(expected.BitValue);
-        actual.DecimalValue.ShouldBe(expected.DecimalValue);
-        actual.NumericValue.ShouldBe(expected.NumericValue);
-        actual.MoneyValue.ShouldBe(expected.MoneyValue);
-        actual.SmallMoneyValue.ShouldBe(expected.SmallMoneyValue);
-        actual.FloatValue!.Value.ShouldBe(expected.FloatValue!.Value, 0.001d);
-        actual.RealValue!.Value.ShouldBe(expected.RealValue!.Value, 0.001d);
-        actual.DateValue.ShouldBe(new DateTime(expected.DateValue!.Value.Year, expected.DateValue!.Value.Month, expected.DateValue!.Value.Day));
-        actual.DateTimeValue.ShouldBe(DateTime.Parse(expected.DateTimeValue!.Value.ToString("yyyy/MM/dd HH:mm:ss")));
-        Math.Abs((actual.SmallDateTimeValue!.Value - expected.SmallDateTimeValue!.Value).TotalMinutes).ShouldBeLessThan(1);
-        actual.DateTime2Value.ShouldBe(DateTime.Parse(expected.DateTime2Value!.Value.ToString("yyyy/MM/dd HH:mm:ss")));
-        actual.TimeValue.ShouldBe(new TimeSpan(expected.TimeValue!.Value.Hours, expected.TimeValue!.Value.Minutes, expected.TimeValue!.Value.Seconds));
-        actual.DateTimeOffsetValue.ShouldBe(DateTime.Parse(expected.DateTimeOffsetValue!.Value.ToString("yyyy/MM/dd HH:mm")));
-        actual.CharValue.ShouldBe(expected.CharValue?.TrimEnd());
-        actual.VarCharValue.ShouldBe(expected.VarCharValue?.TrimEnd());
-        actual.NCharValue.ShouldBe(expected.NCharValue?.TrimEnd());
-        actual.BinaryValue.ShouldBeEquivalentTo(expected.BinaryValue);
-        actual.VarBinaryValue.ShouldBeEquivalentTo(expected.VarBinaryValue);
-        actual.UniqueIdValue.ShouldBe(expected.UniqueIdValue);
-        actual.XmlValue.ShouldBe(expected.XmlValue);
-
-    }
-
 }

@@ -15,7 +15,7 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
     public Action<IColumnContext> DefaultColumnContext { get; set; } = _ => { };
 
     private readonly List<FixedLengthColumn> _columns = [];
-    public List<FixedLengthColumn> Columns => _columns;
+    public IReadOnlyList<Column> Columns => _columns;
     public Predicate<IFixedLengthReader> RowFilter { get; private set; } = _ => true;
     private readonly string _destinationTableName;
     private int _maxRetryCount = 0;

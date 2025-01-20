@@ -11,50 +11,26 @@ using SqlBulkCopier.Test.CsvHelper.Util;
 
 namespace SqlBulkCopier.Test.CsvHelper;
 
-[Collection("CsvBulkCopierNoHeaderBuilderTest")]
 public class CsvBulkCopierNoHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICsvBulkCopierNoHeaderBuilder>(false)
 {
     public override void SetDefaultColumnContext()
     {
         // Arrange
         const decimal expected = 1234567.89m;
-        var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierBuilder
-            .Create("[dbo].[BulkInsertTestTarget]")
+        var builder = ProvideBuilder()
             .SetDefaultColumnContext(
                 c => c
                     .TrimEnd(['x', 'y'])
-                    .TreatEmptyStringAsNull()
-                    .AsDecimal(NumberStyles.AllowThousands | NumberStyles.AllowDecimalPoint, CultureInfo.GetCultureInfo("de-DE")))
-            .AddColumnMapping("First", 0, 1)
-            .AddColumnMapping("Second", 1, 2, c => c.AsDecimal());
-        var first = builder.Columns.First();
-        var second = builder.Columns.Last();
+                    .TreatEmptyStringAsNull());
+        var column = builder.Columns.First(x => x.Name == "DecimalValue");
 
         // Act & Assert
-        first.Convert("1.234.567,89xy").ShouldBe(expected);
-        second.Convert("1,234,567.89xy").ShouldBe(expected);
+        column.Convert("1,234,567.89xy").ShouldBe(expected);
     }
 
-    protected override void SetRowFilter(ICsvBulkCopierNoHeaderBuilder builder)
+    protected override ICsvBulkCopierNoHeaderBuilder ProvideBuilder(bool withRowFilter = false)
     {
-        builder.SetRowFilter(reader =>
-        {
-            if (reader.Parser.RawRecord.StartsWith("Header"))
-            {
-                return false;
-            }
-
-            if (reader.Parser.RawRecord.StartsWith("Footer"))
-            {
-                return false;
-            }
-
-            return true;
-        });
-    }
-
-    protected override ICsvBulkCopierNoHeaderBuilder ProvideBuilder()
-        => CsvBulkCopierBuilder
+        var builder = CsvBulkCopierBuilder
             .CreateNoHeader("[dbo].[BulkInsertTestTarget]")
             .SetDefaultColumnContext(c => c.TrimEnd().TreatEmptyStringAsNull())
 
@@ -75,7 +51,7 @@ public class CsvBulkCopierNoHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICsvB
             .AddColumnMapping("BitValue", 5, c => c.AsBit())
 
             // decimal や float なども標準的な数値文字列であれば自動変換が可能
-            .AddColumnMapping("DecimalValue", 6)
+            .AddColumnMapping("DecimalValue", 6, c => c.AsDecimal())
             .AddColumnMapping("NumericValue", 7)
             .AddColumnMapping("MoneyValue", 8)
             .AddColumnMapping("SmallMoneyValue", 9)
@@ -105,4 +81,25 @@ public class CsvBulkCopierNoHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICsvB
             // もし ASCII 文字列そのままなら変換不要
             .AddColumnMapping("BinaryValue", 22, c => c.AsBinary())
             .AddColumnMapping("VarBinaryValue", 23, c => c.AsVarBinary());
+
+        if (withRowFilter)
+        {
+            builder.SetRowFilter(reader =>
+            {
+                if (reader.Parser.RawRecord.StartsWith("Header"))
+                {
+                    return false;
+                }
+
+                if (reader.Parser.RawRecord.StartsWith("Footer"))
+                {
+                    return false;
+                }
+
+                return true;
+            });
+        }
+
+        return builder;
+    }
 }

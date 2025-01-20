@@ -11,7 +11,6 @@ using SqlBulkCopier.Test.CsvHelper.Util;
 
 namespace SqlBulkCopier.Test.CsvHelper;
 
-[Collection("CsvBulkCopierWithHeaderBuilderTest")]
 public class CsvBulkCopierWithHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICsvBulkCopierWithHeaderBuilder>(true)
 {
     public override void SetDefaultColumnContext()
@@ -35,26 +34,9 @@ public class CsvBulkCopierWithHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICs
         second.Convert("1,234,567.89xy").ShouldBe(expected);
     }
 
-    protected override void SetRowFilter(ICsvBulkCopierWithHeaderBuilder builder)
+    protected override ICsvBulkCopierWithHeaderBuilder ProvideBuilder(bool withRowFilter = false)
     {
-        builder.SetRowFilter(reader =>
-        {
-            if (reader.Parser.RawRecord.StartsWith("Header"))
-            {
-                return false;
-            }
-
-            if (reader.Parser.RawRecord.StartsWith("Footer"))
-            {
-                return false;
-            }
-
-            return true;
-        });
-    }
-
-    protected override ICsvBulkCopierWithHeaderBuilder ProvideBuilder()
-        => CsvBulkCopierBuilder
+        var builder = CsvBulkCopierBuilder
             .CreateWithHeader("[dbo].[BulkInsertTestTarget]")
             .SetDefaultColumnContext(c => c.TrimEnd().TreatEmptyStringAsNull())
 
@@ -105,4 +87,23 @@ public class CsvBulkCopierWithHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICs
             // もし ASCII 文字列そのままなら変換不要
             .AddColumnMapping("BinaryValue", c => c.AsBinary())
             .AddColumnMapping("VarBinaryValue", c => c.AsVarBinary());
+        if (withRowFilter)
+        {
+            builder.SetRowFilter(reader =>
+            {
+                if (reader.Parser.RawRecord.StartsWith("Header"))
+                {
+                    return false;
+                }
+
+                if (reader.Parser.RawRecord.StartsWith("Footer"))
+                {
+                    return false;
+                }
+
+                return true;
+            });
+        }
+        return builder;
+    }
 }

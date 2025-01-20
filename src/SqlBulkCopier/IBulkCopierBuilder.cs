@@ -4,6 +4,7 @@ namespace SqlBulkCopier;
 
 public interface IBulkCopierBuilder
 {
+    IReadOnlyList<Column> Columns { get; }
     IBulkCopier Build(SqlConnection connection);
     IBulkCopier Build(string connectionString);
     IBulkCopier Build(string connectionString, SqlBulkCopyOptions copyOptions);
