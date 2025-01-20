@@ -37,12 +37,8 @@ public class CsvBulkCopierWithHeaderBuilderTest
         second.Convert("1,234,567.89xy").ShouldBe(expected);
     }
 
-    public abstract class WriteToServerAsync() : BulkCopierBuilderTestBase(DatabaseName)
+    public abstract class WriteToServerAsync : BulkCopierBuilderTestBase
     {
-        private const string DatabaseName = "CsvBulkCopierBuilderTest";
-
-        const int Count = 100;
-
         private List<BulkInsertTestTarget> Targets { get; } = GenerateBulkInsertTestTargetData(Count);
 
         public class WithoutRetry : WriteToServerAsync

@@ -2,12 +2,305 @@ using Bogus;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Shouldly;
+using System.Text;
+// ReSharper disable UseAwaitUsing
+// ReSharper disable AccessToDisposedClosure
 
 namespace SqlBulkCopier.Test;
+
+public abstract class BulkCopierBuilderTestBase2<TBuilder> : BulkCopierBuilderTestBase
+    where TBuilder : IBulkCopierBuilder<TBuilder>
+{
+    protected List<BulkInsertTestTarget> Targets { get; } = GenerateBulkInsertTestTargetData(Count);
+
+    [Fact]
+    public abstract void SetDefaultColumnContext();
+
+    [Fact]
+    public async Task WriteToServerAsync_NoRetry_WithConnection_ShouldSucceed()
+    {
+        // Arrange
+        using var sqlBulkCopier = ProvideBuilder()
+            .SetBatchSize(Count / 10)
+            .SetNotifyAfter(Count / 10)
+            .Build(await OpenConnectionAsync());
+
+        // ファイルを開いて実行
+        await sqlBulkCopier.WriteToServerAsync(
+            await CreateBulkInsertStreamAsync(Targets),
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+
+        // Assert
+        await AssertAsync();
+    }
+
+    [Fact]
+    public async Task WriteToServerAsync_NoRetry_WithConnection_BeforeTruncate_ShouldSucceed()
+    {
+        // Arrange
+        using var sqlBulkCopier = ProvideBuilder()
+            .SetTruncateBeforeBulkInsert(true)
+            .Build(await OpenConnectionAsync());
+
+        await sqlBulkCopier.WriteToServerAsync(
+            await CreateBulkInsertStreamAsync(Targets),
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+
+        await AssertAsync();
+
+        // Act
+        await sqlBulkCopier.WriteToServerAsync(
+            await CreateBulkInsertStreamAsync(Targets),
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+
+        // Assert
+        await AssertAsync();
+    }
+
+    [Fact]
+    public async Task WriteToServerAsync_NoRetry_WithConnectionString_ShouldSucceed()
+    {
+        // Arrange
+        using var sqlBulkCopier = ProvideBuilder()
+            .Build(SqlBulkCopierConnectionString);
+
+        // ファイルを開いて実行
+        await sqlBulkCopier.WriteToServerAsync(
+            await CreateBulkInsertStreamAsync(Targets),
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+
+        // Assert
+        await AssertAsync();
+    }
+
+    [Fact]
+    public async Task WriteToServerAsync_NoRetry_WithConnectionString_WithOptions_ShouldSucceed()
+    {
+        // Arrange
+        using var sqlBulkCopier = ProvideBuilder()
+            .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
+
+        // ファイルを開いて実行
+        await sqlBulkCopier.WriteToServerAsync(
+            await CreateBulkInsertStreamAsync(Targets),
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+
+        // Assert
+        await AssertAsync();
+    }
+
+    [Fact]
+    public async Task WriteToServerAsync_NoRetry_WithConnection_WithTransaction_ShouldSucceed()
+    {
+        // Arrange
+        using var connection = await OpenConnectionAsync();
+        using var transaction = connection.BeginTransaction();
+
+        using var sqlBulkCopier = ProvideBuilder()
+            .Build(connection, SqlBulkCopyOptions.Default, transaction);
+
+        // ファイルを開いて実行
+        await sqlBulkCopier.WriteToServerAsync(
+            await CreateBulkInsertStreamAsync(Targets),
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+
+        // Assert
+        await AssertAsync();
+
+
+        transaction.Rollback();
+
+        using var newConnection = new SqlConnection(SqlBulkCopierConnectionString);
+        await newConnection.OpenAsync(CancellationToken.None);
+        (await newConnection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[BulkInsertTestTarget]"))
+            .ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task WriteToServerAsync_NoRetry_WithConnection_WithHeaderAndFooter_ShouldSucceed()
+    {
+        // Arrange
+        Encoding encoding = new UTF8Encoding(false);
+
+        var builder = ProvideBuilder();
+        SetRowFilter(builder);
+            // ビルド
+        using var sqlBulkCopier =    builder.Build(await OpenConnectionAsync());
+
+        // ファイルを開いて実行
+        await sqlBulkCopier.WriteToServerAsync(
+            await CreateBulkInsertStreamAsync(Targets),
+            encoding,
+            TimeSpan.FromMinutes(30));
+
+        // Assert
+        await AssertAsync();
+    }
+
+    [Fact]
+    public async Task WriteToServerAsync_WithRetry_WithConnection_ShouldError()
+    {
+        // Arrange
+        using var sqlBulkCopier = ProvideBuilder()
+            .SetMaxRetryCount(3)
+            .Build(await OpenConnectionAsync());
+
+        // ファイルを開いて実行
+        using var stream = await CreateBulkInsertStreamAsync(Targets);
+        var func = () => sqlBulkCopier.WriteToServerAsync(
+            // ReSharper disable once AccessToDisposedClosure
+            stream,
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+
+        // Assert
+        func.ShouldThrow<InvalidOperationException>();
+    }
+
+    [Fact]
+    public async Task WriteToServerAsync_WithRetry_WithConnectionString_ShouldSucceed()
+    {
+        // Arrange
+        using var sqlBulkCopier = ProvideBuilder()
+            .SetMaxRetryCount(3)
+            .SetTruncateBeforeBulkInsert(true)
+            .SetInitialDelay(TimeSpan.FromMilliseconds(1))
+            .SetUseExponentialBackoff(false)
+            .Build(SqlBulkCopierConnectionString);
+
+        // ファイルを開いて実行
+        await sqlBulkCopier.WriteToServerAsync(
+            await CreateBulkInsertStreamAsync(Targets),
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+
+        // Assert
+        await AssertAsync();
+    }
+
+    [Fact]
+    public async Task WriteToServerAsync_WithRetry_WithConnectionString_WithoutTruncate_ShouldError()
+    {
+        // Arrange
+        using var sqlBulkCopier = ProvideBuilder()
+            .SetMaxRetryCount(3)
+            .Build(SqlBulkCopierConnectionString);
+
+        // ファイルを開いて実行
+        using var stream = await CreateBulkInsertStreamAsync(Targets);
+        var func = () => sqlBulkCopier.WriteToServerAsync(
+            // ReSharper disable once AccessToDisposedClosure
+            stream,
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+
+        // Assert
+        func.ShouldThrow<InvalidOperationException>();
+    }
+
+    [Fact]
+    public async Task WriteToServerAsync_WithRetry_WithConnectionString_WithOptions_ShouldSucceed()
+    {
+        // Arrange
+        using var sqlBulkCopier = ProvideBuilder()
+            .SetMaxRetryCount(3)
+            .SetTruncateBeforeBulkInsert(true)
+            .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
+
+        // ファイルを開いて実行
+        await sqlBulkCopier.WriteToServerAsync(
+            await CreateBulkInsertStreamAsync(Targets),
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+
+        // Assert
+        await AssertAsync();
+    }
+
+    [Fact]
+    public async Task WriteToServerAsync_WithRetry_WithConnection_WithTransaction_ShouldError()
+    {
+        // Arrange
+        using var connection = await OpenConnectionAsync();
+        using var transaction = connection.BeginTransaction();
+
+        using var sqlBulkCopier = ProvideBuilder()
+            .SetMaxRetryCount(3)
+            .Build(connection, SqlBulkCopyOptions.Default, transaction);
+
+        // Act & Assert
+        using var stream = await CreateBulkInsertStreamAsync(Targets);
+        var func = () => sqlBulkCopier.WriteToServerAsync(
+            // ReSharper disable once AccessToDisposedClosure
+            stream,
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+        func.ShouldThrow<InvalidOperationException>();
+    }
+
+
+    protected abstract TBuilder ProvideBuilder();
+
+    protected abstract Task<Stream> CreateBulkInsertStreamAsync(List<BulkInsertTestTarget> dataList, bool withHeaderAndFooter = false);
+
+    protected abstract void SetRowFilter(TBuilder builder);
+
+    protected async Task<SqlConnection> OpenConnectionAsync()
+    {
+        var sqlConnection = new SqlConnection(SqlBulkCopierConnectionString);
+        await sqlConnection.OpenAsync(CancellationToken.None);
+        return sqlConnection;
+    }
+    private async Task AssertAsync()
+    {
+        using var sqlConnection = await OpenConnectionAsync();
+
+        var insertedRows = (await sqlConnection.QueryAsync<BulkInsertTestTarget>(
+            "SELECT * FROM [dbo].[BulkInsertTestTarget] with(nolock) order by Id")).ToArray();
+
+        insertedRows.ShouldNotBeEmpty("書き出したデータが読み込まれるはず");
+        insertedRows.Length.ShouldBe(Count);
+
+        // 先頭行などを必要に応じて検証
+        var expected = Targets.First();
+        var actual = insertedRows.First();
+        ShouldBe(expected, actual);
+    }
+
+    /// <summary>
+    /// 文字列を指定されたバイト数になるように右側をスペースでパディング
+    /// </summary>
+    protected static string PadRightBytes(string str, int totalBytes, Encoding encoding)
+    {
+        var stringBytes = encoding.GetBytes(str);
+        if (stringBytes.Length == totalBytes)
+        {
+            // バイト数が一致する場合はそのまま返す
+            return str;
+        }
+        if (totalBytes < stringBytes.Length)
+        {
+            // バイト数が超過する場合は切り詰める
+            return encoding.GetString(stringBytes, 0, totalBytes);
+        }
+
+        // 不足分をスペースで埋める
+        var paddingBytes = totalBytes - stringBytes.Length;
+        return str + new string(' ', paddingBytes);
+    }
+}
 
 [Collection("Use SqlBulkCopier")]
 public abstract class BulkCopierBuilderTestBase
 {
+    protected const int Count = 100;
+
     private static readonly string MasterConnectionString = new SqlConnectionStringBuilder
     {
         DataSource = ".",
@@ -19,16 +312,15 @@ public abstract class BulkCopierBuilderTestBase
     protected string SqlBulkCopierConnectionString => new SqlConnectionStringBuilder
     {
         DataSource = ".",
-        InitialCatalog = _databaseName,
+        InitialCatalog = DatabaseName,
         IntegratedSecurity = true,
         TrustServerCertificate = true
     }.ToString();
 
-    private readonly string _databaseName;
+    private string DatabaseName => this.GetType().Name;
 
-    protected BulkCopierBuilderTestBase(string databaseName)
+    protected BulkCopierBuilderTestBase()
     {
-        _databaseName = databaseName;
         using SqlConnection mainConnection = new(MasterConnectionString);
         mainConnection.Open();
 
@@ -44,14 +336,14 @@ public abstract class BulkCopierBuilderTestBase
 
              SELECT @kill = @kill + 'kill ' + CONVERT(varchar(5), spid) + ';'
              FROM master.dbo.sysprocesses 
-             WHERE DB_NAME(dbid) = '{databaseName}'
+             WHERE DB_NAME(dbid) = '{DatabaseName}'
              AND spid <> @spid
              AND spid > 50;  -- システムプロセスを除外するため、spid が 50 より大きいものを対象
 
              EXEC(@kill);
              """);
-        mainConnection.Execute($"DROP DATABASE IF EXISTS [{databaseName}]");
-        mainConnection.Execute($"CREATE DATABASE [{databaseName}]");
+        mainConnection.Execute($"DROP DATABASE IF EXISTS [{DatabaseName}]");
+        mainConnection.Execute($"CREATE DATABASE [{DatabaseName}]");
         mainConnection.Close();
 
         using SqlConnection sqlConnection = new(SqlBulkCopierConnectionString);
