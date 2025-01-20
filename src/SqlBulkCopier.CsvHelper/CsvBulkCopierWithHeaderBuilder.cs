@@ -7,7 +7,7 @@ namespace SqlBulkCopier.CsvHelper;
 /// CsvHelperCsvHelperBuilder
 /// 
 /// </summary>
-public class CsvBulkCopierWithHeaderBuilder : ICsvBulkCopierWithHeaderBuilder, ICsvBulkCopierNoHeaderBuilder
+public class CsvBulkCopierWithHeaderBuilder : ICsvBulkCopierWithHeaderBuilder
 {
     public static ICsvBulkCopierWithHeaderBuilder Create(string destinationTableName)
         => new CsvBulkCopierWithHeaderBuilder(destinationTableName, true);
@@ -47,73 +47,37 @@ public class CsvBulkCopierWithHeaderBuilder : ICsvBulkCopierWithHeaderBuilder, I
         _hasHeader = hasHeader;
     }
 
-    ICsvBulkCopierWithHeaderBuilder ICsvBulkCopierWithHeaderBuilder.SetMaxRetryCount(int value)
+    public ICsvBulkCopierWithHeaderBuilder SetMaxRetryCount(int value)
     {
         _maxRetryCount = value;
         return this;
     }
 
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetInitialDelay(TimeSpan value)
+    public ICsvBulkCopierWithHeaderBuilder SetInitialDelay(TimeSpan value)
     {
         _initialDelay = value;
         return this;
     }
 
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetTruncateBeforeBulkInsert(bool value)
+    public ICsvBulkCopierWithHeaderBuilder SetTruncateBeforeBulkInsert(bool value)
     {
         _truncateBeforeBulkInsert = value;
         return this;
     }
 
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetUseExponentialBackoff(bool value)
+    public ICsvBulkCopierWithHeaderBuilder SetUseExponentialBackoff(bool value)
     {
         _useExponentialBackoff = value;
         return this;
     }
 
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetBatchSize(int value)
+    public ICsvBulkCopierWithHeaderBuilder SetBatchSize(int value)
     {
         _batchSize = value;
         return this;
     }
 
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetNotifyAfter(int value)
-    {
-        _notifyAfter = value;
-        return this;
-    }
-
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetMaxRetryCount(int value)
-    {
-        _maxRetryCount = value;
-        return this;
-    }
-
-    ICsvBulkCopierWithHeaderBuilder ICsvBulkCopierWithHeaderBuilder.SetInitialDelay(TimeSpan value)
-    {
-        _initialDelay = value;
-        return this;
-    }
-
-    ICsvBulkCopierWithHeaderBuilder ICsvBulkCopierWithHeaderBuilder.SetTruncateBeforeBulkInsert(bool value)
-    {
-        _truncateBeforeBulkInsert = value;
-        return this;
-    }
-
-    ICsvBulkCopierWithHeaderBuilder ICsvBulkCopierWithHeaderBuilder.SetUseExponentialBackoff(bool value)
-    {
-        _useExponentialBackoff = value;
-        return this;
-    }
-
-    ICsvBulkCopierWithHeaderBuilder ICsvBulkCopierWithHeaderBuilder.SetBatchSize(int value)
-    {
-        _batchSize = value;
-        return this;
-    }
-
-    ICsvBulkCopierWithHeaderBuilder ICsvBulkCopierWithHeaderBuilder.SetNotifyAfter(int value)
+    public ICsvBulkCopierWithHeaderBuilder SetNotifyAfter(int value)
     {
         _notifyAfter = value;
         return this;
@@ -124,44 +88,15 @@ public class CsvBulkCopierWithHeaderBuilder : ICsvBulkCopierWithHeaderBuilder, I
     /// </summary>
     /// <param name="c"></param>
     /// <returns></returns>
-    ICsvBulkCopierWithHeaderBuilder ICsvBulkCopierWithHeaderBuilder.SetDefaultColumnContext(Action<IColumnContext> c)
+    public ICsvBulkCopierWithHeaderBuilder SetDefaultColumnContext(Action<IColumnContext> c)
     {
         DefaultColumnContext = c;
         return this;
     }
 
-    ICsvBulkCopierWithHeaderBuilder ICsvBulkCopierWithHeaderBuilder.SetRowFilter(Predicate<CsvReader> rowFilter)
+    public ICsvBulkCopierWithHeaderBuilder SetRowFilter(Predicate<CsvReader> rowFilter)
     {
         _rowFilter = rowFilter;
-        return this;
-    }
-
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetDefaultColumnContext(Action<IColumnContext> c)
-    {
-        DefaultColumnContext = c;
-        return this;
-    }
-
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetRowFilter(Predicate<CsvReader> rowFilter)
-    {
-        _rowFilter = rowFilter;
-        return this;
-    }
-
-    public ICsvBulkCopierNoHeaderBuilder AddColumnMapping(string dbColumnName, int csvColumnOrdinal)
-    {
-        var columnContext = new CsvColumnContext(csvColumnOrdinal, dbColumnName);
-        DefaultColumnContext(columnContext);
-        _columns.Add(columnContext.Build());
-        return this;
-    }
-
-    public ICsvBulkCopierNoHeaderBuilder AddColumnMapping(string dbColumnName, int csvColumnOrdinal, Action<IColumnContext> c)
-    {
-        var columnContext = new CsvColumnContext(csvColumnOrdinal, dbColumnName);
-        DefaultColumnContext(columnContext);
-        c(columnContext);
-        _columns.Add(columnContext.Build());
         return this;
     }
 

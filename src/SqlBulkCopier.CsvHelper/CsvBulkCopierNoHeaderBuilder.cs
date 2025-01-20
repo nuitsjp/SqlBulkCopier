@@ -47,49 +47,49 @@ public class CsvBulkCopierNoHeaderBuilder : ICsvBulkCopierNoHeaderBuilder
         _hasHeader = hasHeader;
     }
 
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetInitialDelay(TimeSpan value)
+    public ICsvBulkCopierNoHeaderBuilder SetInitialDelay(TimeSpan value)
     {
         _initialDelay = value;
         return this;
     }
 
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetTruncateBeforeBulkInsert(bool value)
+    public ICsvBulkCopierNoHeaderBuilder SetTruncateBeforeBulkInsert(bool value)
     {
         _truncateBeforeBulkInsert = value;
         return this;
     }
 
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetUseExponentialBackoff(bool value)
+    public ICsvBulkCopierNoHeaderBuilder SetUseExponentialBackoff(bool value)
     {
         _useExponentialBackoff = value;
         return this;
     }
 
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetBatchSize(int value)
+    public ICsvBulkCopierNoHeaderBuilder SetBatchSize(int value)
     {
         _batchSize = value;
         return this;
     }
 
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetNotifyAfter(int value)
+    public ICsvBulkCopierNoHeaderBuilder SetNotifyAfter(int value)
     {
         _notifyAfter = value;
         return this;
     }
 
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetMaxRetryCount(int value)
+    public ICsvBulkCopierNoHeaderBuilder SetMaxRetryCount(int value)
     {
         _maxRetryCount = value;
         return this;
     }
 
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetDefaultColumnContext(Action<IColumnContext> c)
+    public ICsvBulkCopierNoHeaderBuilder SetDefaultColumnContext(Action<IColumnContext> c)
     {
         DefaultColumnContext = c;
         return this;
     }
 
-    ICsvBulkCopierNoHeaderBuilder ICsvBulkCopierNoHeaderBuilder.SetRowFilter(Predicate<CsvReader> rowFilter)
+    public ICsvBulkCopierNoHeaderBuilder SetRowFilter(Predicate<CsvReader> rowFilter)
     {
         _rowFilter = rowFilter;
         return this;
