@@ -4,8 +4,7 @@ using Microsoft.Data.SqlClient;
 namespace SqlBulkCopier.CsvHelper;
 
 /// <summary>
-/// CsvHelperCsvHelperBuilder
-/// 
+/// CsvBulkCopierNoHeaderBuilder
 /// </summary>
 public class CsvBulkCopierNoHeaderBuilder : ICsvBulkCopierNoHeaderBuilder
 {
@@ -106,20 +105,6 @@ public class CsvBulkCopierNoHeaderBuilder : ICsvBulkCopierNoHeaderBuilder
     public ICsvBulkCopierNoHeaderBuilder AddColumnMapping(string dbColumnName, int csvColumnOrdinal, Action<IColumnContext> c)
     {
         var columnContext = new CsvColumnContext(csvColumnOrdinal, dbColumnName);
-        DefaultColumnContext(columnContext);
-        c(columnContext);
-        _columns.Add(columnContext.Build());
-        return this;
-    }
-
-    public ICsvBulkCopierNoHeaderBuilder AddColumnMapping(string columnName)
-    {
-        return AddColumnMapping(columnName, _ => { });
-    }
-
-    public ICsvBulkCopierNoHeaderBuilder AddColumnMapping(string columnName, Action<IColumnContext> c)
-    {
-        var columnContext = new CsvColumnContext(_columns.Count, columnName);
         DefaultColumnContext(columnContext);
         c(columnContext);
         _columns.Add(columnContext.Build());
