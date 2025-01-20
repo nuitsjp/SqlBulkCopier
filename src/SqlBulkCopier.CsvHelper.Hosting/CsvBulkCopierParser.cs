@@ -18,7 +18,7 @@ public static class CsvBulkCopierParser
             : ParseNoHeaderBuilder(sqlBulkCopier);
     }
 
-    internal static ICsvBulkCopierBuilder ParseHasHeaderBuilder(IConfigurationSection sqlBulkCopier)
+    internal static ICsvBulkCopierWithHeaderBuilder ParseHasHeaderBuilder(IConfigurationSection sqlBulkCopier)
     {
         var tableName = sqlBulkCopier.GetValue<string>("DestinationTableName");
         if (tableName is null)
@@ -26,7 +26,7 @@ public static class CsvBulkCopierParser
             throw new InvalidOperationException("DestinationTableName is not found or empty.");
         }
 
-        var builder = CsvBulkCopierBuilder.Create(tableName);
+        var builder = CsvBulkCopierWithHeaderBuilder.Create(tableName);
         builder.SetDefaultColumnContext(
             SetupContext(sqlBulkCopier.GetSection("DefaultColumnSettings")));
 
@@ -47,7 +47,7 @@ public static class CsvBulkCopierParser
             throw new InvalidOperationException("DestinationTableName is not found or empty.");
         }
 
-        var builder = CsvBulkCopierBuilder.CreateNoHeader(tableName);
+        var builder = CsvBulkCopierWithHeaderBuilder.CreateNoHeader(tableName);
         builder.SetDefaultColumnContext(
             SetupContext(sqlBulkCopier.GetSection("DefaultColumnSettings")));
 
