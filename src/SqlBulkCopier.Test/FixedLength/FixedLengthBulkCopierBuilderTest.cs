@@ -10,6 +10,7 @@ using SqlBulkCopier.FixedLength;
 
 namespace SqlBulkCopier.Test.FixedLength;
 
+[Collection("CsvBulkCopierNoHeaderBuilderTest")]
 public class CsvBulkCopierNoHeaderBuilderTest : WriteToServerAsync<IFixedLengthBulkCopierBuilder>
 {
     public override void SetDefaultColumnContext()

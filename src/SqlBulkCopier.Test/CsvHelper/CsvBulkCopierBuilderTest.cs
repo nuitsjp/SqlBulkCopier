@@ -17,6 +17,7 @@ public abstract class CsvBulkCopierBuilderTest<TBuilder>(bool hasHeader) : Write
     {
         var encoding = new UTF8Encoding(false);
         using var stream = new MemoryStream();
+        // ReSharper disable once UseAwaitUsing
         using var writer = new StreamWriter(stream, encoding);
         var csvWriter = new CsvWriter(
             writer,

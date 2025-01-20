@@ -11,6 +11,7 @@ using SqlBulkCopier.Test.CsvHelper.Util;
 
 namespace SqlBulkCopier.Test.CsvHelper;
 
+[Collection("CsvBulkCopierWithHeaderBuilderTest")]
 public class CsvBulkCopierWithHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICsvBulkCopierWithHeaderBuilder>(true)
 {
     public override void SetDefaultColumnContext()

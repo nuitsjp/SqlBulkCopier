@@ -8,10 +8,116 @@ using System.Text;
 
 namespace SqlBulkCopier.Test;
 
-public abstract class WriteToServerAsync<TBuilder> : BulkCopierBuilderTestBase
-    where TBuilder : IBulkCopierBuilder<TBuilder>
+public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierBuilder<TBuilder>
 {
     protected List<BulkInsertTestTarget> Targets { get; } = GenerateBulkInsertTestTargetData(Count);
+
+    private string DatabaseName => this.GetType().Name;
+
+    protected WriteToServerAsync()
+    {
+        using SqlConnection mainConnection = new(MasterConnectionString);
+        mainConnection.Open();
+
+        mainConnection.Execute(
+            // ReSharper disable StringLiteralTypo
+            $"""
+             -- 自分自身の接続を除いたユーザープロセスを対象にした接続の強制切断
+             DECLARE @kill varchar(8000) = '';
+             DECLARE @spid int;
+
+             -- 自分自身のプロセスIDを取得
+             SET @spid = @@SPID;
+
+             SELECT @kill = @kill + 'kill ' + CONVERT(varchar(5), spid) + ';'
+             FROM master.dbo.sysprocesses 
+             WHERE DB_NAME(dbid) = '{DatabaseName}'
+             AND spid <> @spid
+             AND spid > 50;  -- システムプロセスを除外するため、spid が 50 より大きいものを対象
+
+             EXEC(@kill);
+             """);
+        mainConnection.Execute($"DROP DATABASE IF EXISTS [{DatabaseName}]");
+        mainConnection.Execute($"CREATE DATABASE [{DatabaseName}]");
+        mainConnection.Close();
+
+        using SqlConnection sqlConnection = new(SqlBulkCopierConnectionString);
+        sqlConnection.Open();
+
+        sqlConnection.Execute(
+            """
+            CREATE TABLE dbo.BulkInsertTestTarget
+            (
+                -- 一意に識別するための主キー
+                Id INT NOT NULL PRIMARY KEY,
+            
+                -- 数値系 (Exact Numerics)
+                TinyInt TINYINT,
+                SmallInt SMALLINT,
+                IntValue INT,
+                BigInt BIGINT,
+                BitValue BIT,
+                DecimalValue DECIMAL(11, 2),
+                NumericValue NUMERIC(11, 2),
+                MoneyValue MONEY,
+                SmallMoneyValue SMALLMONEY,
+            
+                -- 数値系 (Approximate Numerics)
+                FloatValue FLOAT,
+                RealValue REAL,
+            
+                -- 日付・時刻系
+                DateValue DATE,
+                TimeValue TIME(7),
+                DateTimeValue DATETIME,
+                SmallDateTimeValue SMALLDATETIME,
+                DateTime2Value DATETIME2(7),
+                DateTimeOffsetValue DATETIMEOFFSET(7),
+            
+                -- 文字列系
+                CharValue CHAR(10),
+                VarCharValue VARCHAR(50),
+                NCharValue NCHAR(10),
+                NVarCharValue NVARCHAR(50),
+            
+                -- バイナリ系
+                BinaryValue BINARY(10),
+                VarBinaryValue VARBINARY(50),
+            
+                -- その他（一般的に使用されるもの）
+                UniqueIdValue UNIQUEIDENTIFIER,
+                XmlValue XML
+            );
+            """);
+
+        sqlConnection.Execute(
+            """
+            -- テーブルの作成
+            CREATE TABLE dbo.Customer (
+                CustomerId INT PRIMARY KEY,
+                FirstName NVARCHAR(50),
+                LastName NVARCHAR(50),
+                Email NVARCHAR(100),
+                PhoneNumber NVARCHAR(20),
+                AddressLine1 NVARCHAR(100),
+                AddressLine2 NVARCHAR(100),
+                City NVARCHAR(50),
+                State NVARCHAR(50),
+                PostalCode NVARCHAR(10),
+                Country NVARCHAR(50),
+                BirthDate DATE,
+                Gender NVARCHAR(10),
+                Occupation NVARCHAR(50),
+                Income DECIMAL(18,2),
+                RegistrationDate DATETIME,
+                LastLogin DATETIME,
+                IsActive BIT,
+                Notes NVARCHAR(MAX),
+                CreatedAt DATETIME DEFAULT GETDATE(),  -- デフォルト値として GetDate() を設定
+                UpdatedAt DATETIME DEFAULT GETDATE()   -- デフォルト値として GetDate() を設定
+            )
+            """);
+    }
 
     [Fact]
     public abstract void SetDefaultColumnContext();
@@ -257,6 +363,7 @@ public abstract class WriteToServerAsync<TBuilder> : BulkCopierBuilderTestBase
         await sqlConnection.OpenAsync(CancellationToken.None);
         return sqlConnection;
     }
+
     private async Task AssertAsync()
     {
         using var sqlConnection = await OpenConnectionAsync();
@@ -294,11 +401,7 @@ public abstract class WriteToServerAsync<TBuilder> : BulkCopierBuilderTestBase
         var paddingBytes = totalBytes - stringBytes.Length;
         return str + new string(' ', paddingBytes);
     }
-}
 
-[Collection("Use SqlBulkCopier")]
-public abstract class BulkCopierBuilderTestBase
-{
     protected const int Count = 100;
 
     private static readonly string MasterConnectionString = new SqlConnectionStringBuilder
@@ -316,113 +419,6 @@ public abstract class BulkCopierBuilderTestBase
         IntegratedSecurity = true,
         TrustServerCertificate = true
     }.ToString();
-
-    private string DatabaseName => this.GetType().Name;
-
-    protected BulkCopierBuilderTestBase()
-    {
-        using SqlConnection mainConnection = new(MasterConnectionString);
-        mainConnection.Open();
-
-        mainConnection.Execute(
-            // ReSharper disable StringLiteralTypo
-            $"""
-             -- 自分自身の接続を除いたユーザープロセスを対象にした接続の強制切断
-             DECLARE @kill varchar(8000) = '';
-             DECLARE @spid int;
-
-             -- 自分自身のプロセスIDを取得
-             SET @spid = @@SPID;
-
-             SELECT @kill = @kill + 'kill ' + CONVERT(varchar(5), spid) + ';'
-             FROM master.dbo.sysprocesses 
-             WHERE DB_NAME(dbid) = '{DatabaseName}'
-             AND spid <> @spid
-             AND spid > 50;  -- システムプロセスを除外するため、spid が 50 より大きいものを対象
-
-             EXEC(@kill);
-             """);
-        mainConnection.Execute($"DROP DATABASE IF EXISTS [{DatabaseName}]");
-        mainConnection.Execute($"CREATE DATABASE [{DatabaseName}]");
-        mainConnection.Close();
-
-        using SqlConnection sqlConnection = new(SqlBulkCopierConnectionString);
-        sqlConnection.Open();
-
-        sqlConnection.Execute(
-            """
-            CREATE TABLE dbo.BulkInsertTestTarget
-            (
-                -- 一意に識別するための主キー
-                Id INT NOT NULL PRIMARY KEY,
-            
-                -- 数値系 (Exact Numerics)
-                TinyInt TINYINT,
-                SmallInt SMALLINT,
-                IntValue INT,
-                BigInt BIGINT,
-                BitValue BIT,
-                DecimalValue DECIMAL(11, 2),
-                NumericValue NUMERIC(11, 2),
-                MoneyValue MONEY,
-                SmallMoneyValue SMALLMONEY,
-            
-                -- 数値系 (Approximate Numerics)
-                FloatValue FLOAT,
-                RealValue REAL,
-            
-                -- 日付・時刻系
-                DateValue DATE,
-                TimeValue TIME(7),
-                DateTimeValue DATETIME,
-                SmallDateTimeValue SMALLDATETIME,
-                DateTime2Value DATETIME2(7),
-                DateTimeOffsetValue DATETIMEOFFSET(7),
-            
-                -- 文字列系
-                CharValue CHAR(10),
-                VarCharValue VARCHAR(50),
-                NCharValue NCHAR(10),
-                NVarCharValue NVARCHAR(50),
-            
-                -- バイナリ系
-                BinaryValue BINARY(10),
-                VarBinaryValue VARBINARY(50),
-            
-                -- その他（一般的に使用されるもの）
-                UniqueIdValue UNIQUEIDENTIFIER,
-                XmlValue XML
-            );
-            """);
-
-        sqlConnection.Execute(
-            """
-            -- テーブルの作成
-            CREATE TABLE dbo.Customer (
-                CustomerId INT PRIMARY KEY,
-                FirstName NVARCHAR(50),
-                LastName NVARCHAR(50),
-                Email NVARCHAR(100),
-                PhoneNumber NVARCHAR(20),
-                AddressLine1 NVARCHAR(100),
-                AddressLine2 NVARCHAR(100),
-                City NVARCHAR(50),
-                State NVARCHAR(50),
-                PostalCode NVARCHAR(10),
-                Country NVARCHAR(50),
-                BirthDate DATE,
-                Gender NVARCHAR(10),
-                Occupation NVARCHAR(50),
-                Income DECIMAL(18,2),
-                RegistrationDate DATETIME,
-                LastLogin DATETIME,
-                IsActive BIT,
-                Notes NVARCHAR(MAX),
-                CreatedAt DATETIME DEFAULT GETDATE(),  -- デフォルト値として GetDate() を設定
-                UpdatedAt DATETIME DEFAULT GETDATE()   -- デフォルト値として GetDate() を設定
-            )
-            """);
-    }
 
     /// <summary>
     /// Bogusを使ってテスト用データを生成
@@ -555,4 +551,5 @@ public abstract class BulkCopierBuilderTestBase
         actual.XmlValue.ShouldBe(expected.XmlValue);
 
     }
+
 }
