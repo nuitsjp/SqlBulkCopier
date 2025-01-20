@@ -8,7 +8,7 @@ using System.Text;
 
 namespace SqlBulkCopier.Test;
 
-public abstract class BulkCopierBuilderTestBase2<TBuilder> : BulkCopierBuilderTestBase
+public abstract class WriteToServerAsync<TBuilder> : BulkCopierBuilderTestBase
     where TBuilder : IBulkCopierBuilder<TBuilder>
 {
     protected List<BulkInsertTestTarget> Targets { get; } = GenerateBulkInsertTestTargetData(Count);
@@ -17,7 +17,7 @@ public abstract class BulkCopierBuilderTestBase2<TBuilder> : BulkCopierBuilderTe
     public abstract void SetDefaultColumnContext();
 
     [Fact]
-    public async Task WriteToServerAsync_NoRetry_WithConnection_ShouldSucceed()
+    public async Task NoRetry_WithConnection_ShouldSucceed()
     {
         // Arrange
         using var sqlBulkCopier = ProvideBuilder()
@@ -36,7 +36,7 @@ public abstract class BulkCopierBuilderTestBase2<TBuilder> : BulkCopierBuilderTe
     }
 
     [Fact]
-    public async Task WriteToServerAsync_NoRetry_WithConnection_BeforeTruncate_ShouldSucceed()
+    public async Task NoRetry_WithConnection_BeforeTruncate_ShouldSucceed()
     {
         // Arrange
         using var sqlBulkCopier = ProvideBuilder()
@@ -61,7 +61,7 @@ public abstract class BulkCopierBuilderTestBase2<TBuilder> : BulkCopierBuilderTe
     }
 
     [Fact]
-    public async Task WriteToServerAsync_NoRetry_WithConnectionString_ShouldSucceed()
+    public async Task NoRetry_WithConnectionString_ShouldSucceed()
     {
         // Arrange
         using var sqlBulkCopier = ProvideBuilder()
@@ -78,7 +78,7 @@ public abstract class BulkCopierBuilderTestBase2<TBuilder> : BulkCopierBuilderTe
     }
 
     [Fact]
-    public async Task WriteToServerAsync_NoRetry_WithConnectionString_WithOptions_ShouldSucceed()
+    public async Task NoRetry_WithConnectionString_WithOptions_ShouldSucceed()
     {
         // Arrange
         using var sqlBulkCopier = ProvideBuilder()
@@ -95,7 +95,7 @@ public abstract class BulkCopierBuilderTestBase2<TBuilder> : BulkCopierBuilderTe
     }
 
     [Fact]
-    public async Task WriteToServerAsync_NoRetry_WithConnection_WithTransaction_ShouldSucceed()
+    public async Task NoRetry_WithConnection_WithTransaction_ShouldSucceed()
     {
         // Arrange
         using var connection = await OpenConnectionAsync();
@@ -123,7 +123,7 @@ public abstract class BulkCopierBuilderTestBase2<TBuilder> : BulkCopierBuilderTe
     }
 
     [Fact]
-    public async Task WriteToServerAsync_NoRetry_WithConnection_WithHeaderAndFooter_ShouldSucceed()
+    public async Task NoRetry_WithConnection_WithHeaderAndFooter_ShouldSucceed()
     {
         // Arrange
         Encoding encoding = new UTF8Encoding(false);
@@ -144,7 +144,7 @@ public abstract class BulkCopierBuilderTestBase2<TBuilder> : BulkCopierBuilderTe
     }
 
     [Fact]
-    public async Task WriteToServerAsync_WithRetry_WithConnection_ShouldError()
+    public async Task WithRetry_WithConnection_ShouldError()
     {
         // Arrange
         using var sqlBulkCopier = ProvideBuilder()
@@ -164,7 +164,7 @@ public abstract class BulkCopierBuilderTestBase2<TBuilder> : BulkCopierBuilderTe
     }
 
     [Fact]
-    public async Task WriteToServerAsync_WithRetry_WithConnectionString_ShouldSucceed()
+    public async Task WithRetry_WithConnectionString_ShouldSucceed()
     {
         // Arrange
         using var sqlBulkCopier = ProvideBuilder()
@@ -185,7 +185,7 @@ public abstract class BulkCopierBuilderTestBase2<TBuilder> : BulkCopierBuilderTe
     }
 
     [Fact]
-    public async Task WriteToServerAsync_WithRetry_WithConnectionString_WithoutTruncate_ShouldError()
+    public async Task WithRetry_WithConnectionString_WithoutTruncate_ShouldError()
     {
         // Arrange
         using var sqlBulkCopier = ProvideBuilder()
@@ -205,7 +205,7 @@ public abstract class BulkCopierBuilderTestBase2<TBuilder> : BulkCopierBuilderTe
     }
 
     [Fact]
-    public async Task WriteToServerAsync_WithRetry_WithConnectionString_WithOptions_ShouldSucceed()
+    public async Task WithRetry_WithConnectionString_WithOptions_ShouldSucceed()
     {
         // Arrange
         using var sqlBulkCopier = ProvideBuilder()
@@ -224,7 +224,7 @@ public abstract class BulkCopierBuilderTestBase2<TBuilder> : BulkCopierBuilderTe
     }
 
     [Fact]
-    public async Task WriteToServerAsync_WithRetry_WithConnection_WithTransaction_ShouldError()
+    public async Task WithRetry_WithConnection_WithTransaction_ShouldError()
     {
         // Arrange
         using var connection = await OpenConnectionAsync();

@@ -11,7 +11,7 @@ using SqlBulkCopier.Test.CsvHelper.Util;
 
 namespace SqlBulkCopier.Test.CsvHelper;
 
-public class CsvBulkCopierWithHeaderBuilderTest : WriteToServerAsync<ICsvBulkCopierWithHeaderBuilder>
+public class CsvBulkCopierNoHeaderBuilderTest : WriteToServerAsync<ICsvBulkCopierNoHeaderBuilder>
 {
     public override void SetDefaultColumnContext()
     {
@@ -34,7 +34,7 @@ public class CsvBulkCopierWithHeaderBuilderTest : WriteToServerAsync<ICsvBulkCop
         second.Convert("1,234,567.89xy").ShouldBe(expected);
     }
 
-    protected override void SetRowFilter(ICsvBulkCopierWithHeaderBuilder builder)
+    protected override void SetRowFilter(ICsvBulkCopierNoHeaderBuilder builder)
     {
         builder.SetRowFilter(reader =>
         {
@@ -52,58 +52,58 @@ public class CsvBulkCopierWithHeaderBuilderTest : WriteToServerAsync<ICsvBulkCop
         });
     }
 
-    protected override ICsvBulkCopierWithHeaderBuilder ProvideBuilder()
+    protected override ICsvBulkCopierNoHeaderBuilder ProvideBuilder()
         => CsvBulkCopierBuilder
-            .CreateWithHeader("[dbo].[BulkInsertTestTarget]")
+            .CreateNoHeader("[dbo].[BulkInsertTestTarget]")
             .SetDefaultColumnContext(c => c.TrimEnd().TreatEmptyStringAsNull())
 
             // GUID
-            .AddColumnMapping("UniqueIdValue", c => c.AsUniqueIdentifier())
+            .AddColumnMapping("UniqueIdValue", 24, c => c.AsUniqueIdentifier())
 
             // XML → そのまま文字列で受け取れる
-            .AddColumnMapping("XmlValue")
+            .AddColumnMapping("XmlValue", 25)
 
             // ■ int?, decimal?, float?, string? などは自動変換が期待できるので、変換指定なし
-            .AddColumnMapping("Id")
-            .AddColumnMapping("TinyInt")
-            .AddColumnMapping("SmallInt")
-            .AddColumnMapping("IntValue")
-            .AddColumnMapping("BigInt")
+            .AddColumnMapping("Id", 0)
+            .AddColumnMapping("TinyInt", 1)
+            .AddColumnMapping("SmallInt", 2)
+            .AddColumnMapping("IntValue", 3)
+            .AddColumnMapping("BigInt", 4)
 
             // bit列は "0" or "1" → bool に明示変換が必要
-            .AddColumnMapping("BitValue", c => c.AsBit())
+            .AddColumnMapping("BitValue", 5, c => c.AsBit())
 
             // decimal や float なども標準的な数値文字列であれば自動変換が可能
-            .AddColumnMapping("DecimalValue")
-            .AddColumnMapping("NumericValue")
-            .AddColumnMapping("MoneyValue")
-            .AddColumnMapping("SmallMoneyValue")
-            .AddColumnMapping("FloatValue")
-            .AddColumnMapping("RealValue")
+            .AddColumnMapping("DecimalValue", 6)
+            .AddColumnMapping("NumericValue", 7)
+            .AddColumnMapping("MoneyValue", 8)
+            .AddColumnMapping("SmallMoneyValue", 9)
+            .AddColumnMapping("FloatValue", 10)
+            .AddColumnMapping("RealValue", 11)
 
             // 日付系：yyyyMMdd, yyyyMMddHHmmss などは SQLServer が自動認識しない場合が多い
             // よって、パーサーを指定
-            .AddColumnMapping("DateValue", c => c.AsDate("yyyyMMdd"))
-            .AddColumnMapping("DateTimeValue", c => c.AsDateTime("yyyyMMddHHmmss"))
-            .AddColumnMapping("SmallDateTimeValue", c => c.AsSmallDateTime("yyyyMMddHHmmss"))
-            .AddColumnMapping("DateTime2Value", c => c.AsDateTime2("yyyyMMddHHmmss"))
+            .AddColumnMapping("DateValue", 12, c => c.AsDate("yyyyMMdd"))
+            .AddColumnMapping("DateTimeValue", 13, c => c.AsDateTime("yyyyMMddHHmmss"))
+            .AddColumnMapping("SmallDateTimeValue", 14, c => c.AsSmallDateTime("yyyyMMddHHmmss"))
+            .AddColumnMapping("DateTime2Value", 15, c => c.AsDateTime2("yyyyMMddHHmmss"))
 
             // time: "HHmmss" として保存しているなら要手動パース
-            .AddColumnMapping("TimeValue", c => c.AsTime(@"hh\:mm\:ss"))
+            .AddColumnMapping("TimeValue", 16, c => c.AsTime(@"hh\:mm\:ss"))
 
             // datetimeoffset: "yyyyMMddHHmmss+09:00" など → 要パーサー
-            .AddColumnMapping("DateTimeOffsetValue", c => c.AsDateTimeOffset("yyyyMMddHHmmK"))
+            .AddColumnMapping("DateTimeOffsetValue", 17, c => c.AsDateTimeOffset("yyyyMMddHHmmK"))
 
             // 文字列系は何も指定しなければそのまま文字列としてマッピングされる（必要に応じて TrimEnd）
-            .AddColumnMapping("CharValue")
-            .AddColumnMapping("VarCharValue")
-            .AddColumnMapping("NCharValue")
-            .AddColumnMapping("NVarCharValue")
+            .AddColumnMapping("CharValue", 18)
+            .AddColumnMapping("VarCharValue", 19)
+            .AddColumnMapping("NCharValue", 20)
+            .AddColumnMapping("NVarCharValue", 21)
 
             // バイナリを Base64 で書き出しているなら、Convert.FromBase64String が必要
             // もし ASCII 文字列そのままなら変換不要
-            .AddColumnMapping("BinaryValue", c => c.AsBinary())
-            .AddColumnMapping("VarBinaryValue", c => c.AsVarBinary());
+            .AddColumnMapping("BinaryValue", 22, c => c.AsBinary())
+            .AddColumnMapping("VarBinaryValue", 23, c => c.AsVarBinary());
 
     /// <summary>
     /// 生成したデータを固定長でファイル出力(バイト数でパディング)する
@@ -114,8 +114,12 @@ public class CsvBulkCopierWithHeaderBuilderTest : WriteToServerAsync<ICsvBulkCop
         var encoding = new UTF8Encoding(false);
         using var stream = new MemoryStream();
         using var writer = new StreamWriter(stream, encoding);
-
-        var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
+        var csvWriter = new CsvWriter(
+            writer,
+            new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = false // ヘッダー行を無効化
+            });
         csvWriter.Context.RegisterClassMap<BulkInsertTestTargetMap>();
         await csvWriter.WriteRecordsAsync(Targets, CancellationToken.None);
         await csvWriter.FlushAsync();
