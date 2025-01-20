@@ -20,8 +20,8 @@ public class CsvBulkCopierWithHeaderBuilderTest
     {
         // Arrange
         const decimal expected = 1234567.89m;
-        var builder = (CsvBulkCopierWithHeaderBuilder)CsvBulkCopierWithHeaderBuilder
-            .Create("[dbo].[BulkInsertTestTarget]")
+        var builder = (CsvBulkCopierBuilder)CsvBulkCopierBuilder
+            .CreateWithHeader("[dbo].[BulkInsertTestTarget]")
             .SetDefaultColumnContext(
                 c => c
                     .TrimEnd(['x', 'y'])
@@ -262,7 +262,7 @@ public class CsvBulkCopierWithHeaderBuilderTest
                 // Arrange
                 //////////////////////////////////////////////////////////////////////////////////
                 var maxRetryCount = 3;
-                var builder = (CsvBulkCopierWithHeaderBuilder)ProvideBuilder();
+                var builder = (CsvBulkCopierBuilder)ProvideBuilder();
                 var csvDataReaderBuilder = new CsvDataReaderBuilder(true, builder.Columns, reader => true);
                 var csvDataReaderBuilderMock = new Mock<IDataReaderBuilder>();
                 csvDataReaderBuilderMock
@@ -321,7 +321,7 @@ public class CsvBulkCopierWithHeaderBuilderTest
                 // Arrange
                 //////////////////////////////////////////////////////////////////////////////////
                 var maxRetryCount = 3;
-                var builder = (CsvBulkCopierWithHeaderBuilder)ProvideBuilder();
+                var builder = (CsvBulkCopierBuilder)ProvideBuilder();
                 var csvDataReaderBuilder = new CsvDataReaderBuilder(true, builder.Columns, reader => true);
                 var csvDataReaderBuilderMock = new Mock<IDataReaderBuilder>();
                 csvDataReaderBuilderMock
@@ -562,8 +562,8 @@ public class CsvBulkCopierWithHeaderBuilderTest
         }
 
         private ICsvBulkCopierWithHeaderBuilder ProvideBuilder()
-            => CsvBulkCopierWithHeaderBuilder
-                .Create("[dbo].[BulkInsertTestTarget]")
+            => CsvBulkCopierBuilder
+                .CreateWithHeader("[dbo].[BulkInsertTestTarget]")
                 .SetDefaultColumnContext(c => c.TrimEnd().TreatEmptyStringAsNull())
 
                 // GUID
@@ -615,8 +615,8 @@ public class CsvBulkCopierWithHeaderBuilderTest
                 .AddColumnMapping("VarBinaryValue", c => c.AsVarBinary());
 
         private ICsvBulkCopierNoHeaderBuilder ProvideNoHeaderBuilder()
-            => CsvBulkCopierNoHeaderBuilder
-                .Create("[dbo].[BulkInsertTestTarget]")
+            => CsvBulkCopierBuilder
+                .CreateNoHeader("[dbo].[BulkInsertTestTarget]")
                 .SetDefaultColumnContext(c => c.TrimEnd().TreatEmptyStringAsNull())
 
                 // GUID
