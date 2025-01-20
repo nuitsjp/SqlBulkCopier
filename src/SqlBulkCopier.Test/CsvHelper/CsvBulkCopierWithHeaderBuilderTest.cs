@@ -114,8 +114,12 @@ public class CsvBulkCopierWithHeaderBuilderTest : WriteToServerAsync<ICsvBulkCop
         var encoding = new UTF8Encoding(false);
         using var stream = new MemoryStream();
         using var writer = new StreamWriter(stream, encoding);
-
-        var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
+        var csvWriter = new CsvWriter(
+            writer,
+            new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = true // ヘッダー行を有効化
+            });
         csvWriter.Context.RegisterClassMap<BulkInsertTestTargetMap>();
         await csvWriter.WriteRecordsAsync(Targets, CancellationToken.None);
         await csvWriter.FlushAsync();
