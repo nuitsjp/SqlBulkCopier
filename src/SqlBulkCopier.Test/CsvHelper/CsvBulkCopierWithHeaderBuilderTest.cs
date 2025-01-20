@@ -11,7 +11,7 @@ using SqlBulkCopier.Test.CsvHelper.Util;
 
 namespace SqlBulkCopier.Test.CsvHelper;
 
-public class CsvBulkCopierWithHeaderBuilderTest : WriteToServerAsync<ICsvBulkCopierWithHeaderBuilder>
+public class CsvBulkCopierWithHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICsvBulkCopierWithHeaderBuilder>(true)
 {
     public override void SetDefaultColumnContext()
     {
@@ -104,38 +104,4 @@ public class CsvBulkCopierWithHeaderBuilderTest : WriteToServerAsync<ICsvBulkCop
             // もし ASCII 文字列そのままなら変換不要
             .AddColumnMapping("BinaryValue", c => c.AsBinary())
             .AddColumnMapping("VarBinaryValue", c => c.AsVarBinary());
-
-    /// <summary>
-    /// 生成したデータを固定長でファイル出力(バイト数でパディング)する
-    /// </summary>
-    // ReSharper disable once UnusedMember.Local
-    protected override async Task<Stream> CreateBulkInsertStreamAsync(List<BulkInsertTestTarget> dataList, bool withHeaderAndFooter = false)
-    {
-        var encoding = new UTF8Encoding(false);
-        using var stream = new MemoryStream();
-        using var writer = new StreamWriter(stream, encoding);
-        var csvWriter = new CsvWriter(
-            writer,
-            new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                HasHeaderRecord = true // ヘッダー行を有効化
-            });
-        csvWriter.Context.RegisterClassMap<BulkInsertTestTargetMap>();
-        await csvWriter.WriteRecordsAsync(Targets, CancellationToken.None);
-        await csvWriter.FlushAsync();
-
-        if (withHeaderAndFooter == false)
-        {
-            // csvWriterなどを閉じると、streamも閉じられるため作り直す
-            return new MemoryStream(stream.ToArray());
-        }
-
-        return new MemoryStream(
-            encoding.GetBytes(
-                $"""
-                 Header
-                 {encoding.GetString(stream.ToArray())}
-                 Footer
-                 """));
-    }
 }
