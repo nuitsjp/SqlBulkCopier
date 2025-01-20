@@ -615,8 +615,8 @@ public class CsvBulkCopierWithHeaderBuilderTest
                 .AddColumnMapping("VarBinaryValue", c => c.AsVarBinary());
 
         private ICsvBulkCopierNoHeaderBuilder ProvideNoHeaderBuilder()
-            => CsvBulkCopierWithHeaderBuilder
-                .CreateNoHeader("[dbo].[BulkInsertTestTarget]")
+            => CsvBulkCopierNoHeaderBuilder
+                .Create("[dbo].[BulkInsertTestTarget]")
                 .SetDefaultColumnContext(c => c.TrimEnd().TreatEmptyStringAsNull())
 
                 // GUID

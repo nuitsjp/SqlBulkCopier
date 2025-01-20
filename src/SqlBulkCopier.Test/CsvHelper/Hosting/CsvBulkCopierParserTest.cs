@@ -1846,7 +1846,7 @@ public class CsvBulkCopierParserTest
             var configuration = BuildJsonConfig(settings);
 
             // Act
-            var builder = (CsvBulkCopierWithHeaderBuilder)CsvBulkCopierParser.ParseNoHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
+            var builder = (CsvBulkCopierNoHeaderBuilder)CsvBulkCopierParser.ParseNoHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
             var context = new CsvColumnContext(0, string.Empty);
             builder.DefaultColumnContext(context);
             context.Build();

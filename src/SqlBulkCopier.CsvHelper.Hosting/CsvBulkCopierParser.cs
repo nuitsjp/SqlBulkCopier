@@ -47,7 +47,7 @@ public static class CsvBulkCopierParser
             throw new InvalidOperationException("DestinationTableName is not found or empty.");
         }
 
-        var builder = CsvBulkCopierWithHeaderBuilder.CreateNoHeader(tableName);
+        var builder = CsvBulkCopierNoHeaderBuilder.Create(tableName);
         builder.SetDefaultColumnContext(
             SetupContext(sqlBulkCopier.GetSection("DefaultColumnSettings")));
 
