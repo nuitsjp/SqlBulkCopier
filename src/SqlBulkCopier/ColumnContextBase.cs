@@ -3,17 +3,20 @@ using System.Globalization;
 
 namespace SqlBulkCopier;
 
-public abstract class ColumnContextBase : IColumnContext
+public abstract class ColumnContextBase(int ordinal, string name) : IColumnContext
 {
-    protected SqlDbType? SqlDbType;
+    public int Ordinal { get; } = ordinal;
+    public SqlDbType? SqlDbType { get; private set; }
+    public string? Format { get; private set; }
     protected NumberStyles NumberStyles = NumberStyles.None;
-    protected string? Format;
     protected DateTimeStyles DateTimeStyles = DateTimeStyles.None;
     protected CultureInfo? CultureInfo;
     protected TrimMode TrimMode = TrimMode.None;
     protected char[]? TrimChars;
     protected bool IsTreatEmptyStringAsNull;
     protected Func<string, object>? Converter;
+
+    public string Name { get; } = name;
 
     public IColumnContext AsBigInt(NumberStyles numberStyles = NumberStyles.None, CultureInfo? cultureInfo = null)
     {

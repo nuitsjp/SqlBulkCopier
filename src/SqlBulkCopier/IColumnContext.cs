@@ -1,9 +1,14 @@
-﻿using System.Globalization;
+﻿using System.Data;
+using System.Globalization;
 
 namespace SqlBulkCopier;
 
 public interface IColumnContext
 {
+    string Name { get; }
+    int Ordinal { get; }
+    SqlDbType? SqlDbType { get; }
+    string? Format { get; }
     IColumnContext AsBigInt(NumberStyles numberStyles = NumberStyles.None, CultureInfo? cultureInfo = null);
     IColumnContext AsBit();
     IColumnContext AsUniqueIdentifier();

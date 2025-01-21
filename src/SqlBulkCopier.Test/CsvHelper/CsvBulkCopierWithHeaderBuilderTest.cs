@@ -30,8 +30,9 @@ public class CsvBulkCopierWithHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICs
         var second = builder.Columns.Last();
 
         // Act & Assert
-        first.Convert("1.234.567,89xy").ShouldBe(expected);
-        second.Convert("1,234,567.89xy").ShouldBe(expected);
+        //first.Convert("1.234.567,89xy").ShouldBe(expected);
+        //second.Convert("1,234,567.89xy").ShouldBe(expected);
+        throw new NotImplementedException();
     }
 
     protected override ICsvBulkCopierWithHeaderBuilder ProvideBuilder(bool withRowFilter = false)

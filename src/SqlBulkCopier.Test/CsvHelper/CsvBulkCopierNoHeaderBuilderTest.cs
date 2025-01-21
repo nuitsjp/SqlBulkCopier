@@ -25,7 +25,8 @@ public class CsvBulkCopierNoHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICsvB
         var column = builder.Columns.First(x => x.Name == "DecimalValue");
 
         // Act & Assert
-        column.Convert("1,234,567.89xy").ShouldBe(expected);
+        //column.Convert("1,234,567.89xy").ShouldBe(expected);
+        throw new NotImplementedException();
     }
 
     protected override ICsvBulkCopierNoHeaderBuilder ProvideBuilder(bool withRowFilter = false)

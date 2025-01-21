@@ -1861,12 +1861,12 @@ public class FixedLengthBulkCopierParserTest
 
             // Assert
             builder.Columns.Count.ShouldBe(2);
-            var customerId = (FixedLengthColumn)builder.Columns.Single(x => x.Name == "CustomerId");
+            var customerId = (FixedLengthColumnContext)builder.Columns.Single(x => x.Name == "CustomerId");
             customerId.ShouldNotBeNull();
             customerId.OffsetBytes.ShouldBe(0);
             customerId.LengthBytes.ShouldBe(10);
 
-            var birthDate = (FixedLengthColumn)builder.Columns.Single(x => x.Name == "BirthDate");
+            var birthDate = (FixedLengthColumnContext)builder.Columns.Single(x => x.Name == "BirthDate");
             birthDate.ShouldNotBeNull();
             birthDate.OffsetBytes.ShouldBe(10);
             birthDate.LengthBytes.ShouldBe(8);

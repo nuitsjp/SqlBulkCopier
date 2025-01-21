@@ -143,7 +143,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -171,7 +171,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -200,7 +200,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -229,7 +229,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -258,7 +258,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -286,7 +286,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -314,7 +314,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -342,7 +342,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -370,7 +370,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -400,7 +400,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -427,7 +427,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -453,7 +453,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -483,7 +483,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -510,7 +510,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -537,7 +537,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -564,7 +564,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -591,7 +591,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -618,7 +618,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -645,7 +645,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -672,7 +672,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -699,7 +699,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -726,7 +726,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -753,7 +753,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -780,7 +780,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -807,7 +807,7 @@ public class CsvBulkCopierParserTest
 
                     // Act
                     var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                    var context = new CsvColumnContext(0, string.Empty);
+                    var context = new CsvColumnContext(0, string.Empty, c => { });
                     builder.DefaultColumnContext(context);
                     var column = context.Build();
 
@@ -836,7 +836,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -867,7 +867,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -899,7 +899,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -930,7 +930,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -962,7 +962,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -993,7 +993,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1025,7 +1025,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1056,7 +1056,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1088,7 +1088,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1119,7 +1119,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1151,7 +1151,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1182,7 +1182,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1214,7 +1214,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1245,7 +1245,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1277,7 +1277,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1308,7 +1308,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1340,7 +1340,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1371,7 +1371,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1403,7 +1403,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1434,7 +1434,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1466,7 +1466,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1497,7 +1497,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1529,7 +1529,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1560,7 +1560,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1592,7 +1592,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1623,7 +1623,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1655,7 +1655,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1686,7 +1686,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1718,7 +1718,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1749,7 +1749,7 @@ public class CsvBulkCopierParserTest
 
                         // Act
                         var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-                        var context = new CsvColumnContext(0, string.Empty);
+                        var context = new CsvColumnContext(0, string.Empty, c => { });
                         builder.DefaultColumnContext(context);
                         var column = context.Build();
 
@@ -1785,7 +1785,7 @@ public class CsvBulkCopierParserTest
 
             // Act
             var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-            var context = new CsvColumnContext(0, string.Empty);
+            var context = new CsvColumnContext(0, string.Empty, c => { });
             builder.DefaultColumnContext(context);
             context.Build();
 
@@ -1796,7 +1796,7 @@ public class CsvBulkCopierParserTest
 
             var birthDate = builder.Columns.SingleOrDefault(x => x.Name == "BirthDate");
             birthDate.ShouldNotBeNull();
-            birthDate!.SqlDbType.ShouldBe(SqlDbType.Date);
+            birthDate.SqlDbType.ShouldBe(SqlDbType.Date);
             birthDate.Format.ShouldBe("yyyyMMdd");
         }
     }
@@ -1847,7 +1847,7 @@ public class CsvBulkCopierParserTest
 
             // Act
             var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseNoHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
-            var context = new CsvColumnContext(0, string.Empty);
+            var context = new CsvColumnContext(0, string.Empty, c => { });
             builder.DefaultColumnContext(context);
             context.Build();
 

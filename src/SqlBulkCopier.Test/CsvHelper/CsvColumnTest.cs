@@ -6,7 +6,7 @@ namespace SqlBulkCopier.Test.CsvHelper;
 public class CsvColumnTest : ColumnTest
 {
     protected override IColumnContext CreateColumnContext()
-        => new CsvColumnContext(0, "column");
+        => new CsvColumnContext(0, "column", c => { });
 
     [Fact]
     public void Basic()

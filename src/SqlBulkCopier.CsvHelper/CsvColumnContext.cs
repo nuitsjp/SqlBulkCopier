@@ -1,12 +1,13 @@
 ﻿namespace SqlBulkCopier.CsvHelper;
 
-public class CsvColumnContext(int ordinal, string name) : ColumnContextBase
+public class CsvColumnContext(int ordinal, string name, Action<IColumnContext> setColumnContext) : ColumnContextBase(ordinal, name)
 {
     public override Column Build()
     {
+        setColumnContext(this);
         return new CsvColumn(
-            ordinal,
-            name,
+            Ordinal,
+            Name,
             SqlDbType,
             NumberStyles,
             DateTimeStyles,

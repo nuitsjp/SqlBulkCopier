@@ -14,8 +14,8 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
     /// </summary>
     public Action<IColumnContext> DefaultColumnContext { get; set; } = _ => { };
 
-    private readonly List<FixedLengthColumn> _columns = [];
-    public IReadOnlyList<Column> Columns => _columns;
+    private readonly List<FixedLengthColumnContext> _columns = [];
+    public IReadOnlyList<IColumnContext> Columns => _columns;
     public Predicate<IFixedLengthReader> RowFilter { get; private set; } = _ => true;
     private readonly string _destinationTableName;
     private int _maxRetryCount = 0;
@@ -86,14 +86,15 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
         var columnContext = new FixedLengthColumnContext(_columns.Count, dbColumnName, offsetBytes, lengthBytes);
         DefaultColumnContext(columnContext);
         c(columnContext);
-        _columns.Add((FixedLengthColumn)columnContext.Build());
+        _columns.Add(columnContext);
         return this;
     }
     public IBulkCopier Build(SqlConnection connection)
     {
+        var columns = _columns.Select(x => (FixedLengthColumn)x.Build()).ToArray();
         return new BulkCopier(
             _destinationTableName,
-            new FixedLengthDataReaderBuilder(_columns, RowFilter),
+            new FixedLengthDataReaderBuilder(columns, RowFilter),
             connection)
         {
             MaxRetryCount = _maxRetryCount,
@@ -107,9 +108,10 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
 
     public IBulkCopier Build(string connectionString)
     {
+        var columns = _columns.Select(x => (FixedLengthColumn)x.Build()).ToArray();
         return new BulkCopier(
             _destinationTableName,
-            new FixedLengthDataReaderBuilder(_columns, RowFilter),
+            new FixedLengthDataReaderBuilder(columns, RowFilter),
             connectionString)
         {
             MaxRetryCount = _maxRetryCount,
@@ -123,9 +125,10 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
 
     public IBulkCopier Build(string connectionString, SqlBulkCopyOptions copyOptions)
     {
+        var columns = _columns.Select(x => (FixedLengthColumn)x.Build()).ToArray();
         return new BulkCopier(
             _destinationTableName,
-            new FixedLengthDataReaderBuilder(_columns, RowFilter),
+            new FixedLengthDataReaderBuilder(columns, RowFilter),
             connectionString,
             copyOptions)
         {
@@ -140,9 +143,10 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
 
     public IBulkCopier Build(SqlConnection connection, SqlBulkCopyOptions copyOptions, SqlTransaction externalTransaction)
     {
+        var columns = _columns.Select(x => (FixedLengthColumn)x.Build()).ToArray();
         return new BulkCopier(
             _destinationTableName,
-            new FixedLengthDataReaderBuilder(_columns, RowFilter),
+            new FixedLengthDataReaderBuilder(columns, RowFilter),
             connection,
             copyOptions,
             externalTransaction)
