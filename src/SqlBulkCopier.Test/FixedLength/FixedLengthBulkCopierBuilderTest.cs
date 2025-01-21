@@ -8,6 +8,9 @@ namespace SqlBulkCopier.Test.FixedLength;
 // ReSharper disable once UnusedMember.Global
 public class FixedLengthBulkCopierBuilderTest : WriteToServerAsync<IFixedLengthBulkCopierBuilder>
 {
+    public override WithRetryDataReaderBuilder CreateWithRetryDataReaderBuilder(IFixedLengthBulkCopierBuilder builder, int retryCount) 
+        => new(new FixedLengthDataReaderBuilder(builder.BuildColumns().Cast<FixedLengthColumn>(), _ => true), retryCount);
+
     protected override IFixedLengthBulkCopierBuilder ProvideBuilder(bool withRowFilter = false)
     {
         var builder = FixedLengthBulkCopierBuilder

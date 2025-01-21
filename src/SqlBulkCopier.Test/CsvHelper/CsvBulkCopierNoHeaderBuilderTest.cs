@@ -7,6 +7,9 @@ namespace SqlBulkCopier.Test.CsvHelper;
 // ReSharper disable once UnusedMember.Global
 public class CsvBulkCopierNoHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICsvBulkCopierNoHeaderBuilder>(false)
 {
+    public override WithRetryDataReaderBuilder CreateWithRetryDataReaderBuilder(ICsvBulkCopierNoHeaderBuilder builder, int retryCount) 
+        => new(new CsvDataReaderBuilder(false, builder.BuildColumns(), _ => true), retryCount);
+
     protected override ICsvBulkCopierNoHeaderBuilder ProvideBuilder(bool withRowFilter = false)
     {
         var builder = CsvBulkCopierBuilder
