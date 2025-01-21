@@ -12,5 +12,10 @@ public interface IBulkCopier : IDisposable
     int NotifyAfter { get; set; }
     int RowsCopied { get; }
     long RowsCopied64 { get; }
+    int MaxRetryCount { get; }
+    bool TruncateBeforeBulkInsert { get; }
+    bool UseExponentialBackoff { get; }
+    TimeSpan InitialDelay { get; }
+
     Task WriteToServerAsync(Stream stream, Encoding encoding, TimeSpan timeout);
 }

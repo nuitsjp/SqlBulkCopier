@@ -1,8 +1,12 @@
+using System.Data;
 using Bogus;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Shouldly;
 using System.Text;
+using Moq;
+using SqlBulkCopier.CsvHelper;
+
 // ReSharper disable UseAwaitUsing
 // ReSharper disable AccessToDisposedClosure
 
@@ -34,7 +38,7 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
     protected abstract Task<Stream> CreateBulkInsertStreamAsync(List<BulkInsertTestTarget> dataList, bool withHeaderAndFooter = false);
 
     [Fact]
-    public void SetDefaultColumnContext()
+    public void SetDefaultColumnContext_ShouldSucceed()
     {
         // Arrange
         const decimal expected = 1234567.89m;
@@ -51,15 +55,56 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
     }
 
     [Fact]
+    public void SetOptions_ShouldSucceed()
+    {
+        // Arrange & Act
+        using var sqlBulkCopier = ProvideBuilder()
+            .SetBatchSize(1)
+            .SetNotifyAfter(2)
+            .Build(SqlBulkCopierConnectionString);
+
+        // Assert
+        sqlBulkCopier.DestinationTableName.ShouldBe("[dbo].[BulkInsertTestTarget]");
+        sqlBulkCopier.BatchSize.ShouldBe(1);
+        sqlBulkCopier.NotifyAfter.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task SqlRowsCopied_ShouldSucceed()
+    {
+        // Arrange
+        using var sqlBulkCopier = ProvideBuilder()
+            .SetNotifyAfter(RowNumber / 10)
+            .Build(await OpenConnectionAsync());
+
+        var callBacked = false;
+        sqlBulkCopier.SqlRowsCopied += (_, _) =>
+        {
+            callBacked = true;
+            sqlBulkCopier.RowsCopied.ShouldNotBe(0);
+            sqlBulkCopier.RowsCopied64.ShouldNotBe(0);
+        };
+
+        // Act
+        await sqlBulkCopier.WriteToServerAsync(
+            await CreateBulkInsertStreamAsync(Targets),
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+
+        // Assert
+        callBacked.ShouldBeTrue();
+        sqlBulkCopier.RowsCopied.ShouldBe(RowNumber);
+        sqlBulkCopier.RowsCopied64.ShouldBe(RowNumber);
+    }
+
+    [Fact]
     public async Task NoRetry_WithConnection_ShouldSucceed()
     {
         // Arrange
         using var sqlBulkCopier = ProvideBuilder()
-            .SetBatchSize(RowNumber / 10)
-            .SetNotifyAfter(RowNumber / 10)
             .Build(await OpenConnectionAsync());
 
-        // ファイルを開いて実行
+        // Act
         await sqlBulkCopier.WriteToServerAsync(
             await CreateBulkInsertStreamAsync(Targets),
             new UTF8Encoding(false),
@@ -101,7 +146,7 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
         using var sqlBulkCopier = ProvideBuilder()
             .Build(SqlBulkCopierConnectionString);
 
-        // ファイルを開いて実行
+        // Act
         await sqlBulkCopier.WriteToServerAsync(
             await CreateBulkInsertStreamAsync(Targets),
             new UTF8Encoding(false),
@@ -118,7 +163,7 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
         using var sqlBulkCopier = ProvideBuilder()
             .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
 
-        // ファイルを開いて実行
+        // Act
         await sqlBulkCopier.WriteToServerAsync(
             await CreateBulkInsertStreamAsync(Targets),
             new UTF8Encoding(false),
@@ -138,7 +183,7 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
         using var sqlBulkCopier = ProvideBuilder()
             .Build(connection, SqlBulkCopyOptions.Default, transaction);
 
-        // ファイルを開いて実行
+        // Act
         await sqlBulkCopier.WriteToServerAsync(
             await CreateBulkInsertStreamAsync(Targets),
             new UTF8Encoding(false),
@@ -165,7 +210,7 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
         using var sqlBulkCopier = ProvideBuilder(true)
             .Build(await OpenConnectionAsync());
 
-        // ファイルを開いて実行
+        // Act
         await sqlBulkCopier.WriteToServerAsync(
             await CreateBulkInsertStreamAsync(Targets),
             encoding,
@@ -183,7 +228,7 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
             .SetMaxRetryCount(3)
             .Build(await OpenConnectionAsync());
 
-        // ファイルを開いて実行
+        // Act
         using var stream = await CreateBulkInsertStreamAsync(Targets);
         var func = () => sqlBulkCopier.WriteToServerAsync(
             // ReSharper disable once AccessToDisposedClosure
@@ -206,7 +251,7 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
             .SetUseExponentialBackoff(false)
             .Build(SqlBulkCopierConnectionString);
 
-        // ファイルを開いて実行
+        // Act
         await sqlBulkCopier.WriteToServerAsync(
             await CreateBulkInsertStreamAsync(Targets),
             new UTF8Encoding(false),
@@ -224,7 +269,7 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
             .SetMaxRetryCount(3)
             .Build(SqlBulkCopierConnectionString);
 
-        // ファイルを開いて実行
+        // Act
         using var stream = await CreateBulkInsertStreamAsync(Targets);
         var func = () => sqlBulkCopier.WriteToServerAsync(
             // ReSharper disable once AccessToDisposedClosure
@@ -245,7 +290,7 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
             .SetTruncateBeforeBulkInsert(true)
             .Build(SqlBulkCopierConnectionString, SqlBulkCopyOptions.Default);
 
-        // ファイルを開いて実行
+        // Act
         await sqlBulkCopier.WriteToServerAsync(
             await CreateBulkInsertStreamAsync(Targets),
             new UTF8Encoding(false),
