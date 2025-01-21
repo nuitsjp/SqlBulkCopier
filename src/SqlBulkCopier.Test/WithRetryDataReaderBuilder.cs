@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 
 namespace SqlBulkCopier.Test;
 
+// ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
 public class WithRetryDataReaderBuilder(IDataReaderBuilder builder, int retryCount) : IDataReaderBuilder
 {
     private int _currentCount;

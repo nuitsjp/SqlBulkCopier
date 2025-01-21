@@ -3,8 +3,6 @@ using Dapper;
 using Microsoft.Data.SqlClient;
 using Shouldly;
 using System.Text;
-using SqlBulkCopier.CsvHelper;
-using System.IO;
 
 // ReSharper disable UseAwaitUsing
 // ReSharper disable AccessToDisposedClosure
