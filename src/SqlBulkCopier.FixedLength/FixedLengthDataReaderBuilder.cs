@@ -8,7 +8,7 @@ namespace SqlBulkCopier.FixedLength;
 /// <summary>
 /// Builder for FixedLengthDataReader.
 /// </summary>
-public class FixedLengthDataReaderBuilder(IReadOnlyList<FixedLengthColumn> columns, Predicate<IFixedLengthReader> rowFilter) : IDataReaderBuilder
+public class FixedLengthDataReaderBuilder(IEnumerable<FixedLengthColumn> columns, Predicate<IFixedLengthReader> rowFilter) : IDataReaderBuilder
 {
     public void SetupColumnMappings(SqlBulkCopy sqlBulkCopy)
     {

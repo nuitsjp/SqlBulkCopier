@@ -24,8 +24,8 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
     /// </summary>
     private Predicate<CsvReader> _rowFilter = _ => true;
 
-    private readonly List<CsvColumnContext> _columns = [];
-    public IReadOnlyList<IColumnContext> Columns => _columns;
+    private readonly List<CsvColumnContext> _columnContexts = [];
+    public IReadOnlyList<IColumnContext> ColumnContexts => _columnContexts;
     private readonly string _destinationTableName;
     private readonly bool _hasHeader;
     private int _maxRetryCount = 0;
@@ -59,10 +59,10 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
 
     public ICsvBulkCopierWithHeaderBuilder AddColumnMapping(string columnName, Action<IColumnContext> c)
     {
-        var columnContext = new CsvColumnContext(_columns.Count, columnName, c => { });
+        var columnContext = new CsvColumnContext(_columnContexts.Count, columnName, c => { });
         DefaultColumnContext(columnContext);
         c(columnContext);
-        _columns.Add(columnContext);
+        _columnContexts.Add(columnContext);
         return this;
     }
 
@@ -74,7 +74,7 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
         var columnContext = new CsvColumnContext(csvColumnOrdinal, dbColumnName, c => { });
         DefaultColumnContext(columnContext);
         c(columnContext);
-        _columns.Add(columnContext);
+        _columnContexts.Add(columnContext);
         return this;
     }
 
@@ -168,9 +168,9 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
         return this;
     }
 
-    private IEnumerable<Column> GetColumns()
+    internal IEnumerable<Column> BuildColumns()
     {
-        foreach (var column in _columns)
+        foreach (var column in _columnContexts)
         {
             DefaultColumnContext(column);
 
@@ -180,10 +180,9 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
 
     public IBulkCopier Build(SqlConnection connection)
     {
-        var columns = _columns.Select(x => x.Build(DefaultColumnContext));
         return new BulkCopier(
             _destinationTableName,
-            new CsvDataReaderBuilder(_hasHeader, columns, _rowFilter),
+            new CsvDataReaderBuilder(_hasHeader, BuildColumns(), _rowFilter),
             connection)
         {
             MaxRetryCount = _maxRetryCount,
@@ -197,10 +196,9 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
 
     public IBulkCopier Build(string connectionString)
     {
-        var columns = _columns.Select(x => x.Build(DefaultColumnContext));
         return new BulkCopier(
             _destinationTableName,
-            new CsvDataReaderBuilder(_hasHeader, columns, _rowFilter),
+            new CsvDataReaderBuilder(_hasHeader, BuildColumns(), _rowFilter),
             connectionString)
         {
             MaxRetryCount = _maxRetryCount,
@@ -214,10 +212,9 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
 
     public IBulkCopier Build(string connectionString, SqlBulkCopyOptions copyOptions)
     {
-        var columns = _columns.Select(x => x.Build(DefaultColumnContext));
         return new BulkCopier(
             _destinationTableName,
-            new CsvDataReaderBuilder(_hasHeader, columns, _rowFilter),
+            new CsvDataReaderBuilder(_hasHeader, BuildColumns(), _rowFilter),
             connectionString,
             copyOptions)
         {
@@ -232,10 +229,9 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
 
     public IBulkCopier Build(SqlConnection connection, SqlBulkCopyOptions copyOptions, SqlTransaction externalTransaction)
     {
-        var columns = _columns.Select(x => x.Build(DefaultColumnContext));
         return new BulkCopier(
             _destinationTableName,
-            new CsvDataReaderBuilder(_hasHeader, columns, _rowFilter),
+            new CsvDataReaderBuilder(_hasHeader, BuildColumns(), _rowFilter),
             connection,
             copyOptions,
             externalTransaction)

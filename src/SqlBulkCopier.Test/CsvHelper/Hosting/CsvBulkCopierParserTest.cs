@@ -1790,11 +1790,11 @@ public class CsvBulkCopierParserTest
             context.Build(c => { });
 
             // Assert
-            builder.Columns.Count.ShouldBe(2);
-            var customerId = builder.Columns.SingleOrDefault(x => x.Name == "CustomerId");
+            builder.ColumnContexts.Count.ShouldBe(2);
+            var customerId = builder.ColumnContexts.SingleOrDefault(x => x.Name == "CustomerId");
             customerId.ShouldNotBeNull();
 
-            var birthDate = builder.Columns.SingleOrDefault(x => x.Name == "BirthDate");
+            var birthDate = builder.ColumnContexts.SingleOrDefault(x => x.Name == "BirthDate");
             birthDate.ShouldNotBeNull();
             birthDate.SqlDbType.ShouldBe(SqlDbType.Date);
             birthDate.Format.ShouldBe("yyyyMMdd");
@@ -1852,12 +1852,12 @@ public class CsvBulkCopierParserTest
             context.Build(c => { });
 
             // Assert
-            builder.Columns.Count.ShouldBe(2);
-            var customerId = builder.Columns.SingleOrDefault(x => x.Name == "CustomerId");
+            builder.ColumnContexts.Count.ShouldBe(2);
+            var customerId = builder.ColumnContexts.SingleOrDefault(x => x.Name == "CustomerId");
             customerId.ShouldNotBeNull();
             customerId!.Ordinal.ShouldBe(2);
 
-            var birthDate = builder.Columns.SingleOrDefault(x => x.Name == "BirthDate");
+            var birthDate = builder.ColumnContexts.SingleOrDefault(x => x.Name == "BirthDate");
             birthDate.ShouldNotBeNull();
             birthDate!.Ordinal.ShouldBe(4);
             birthDate.SqlDbType.ShouldBe(SqlDbType.Date);

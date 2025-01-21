@@ -1860,13 +1860,13 @@ public class FixedLengthBulkCopierParserTest
             context.Build(c => { });
 
             // Assert
-            builder.Columns.Count.ShouldBe(2);
-            var customerId = (FixedLengthColumnContext)builder.Columns.Single(x => x.Name == "CustomerId");
+            builder.ColumnContexts.Count.ShouldBe(2);
+            var customerId = (FixedLengthColumnContext)builder.ColumnContexts.Single(x => x.Name == "CustomerId");
             customerId.ShouldNotBeNull();
             customerId.OffsetBytes.ShouldBe(0);
             customerId.LengthBytes.ShouldBe(10);
 
-            var birthDate = (FixedLengthColumnContext)builder.Columns.Single(x => x.Name == "BirthDate");
+            var birthDate = (FixedLengthColumnContext)builder.ColumnContexts.Single(x => x.Name == "BirthDate");
             birthDate.ShouldNotBeNull();
             birthDate.OffsetBytes.ShouldBe(10);
             birthDate.LengthBytes.ShouldBe(8);

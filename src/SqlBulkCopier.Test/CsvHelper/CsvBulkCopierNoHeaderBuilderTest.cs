@@ -17,16 +17,16 @@ public class CsvBulkCopierNoHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICsvB
     {
         // Arrange
         const decimal expected = 1234567.89m;
-        var builder = ProvideBuilder()
+        var builder = (CsvBulkCopierBuilder)ProvideBuilder()
             .SetDefaultColumnContext(
                 c => c
                     .TrimEnd(['x', 'y'])
-                    .TreatEmptyStringAsNull());
-        var column = builder.Columns.First(x => x.Name == "DecimalValue");
+                    .TreatEmptyStringAsNull()
+                    .AsDecimal());
+        var column = builder.BuildColumns().First(x => x.Name == "DecimalValue");
 
         // Act & Assert
-        //column.Convert("1,234,567.89xy").ShouldBe(expected);
-        throw new NotImplementedException();
+        column.Convert("1,234,567.89xy").ShouldBe(expected);
     }
 
     protected override ICsvBulkCopierNoHeaderBuilder ProvideBuilder(bool withRowFilter = false)
@@ -52,7 +52,7 @@ public class CsvBulkCopierNoHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICsvB
             .AddColumnMapping("BitValue", 5, c => c.AsBit())
 
             // decimal や float なども標準的な数値文字列であれば自動変換が可能
-            .AddColumnMapping("DecimalValue", 6, c => c.AsDecimal())
+            .AddColumnMapping("DecimalValue", 6)
             .AddColumnMapping("NumericValue", 7)
             .AddColumnMapping("MoneyValue", 8)
             .AddColumnMapping("SmallMoneyValue", 9)

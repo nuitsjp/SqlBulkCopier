@@ -17,22 +17,16 @@ public class CsvBulkCopierWithHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICs
     {
         // Arrange
         const decimal expected = 1234567.89m;
-        var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierBuilder
-            .Create("[dbo].[BulkInsertTestTarget]")
+        var builder = (CsvBulkCopierBuilder)ProvideBuilder()
             .SetDefaultColumnContext(
                 c => c
                     .TrimEnd(['x', 'y'])
                     .TreatEmptyStringAsNull()
-                    .AsDecimal(NumberStyles.AllowThousands | NumberStyles.AllowDecimalPoint, CultureInfo.GetCultureInfo("de-DE")))
-            .AddColumnMapping("First", 0, 1)
-            .AddColumnMapping("Second", 1, 2, c => c.AsDecimal());
-        var first = builder.Columns.First();
-        var second = builder.Columns.Last();
+                    .AsDecimal());
+        var column = builder.BuildColumns().First(x => x.Name == "DecimalValue");
 
         // Act & Assert
-        //first.Convert("1.234.567,89xy").ShouldBe(expected);
-        //second.Convert("1,234,567.89xy").ShouldBe(expected);
-        throw new NotImplementedException();
+        column.Convert("1,234,567.89xy").ShouldBe(expected);
     }
 
     protected override ICsvBulkCopierWithHeaderBuilder ProvideBuilder(bool withRowFilter = false)
