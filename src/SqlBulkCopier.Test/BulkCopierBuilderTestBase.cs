@@ -317,6 +317,42 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
         func.ShouldThrow<Exception>();
     }
 
+
+    [Fact]
+    public async Task WithRetry_WithConnectionString_WhenRetryOver_WithUseExponentialBackoff_ShouldError()
+    {
+        // Arrange
+        const int retryCount = 3;
+        var builder = ProvideBuilder()
+            .SetMaxRetryCount(retryCount)
+            .SetTruncateBeforeBulkInsert(true)
+            .SetInitialDelay(TimeSpan.FromMilliseconds(1))
+            .SetUseExponentialBackoff(true);
+
+        var dummyCopier = builder.Build(SqlBulkCopierConnectionString);
+        var sqlBulkCopier = new BulkCopier(
+            dummyCopier.DestinationTableName,
+            CreateWithRetryDataReaderBuilder(builder, retryCount + 1),
+            SqlBulkCopierConnectionString)
+        {
+            MaxRetryCount = dummyCopier.MaxRetryCount,
+            TruncateBeforeBulkInsert = dummyCopier.TruncateBeforeBulkInsert,
+            UseExponentialBackoff = dummyCopier.UseExponentialBackoff,
+            InitialDelay = dummyCopier.InitialDelay
+        };
+
+        // Act
+        using var stream = await CreateBulkInsertStreamAsync(Targets);
+        var func = () => sqlBulkCopier.WriteToServerAsync(
+            // ReSharper disable once AccessToDisposedClosure
+            stream,
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+
+        // Assert
+        func.ShouldThrow<Exception>();
+    }
+
     [Fact]
     public async Task WithRetry_WithConnectionString_WithoutTruncate_ShouldError()
     {
