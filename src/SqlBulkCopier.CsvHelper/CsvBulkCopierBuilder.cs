@@ -54,27 +54,14 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
         return this;
     }
 
-    public ICsvBulkCopierWithHeaderBuilder AddColumnMapping(string columnName)
-    {
-        return AddColumnMapping(columnName, _ => { });
-    }
+    public ICsvBulkCopierWithHeaderBuilder AddColumnMapping(string columnName) 
+        => AddColumnMapping(columnName, _ => { });
 
     public ICsvBulkCopierWithHeaderBuilder AddColumnMapping(string columnName, Action<IColumnContext> c)
-    {
-        var columnContext = new CsvColumnContext(_columns.Count, columnName);
-        DefaultColumnContext(columnContext);
-        c(columnContext);
-        _columns.Add(columnContext.Build());
-        return this;
-    }
+        => (ICsvBulkCopierWithHeaderBuilder)AddColumnMapping(columnName, _columns.Count, _ => { });
 
     public ICsvBulkCopierNoHeaderBuilder AddColumnMapping(string dbColumnName, int csvColumnOrdinal)
-    {
-        var columnContext = new CsvColumnContext(csvColumnOrdinal, dbColumnName);
-        DefaultColumnContext(columnContext);
-        _columns.Add(columnContext.Build());
-        return this;
-    }
+        => AddColumnMapping(dbColumnName, csvColumnOrdinal, _ => { });
 
     public ICsvBulkCopierNoHeaderBuilder AddColumnMapping(string dbColumnName, int csvColumnOrdinal, Action<IColumnContext> c)
     {
