@@ -34,7 +34,21 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
     protected abstract Task<Stream> CreateBulkInsertStreamAsync(List<BulkInsertTestTarget> dataList, bool withHeaderAndFooter = false);
 
     [Fact]
-    public abstract void SetDefaultColumnContext();
+    public void SetDefaultColumnContext()
+    {
+        // Arrange
+        const decimal expected = 1234567.89m;
+        var builder = ProvideBuilder()
+            .SetDefaultColumnContext(
+                c => c
+                    .TrimEnd(['x', 'y'])
+                    .TreatEmptyStringAsNull()
+                    .AsDecimal());
+        var column = builder.BuildColumns().First(x => x.Name == "DecimalValue");
+
+        // Act & Assert
+        column.Convert("1,234,567.89xy").ShouldBe(expected);
+    }
 
     [Fact]
     public async Task NoRetry_WithConnection_ShouldSucceed()

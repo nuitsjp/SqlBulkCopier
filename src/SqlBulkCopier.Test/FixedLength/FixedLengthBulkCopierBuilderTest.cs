@@ -12,22 +12,6 @@ namespace SqlBulkCopier.Test.FixedLength;
 
 public class FixedLengthBulkCopierBuilderTest : WriteToServerAsync<IFixedLengthBulkCopierBuilder>
 {
-    public override void SetDefaultColumnContext()
-    {
-        // Arrange
-        const decimal expected = 1234567.89m;
-        var builder = (FixedLengthBulkCopierBuilder)ProvideBuilder()
-            .SetDefaultColumnContext(
-                c => c
-                    .TrimEnd(['x', 'y'])
-                    .TreatEmptyStringAsNull()
-                    .AsDecimal());
-        var column = builder.BuildColumns().First(x => x.Name == "DecimalValue");
-
-        // Act & Assert
-        column.Convert("1,234,567.89xy").ShouldBe(expected);
-    }
-
     protected override IFixedLengthBulkCopierBuilder ProvideBuilder(bool withRowFilter = false)
     {
         var builder = FixedLengthBulkCopierBuilder

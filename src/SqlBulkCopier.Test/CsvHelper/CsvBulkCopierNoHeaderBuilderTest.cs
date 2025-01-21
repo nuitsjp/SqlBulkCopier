@@ -13,22 +13,6 @@ namespace SqlBulkCopier.Test.CsvHelper;
 
 public class CsvBulkCopierNoHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICsvBulkCopierNoHeaderBuilder>(false)
 {
-    public override void SetDefaultColumnContext()
-    {
-        // Arrange
-        const decimal expected = 1234567.89m;
-        var builder = (CsvBulkCopierBuilder)ProvideBuilder()
-            .SetDefaultColumnContext(
-                c => c
-                    .TrimEnd(['x', 'y'])
-                    .TreatEmptyStringAsNull()
-                    .AsDecimal());
-        var column = builder.BuildColumns().First(x => x.Name == "DecimalValue");
-
-        // Act & Assert
-        column.Convert("1,234,567.89xy").ShouldBe(expected);
-    }
-
     protected override ICsvBulkCopierNoHeaderBuilder ProvideBuilder(bool withRowFilter = false)
     {
         var builder = CsvBulkCopierBuilder

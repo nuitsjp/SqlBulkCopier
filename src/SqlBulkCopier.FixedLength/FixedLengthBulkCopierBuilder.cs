@@ -90,16 +90,16 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
         return this;
     }
 
-    internal IEnumerable<FixedLengthColumn> BuildColumns()
+    public IEnumerable<Column> BuildColumns()
     {
-        return _columnsContext.Select(x => (FixedLengthColumn)x.Build(DefaultColumnContext));
+        return _columnsContext.Select(x => x.Build(DefaultColumnContext));
     }
 
     public IBulkCopier Build(SqlConnection connection)
     {
         return new BulkCopier(
             _destinationTableName,
-            new FixedLengthDataReaderBuilder(BuildColumns(), RowFilter),
+            new FixedLengthDataReaderBuilder(BuildColumns().Cast<FixedLengthColumn>(), RowFilter),
             connection)
         {
             MaxRetryCount = _maxRetryCount,
@@ -115,7 +115,7 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
     {
         return new BulkCopier(
             _destinationTableName,
-            new FixedLengthDataReaderBuilder(BuildColumns(), RowFilter),
+            new FixedLengthDataReaderBuilder(BuildColumns().Cast<FixedLengthColumn>(), RowFilter),
             connectionString)
         {
             MaxRetryCount = _maxRetryCount,
@@ -131,7 +131,7 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
     {
         return new BulkCopier(
             _destinationTableName,
-            new FixedLengthDataReaderBuilder(BuildColumns(), RowFilter),
+            new FixedLengthDataReaderBuilder(BuildColumns().Cast<FixedLengthColumn>(), RowFilter),
             connectionString,
             copyOptions)
         {
@@ -148,7 +148,7 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
     {
         return new BulkCopier(
             _destinationTableName,
-            new FixedLengthDataReaderBuilder(BuildColumns(), RowFilter),
+            new FixedLengthDataReaderBuilder(BuildColumns().Cast<FixedLengthColumn>(), RowFilter),
             connection,
             copyOptions,
             externalTransaction)

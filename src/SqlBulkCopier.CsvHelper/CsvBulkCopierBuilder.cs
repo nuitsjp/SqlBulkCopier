@@ -168,7 +168,7 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
         return this;
     }
 
-    internal IEnumerable<Column> BuildColumns()
+    public IEnumerable<Column> BuildColumns()
     {
         foreach (var column in _columnContexts)
         {
