@@ -6,6 +6,7 @@
 namespace System.Runtime.CompilerServices
 {
     // ReSharper disable once UnusedType.Global
+    // ReSharper disable once UnusedMember.Global
     internal sealed class IsExternalInit;
 }
 #endif

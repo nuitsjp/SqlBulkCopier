@@ -1,11 +1,8 @@
-using System.Data;
 using Bogus;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Shouldly;
 using System.Text;
-using Moq;
-using SqlBulkCopier.CsvHelper;
 
 // ReSharper disable UseAwaitUsing
 // ReSharper disable AccessToDisposedClosure
@@ -61,12 +58,18 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
         using var sqlBulkCopier = ProvideBuilder()
             .SetBatchSize(1)
             .SetNotifyAfter(2)
+            .SetMaxRetryCount(3)
+            .SetTruncateBeforeBulkInsert(true)
+            .SetUseExponentialBackoff(false)
             .Build(SqlBulkCopierConnectionString);
 
         // Assert
         sqlBulkCopier.DestinationTableName.ShouldBe("[dbo].[BulkInsertTestTarget]");
         sqlBulkCopier.BatchSize.ShouldBe(1);
         sqlBulkCopier.NotifyAfter.ShouldBe(2);
+        sqlBulkCopier.MaxRetryCount.ShouldBe(3);
+        sqlBulkCopier.TruncateBeforeBulkInsert.ShouldBeTrue();
+        sqlBulkCopier.UseExponentialBackoff.ShouldBeFalse();
     }
 
     [Fact]
