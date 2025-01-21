@@ -1,16 +1,10 @@
-using System.Globalization;
-using System.Text;
-using CsvHelper.Configuration;
-using CsvHelper;
-using Shouldly;
 using SqlBulkCopier.CsvHelper;
-using SqlBulkCopier.FixedLength;
-using SqlBulkCopier.Test.CsvHelper.Util;
 
 // ReSharper disable UseAwaitUsing
 
 namespace SqlBulkCopier.Test.CsvHelper;
 
+// ReSharper disable once UnusedMember.Global
 public class CsvBulkCopierWithHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICsvBulkCopierWithHeaderBuilder>(true)
 {
     protected override ICsvBulkCopierWithHeaderBuilder ProvideBuilder(bool withRowFilter = false)

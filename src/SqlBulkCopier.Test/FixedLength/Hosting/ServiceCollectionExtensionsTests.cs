@@ -2,7 +2,6 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using SqlBulkCopier.FixedLength;
 using SqlBulkCopier.FixedLength.Hosting;
 using SqlBulkCopier.Hosting;
 

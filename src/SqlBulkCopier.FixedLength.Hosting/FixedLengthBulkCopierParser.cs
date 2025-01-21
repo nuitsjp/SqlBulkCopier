@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using FixedLengthHelper;
 using Microsoft.Extensions.Configuration;
 using SqlBulkCopier.Hosting;

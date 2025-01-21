@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
-using Benchmark;
+﻿using Benchmark;
 using BenchmarkDotNet.Running;
 
-var summary1 = BenchmarkRunner.Run<CsvBenchmarks>();
+// ReSharper disable once UnusedVariable
+var summary = BenchmarkRunner.Run<CsvBenchmarks>();
 

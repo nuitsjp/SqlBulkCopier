@@ -15,7 +15,7 @@ public class FixedLengthColumnTest : ColumnTest
         var options = CreateColumnContext();
 
         // Act
-        var column = (FixedLengthColumn)options.Build(c => { });
+        var column = (FixedLengthColumn)options.Build(_ => { });
 
         // Assert
         column.Ordinal.ShouldBe(0);

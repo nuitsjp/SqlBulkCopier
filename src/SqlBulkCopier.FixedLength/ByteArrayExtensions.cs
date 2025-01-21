@@ -1,6 +1,4 @@
-﻿using System.Buffers;
-
-namespace SqlBulkCopier.FixedLength;
+﻿namespace SqlBulkCopier.FixedLength;
 
 public static class ByteArrayExtensions
 {

@@ -28,12 +28,12 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
     public IReadOnlyList<IColumnContext> ColumnContexts => _columnContexts;
     private readonly string _destinationTableName;
     private readonly bool _hasHeader;
-    private int _maxRetryCount = 0;
+    private int _maxRetryCount;
     private TimeSpan _initialDelay = TimeSpan.FromSeconds(1);
-    private bool _truncateBeforeBulkInsert = false;
+    private bool _truncateBeforeBulkInsert;
     private bool _useExponentialBackoff = true;
-    private int _batchSize = 0;
-    private int _notifyAfter = 0;
+    private int _batchSize;
+    private int _notifyAfter;
 
 
     /// <summary>
@@ -59,7 +59,7 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
 
     public ICsvBulkCopierWithHeaderBuilder AddColumnMapping(string columnName, Action<IColumnContext> c)
     {
-        var columnContext = new CsvColumnContext(_columnContexts.Count, columnName, c => { });
+        var columnContext = new CsvColumnContext(_columnContexts.Count, columnName, _ => { });
         DefaultColumnContext(columnContext);
         c(columnContext);
         _columnContexts.Add(columnContext);
@@ -71,7 +71,7 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
 
     public ICsvBulkCopierNoHeaderBuilder AddColumnMapping(string dbColumnName, int csvColumnOrdinal, Action<IColumnContext> c)
     {
-        var columnContext = new CsvColumnContext(csvColumnOrdinal, dbColumnName, c => { });
+        var columnContext = new CsvColumnContext(csvColumnOrdinal, dbColumnName, _ => { });
         DefaultColumnContext(columnContext);
         c(columnContext);
         _columnContexts.Add(columnContext);

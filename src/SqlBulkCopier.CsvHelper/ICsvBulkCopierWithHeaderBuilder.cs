@@ -1,6 +1,4 @@
-﻿using CsvHelper;
-
-namespace SqlBulkCopier.CsvHelper;
+﻿namespace SqlBulkCopier.CsvHelper;
 
 /// <summary>
 /// Interface for building a bulk copier with header

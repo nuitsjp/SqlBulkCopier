@@ -18,12 +18,12 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
     public IReadOnlyList<IColumnContext> ColumnContexts => _columnsContext;
     public Predicate<IFixedLengthReader> RowFilter { get; private set; } = _ => true;
     private readonly string _destinationTableName;
-    private int _maxRetryCount = 0;
+    private int _maxRetryCount;
     private TimeSpan _initialDelay = TimeSpan.FromSeconds(1);
-    private bool _truncateBeforeBulkInsert = false;
+    private bool _truncateBeforeBulkInsert;
     private bool _useExponentialBackoff = true;
-    private int _batchSize = 0;
-    private int _notifyAfter = 0;
+    private int _batchSize;
+    private int _notifyAfter;
 
     private FixedLengthBulkCopierBuilder(string destinationTableName)
     {

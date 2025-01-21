@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Jobs;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Sample.SetupSampleDatabase;

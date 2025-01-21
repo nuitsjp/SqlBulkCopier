@@ -6,7 +6,7 @@ namespace SqlBulkCopier.Test.CsvHelper;
 public class CsvColumnTest : ColumnTest
 {
     protected override IColumnContext CreateColumnContext()
-        => new CsvColumnContext(0, "column", c => { });
+        => new CsvColumnContext(0, "column", _ => { });
 
     [Fact]
     public void Basic()
@@ -15,7 +15,7 @@ public class CsvColumnTest : ColumnTest
         var options = CreateColumnContext();
 
         // Act
-        var column = (CsvColumn)options.Build(c => { });
+        var column = (CsvColumn)options.Build(_ => { });
 
         // Assert
         column.Ordinal.ShouldBe(0);

@@ -15,7 +15,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .Trim();
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
 
         // Act
         var actual = column.Convert("  Hello  ");
@@ -30,7 +30,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .Trim("012".ToCharArray());
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
 
         // Act
         var actual = column.Convert("012Hello012");
@@ -45,7 +45,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .TrimStart();
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
 
         // Act
         var actual = column.Convert("  Hello  ");
@@ -60,7 +60,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .TrimStart("012".ToCharArray());
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("012Hello012");
 
@@ -74,7 +74,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .TrimEnd();
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("  Hello  ");
         // Assert
@@ -87,7 +87,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .TrimEnd("012".ToCharArray());
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("012Hello012");
         // Assert
@@ -100,7 +100,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .TreatEmptyStringAsNull();
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
 
         // Act
         var actual = column.Convert(string.Empty);
@@ -115,7 +115,7 @@ public abstract class ColumnTest
         // Arrange
         var column = CreateColumnContext()
             .AsBigInt()
-            .Build(c => { });
+            .Build(_ => { });
         // Act
         var actual = column.Convert(long.MaxValue.ToString());
         // Assert
@@ -129,7 +129,7 @@ public abstract class ColumnTest
         var cultureInfo = CultureInfo.GetCultureInfo("de-DE");
         var column = CreateColumnContext()
             .AsBigInt(NumberStyles.AllowThousands, cultureInfo)
-            .Build(c => { });
+            .Build(_ => { });
         // Act
         var actual = column.Convert("1.234.567");
         // Assert
@@ -142,7 +142,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .AsBinary();
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("6qj7n+AIUvDxNw==");
         // Assert
@@ -154,7 +154,7 @@ public abstract class ColumnTest
     {
         // Arrange
         var options = CreateColumnContext().AsBit();
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
 
         // Act & Assert
         column.Convert("1").ShouldBe(true);
@@ -177,7 +177,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .AsDateTime("yyyyMMdd", CultureInfo.InvariantCulture);
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("20210101");
         // Assert
@@ -190,7 +190,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .AsDateTime();
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("2021-01-01");
         // Assert
@@ -205,7 +205,7 @@ public abstract class ColumnTest
         const decimal number = 1234567.89m;
         var column = CreateColumnContext()
             .AsDecimal()
-            .Build(c => { });
+            .Build(_ => { });
         // Act
         var actual = column.Convert(numberString);
         // Assert
@@ -222,7 +222,7 @@ public abstract class ColumnTest
         var cultureInfo = CultureInfo.GetCultureInfo("de-DE");
         var column = CreateColumnContext()
             .AsDecimal(numberStyle, cultureInfo)
-            .Build(c => { });
+            .Build(_ => { });
 
         // Act
         var actual = column.Convert(numberString);
@@ -239,7 +239,7 @@ public abstract class ColumnTest
         const float expectedNumber = 1234567.89f;
         var column = CreateColumnContext()
             .AsFloat()
-            .Build(c => { });
+            .Build(_ => { });
         
         // Act
         var actual = (float)column.Convert(numberString);
@@ -259,7 +259,7 @@ public abstract class ColumnTest
 
         var column = CreateColumnContext()
             .AsFloat(numberStyle, cultureInfo)
-            .Build(c => { });
+            .Build(_ => { });
 
         // Act
         var actual = (float)column.Convert(numberString);
@@ -276,7 +276,7 @@ public abstract class ColumnTest
         const int expectedNumber = 1234567;
         var column = CreateColumnContext()
             .AsInt()
-            .Build(c => { });
+            .Build(_ => { });
         
         // Act
         var actual = column.Convert(numberString);
@@ -296,7 +296,7 @@ public abstract class ColumnTest
 
         var column = CreateColumnContext()
             .AsInt(numberStyle, cultureInfo)
-            .Build(c => { });
+            .Build(_ => { });
 
         // Act
         var actual = column.Convert(numberString);
@@ -313,7 +313,7 @@ public abstract class ColumnTest
         const decimal expectedNumber = 1234567.89m;
         var column = CreateColumnContext()
             .AsMoney()
-            .Build(c => { });
+            .Build(_ => { });
         
         // Act
         var actual = column.Convert(numberString);
@@ -333,7 +333,7 @@ public abstract class ColumnTest
 
         var column = CreateColumnContext()
             .AsMoney(numberStyle, cultureInfo)
-            .Build(c => { });
+            .Build(_ => { });
 
         // Act
         var actual = column.Convert(numberString);
@@ -350,7 +350,7 @@ public abstract class ColumnTest
         const double expectedNumber = 1234567.89;
         var column = CreateColumnContext()
             .AsReal()
-            .Build(c => { });
+            .Build(_ => { });
         
         // Act
         var actual = (double)column.Convert(numberString);
@@ -370,7 +370,7 @@ public abstract class ColumnTest
 
         var column = CreateColumnContext()
             .AsReal(numberStyle, cultureInfo)
-            .Build(c => { });
+            .Build(_ => { });
 
         // Act
         var actual = (double)column.Convert(numberString);
@@ -385,7 +385,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .AsUniqueIdentifier();
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("12345678-1234-1234-1234-123456789012");
         // Assert
@@ -398,7 +398,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .AsSmallDateTime("yyyyMMdd", CultureInfo.InvariantCulture);
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("20210101");
         // Assert
@@ -411,7 +411,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .AsSmallDateTime();
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("2021-01-01");
         // Assert
@@ -426,7 +426,7 @@ public abstract class ColumnTest
         const short expectedNumber = 12345;
         var column = CreateColumnContext()
             .AsSmallInt()
-            .Build(c => { });
+            .Build(_ => { });
         
         // Act
         var actual = column.Convert(numberString);
@@ -446,7 +446,7 @@ public abstract class ColumnTest
 
         var column = CreateColumnContext()
             .AsSmallInt(numberStyle, cultureInfo)
-            .Build(c => { });
+            .Build(_ => { });
 
         // Act
         var actual = column.Convert(numberString);
@@ -463,7 +463,7 @@ public abstract class ColumnTest
         const decimal expectedNumber = 214748.3647m;
         var column = CreateColumnContext()
             .AsSmallMoney()
-            .Build(c => { });
+            .Build(_ => { });
         
         // Act
         var actual = column.Convert(numberString);
@@ -483,7 +483,7 @@ public abstract class ColumnTest
 
         var column = CreateColumnContext()
             .AsSmallMoney(numberStyle, cultureInfo)
-            .Build(c => { });
+            .Build(_ => { });
 
         // Act
         var actual = column.Convert(numberString);
@@ -500,7 +500,7 @@ public abstract class ColumnTest
         var expectedDateTime = new DateTime(2024, 12, 27, 1, 52, 13, DateTimeKind.Utc);
         var column = CreateColumnContext()
             .AsTimestamp()
-            .Build(c => { });
+            .Build(_ => { });
         
         // Act
         var actual = column.Convert(timestampString);
@@ -520,7 +520,7 @@ public abstract class ColumnTest
 
         var column = CreateColumnContext()
             .AsTimestamp(cultureInfo: cultureInfo, style: dateTimeStyle)
-            .Build(c => { });
+            .Build(_ => { });
 
         // Act
         var actual = column.Convert(timestampString);
@@ -537,7 +537,7 @@ public abstract class ColumnTest
         const byte expectedNumber = 255;
         var column = CreateColumnContext()
             .AsTinyInt()
-            .Build(c => { });
+            .Build(_ => { });
         
         // Act
         var actual = column.Convert(numberString);
@@ -557,7 +557,7 @@ public abstract class ColumnTest
 
         var column = CreateColumnContext()
             .AsTinyInt(numberStyle, cultureInfo)
-            .Build(c => { });
+            .Build(_ => { });
 
         // Act
         var actual = column.Convert(numberString);
@@ -572,7 +572,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .AsVarBinary();
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("6qj7n+AIUvDxNw==");
         // Assert
@@ -586,7 +586,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .AsDate("yyyyMMdd", CultureInfo.InvariantCulture);
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("20210101");
         // Assert
@@ -599,7 +599,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .AsDate();
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
 
         // Act
         var actual = column.Convert("2021-01-01");
@@ -614,7 +614,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .AsTime("hhmmss", CultureInfo.InvariantCulture);
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("123456");
         // Assert
@@ -627,7 +627,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .AsTime();
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("12:34:56");
         // Assert
@@ -640,7 +640,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .AsDateTime2("yyyyMMdd", CultureInfo.InvariantCulture);
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("20210101");
         // Assert
@@ -653,7 +653,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .AsDateTime2();
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("2021-01-01");
         // Assert
@@ -666,7 +666,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .AsDateTimeOffset("yyyyMMddHHmmK", CultureInfo.InvariantCulture);
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("202412210904+09:00");
         // Assert
@@ -679,7 +679,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .AsDateTimeOffset();
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
         // Act
         var actual = column.Convert("2021-01-01+09:00");
         // Assert
@@ -692,7 +692,7 @@ public abstract class ColumnTest
         // Arrange
         var options = CreateColumnContext()
             .Convert(s => s.ToUpper());
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
 
         // Act
         var actual = column.Convert("hello");
@@ -710,7 +710,7 @@ public abstract class ColumnTest
             .TreatEmptyStringAsNull()
             .AsBit()
             .Convert(s => s.ToUpper());
-        var column = options.Build(c => { });
+        var column = options.Build(_ => { });
 
         // Act
         var actual = column.Convert(" a ");

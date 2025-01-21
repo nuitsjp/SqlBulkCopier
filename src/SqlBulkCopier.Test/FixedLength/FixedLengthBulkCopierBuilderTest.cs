@@ -1,15 +1,11 @@
-using System.Globalization;
 using System.Text;
-using System.Transactions;
-using Dapper;
-using Microsoft.Data.SqlClient;
-using Shouldly;
 using SqlBulkCopier.FixedLength;
 
 // ReSharper disable UseAwaitUsing
 
 namespace SqlBulkCopier.Test.FixedLength;
 
+// ReSharper disable once UnusedMember.Global
 public class FixedLengthBulkCopierBuilderTest : WriteToServerAsync<IFixedLengthBulkCopierBuilder>
 {
     protected override IFixedLengthBulkCopierBuilder ProvideBuilder(bool withRowFilter = false)
