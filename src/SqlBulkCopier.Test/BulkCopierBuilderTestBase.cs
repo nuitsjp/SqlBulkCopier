@@ -210,6 +210,29 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
             .ShouldBe(0);
     }
 
+
+    [Fact]
+    public async Task NoRetry_WithConnection_WithTransaction_BeforeTruncate_ShouldSucceed()
+    {
+        // Arrange
+        using var connection = await OpenConnectionAsync();
+        using var transaction = connection.BeginTransaction();
+
+        using var sqlBulkCopier = ProvideBuilder()
+            .SetTruncateBeforeBulkInsert(true)
+            .Build(connection, SqlBulkCopyOptions.Default, transaction);
+
+        // Act
+        await sqlBulkCopier.WriteToServerAsync(
+            await CreateBulkInsertStreamAsync(Targets),
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+        transaction.Commit();
+
+        // Assert
+        await AssertAsync();
+    }
+
     [Fact]
     public async Task NoRetry_WithConnection_WithHeaderAndFooter_ShouldSucceed()
     {
