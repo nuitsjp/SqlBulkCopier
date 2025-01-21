@@ -4,38 +4,42 @@ using Microsoft.Data.SqlClient;
 namespace SqlBulkCopier;
 
 /// <summary>
-/// Bulk copier.
+/// Provides functionality for bulk copying data into SQL Server tables.
+/// Supports retries, transaction management, and table truncation.
 /// </summary>
 public class BulkCopier : IBulkCopier
 {
     /// <summary>
-    /// Event when rows copied.
+    /// Event that is raised when a specified number of rows have been processed during the bulk copy operation.
     /// </summary>
     public event SqlRowsCopiedEventHandler? SqlRowsCopied;
 
     /// <summary>
-    /// SQL bulk copy.
+    /// The underlying SqlBulkCopy instance that performs the actual bulk copy operations.
     /// </summary>
     private readonly SqlBulkCopy _sqlBulkCopy;
 
     /// <summary>
-    /// Connection string.
+    /// The connection string used to connect to the database when no external connection is provided.
     /// </summary>
     private readonly string? _connectionString;
 
     /// <summary>
-    /// Connection.
+    /// The external SQL connection, if provided.
     /// </summary>
     private readonly SqlConnection? _connection;
 
     /// <summary>
-    /// External transaction.
+    /// The external transaction, if provided.
     /// </summary>
     private readonly SqlTransaction? _externalTransaction;
 
     /// <summary>
-    /// Constructor.
+    /// Initializes a new instance of the BulkCopier class using an existing SQL connection.
     /// </summary>
+    /// <param name="destinationTableName">The name of the destination table.</param>
+    /// <param name="dataReaderBuilder">The data reader builder that will construct the data reader for the bulk copy operation.</param>
+    /// <param name="connection">The SQL connection to use.</param>
     public BulkCopier(
         string destinationTableName,
         IDataReaderBuilder dataReaderBuilder,
@@ -48,8 +52,11 @@ public class BulkCopier : IBulkCopier
     }
 
     /// <summary>
-    /// Constructor.
+    /// Initializes a new instance of the BulkCopier class using a connection string.
     /// </summary>
+    /// <param name="destinationTableName">The name of the destination table.</param>
+    /// <param name="dataReaderBuilder">The data reader builder that will construct the data reader for the bulk copy operation.</param>
+    /// <param name="connectionString">The connection string to use.</param>
     public BulkCopier(
         string destinationTableName,
         IDataReaderBuilder dataReaderBuilder,
@@ -62,12 +69,16 @@ public class BulkCopier : IBulkCopier
     }
 
     /// <summary>
-    /// Constructor.
+    /// Initializes a new instance of the BulkCopier class using a connection string and bulk copy options.
     /// </summary>
+    /// <param name="destinationTableName">The name of the destination table.</param>
+    /// <param name="dataReaderBuilder">The data reader builder that will construct the data reader for the bulk copy operation.</param>
+    /// <param name="connectionString">The connection string to use.</param>
+    /// <param name="copyOptions">The SqlBulkCopyOptions to use.</param>
     public BulkCopier(
         string destinationTableName,
-        IDataReaderBuilder dataReaderBuilder, 
-        string connectionString, 
+        IDataReaderBuilder dataReaderBuilder,
+        string connectionString,
         SqlBulkCopyOptions copyOptions)
         : this(destinationTableName, new SqlBulkCopy(connectionString, copyOptions), dataReaderBuilder)
     {
@@ -77,12 +88,17 @@ public class BulkCopier : IBulkCopier
     }
 
     /// <summary>
-    /// Constructor.
+    /// Initializes a new instance of the BulkCopier class using an existing SQL connection, bulk copy options, and transaction.
     /// </summary>
+    /// <param name="destinationTableName">The name of the destination table.</param>
+    /// <param name="dataReaderBuilder">The data reader builder that will construct the data reader for the bulk copy operation.</param>
+    /// <param name="connection">The SQL connection to use.</param>
+    /// <param name="copyOptions">The SqlBulkCopyOptions to use.</param>
+    /// <param name="externalTransaction">The transaction to use.</param>
     public BulkCopier(
         string destinationTableName,
-        IDataReaderBuilder dataReaderBuilder, 
-        SqlConnection connection, 
+        IDataReaderBuilder dataReaderBuilder,
+        SqlConnection connection,
         SqlBulkCopyOptions copyOptions,
         SqlTransaction externalTransaction)
         : this(destinationTableName, new SqlBulkCopy(connection, copyOptions, externalTransaction), dataReaderBuilder)
@@ -93,8 +109,11 @@ public class BulkCopier : IBulkCopier
     }
 
     /// <summary>
-    /// Constructor.
+    /// Private constructor that initializes the common components of the BulkCopier.
     /// </summary>
+    /// <param name="destinationTableName">The name of the destination table.</param>
+    /// <param name="sqlBulkCopy">The SqlBulkCopy instance to use.</param>
+    /// <param name="dataReaderBuilder">The data reader builder that will construct the data reader for the bulk copy operation.</param>
     private BulkCopier(
         string destinationTableName,
         SqlBulkCopy sqlBulkCopy,
@@ -109,37 +128,39 @@ public class BulkCopier : IBulkCopier
     }
 
     /// <summary>
-    /// IDataReaderBuilder
+    /// Gets the data reader builder used to construct the data reader for the bulk copy operation.
     /// </summary>
     public IDataReaderBuilder DataReaderBuilder { get; init; }
 
     /// <summary>
-    /// Destination table name of bulk insert.
+    /// Gets the name of the destination table for the bulk insert operation.
     /// </summary>
     public string DestinationTableName => _sqlBulkCopy.DestinationTableName;
 
     /// <summary>
-    /// Maximum retry count.
+    /// Gets or sets the maximum number of retry attempts for the bulk copy operation.
     /// </summary>
     public int MaxRetryCount { get; set; }
 
     /// <summary>
-    /// Truncate before bulk insert.
+    /// Gets or sets whether to truncate the destination table before performing the bulk insert.
     /// </summary>
     public bool TruncateBeforeBulkInsert { get; set; }
 
     /// <summary>
-    /// Use exponential backoff. Retry delay time is doubled.
+    /// Gets or sets whether to use exponential backoff for retry delays.
+    /// When enabled, the delay time between retries doubles with each attempt.
     /// </summary>
     public bool UseExponentialBackoff { get; set; }
 
     /// <summary>
-    /// Retry initial delay time.
+    /// Gets or sets the initial delay time between retry attempts.
     /// </summary>
     public TimeSpan InitialDelay { get; set; }
 
     /// <summary>
-    /// Number of rows in each batch. Refer to SqlBulkCopy.BatchSize.
+    /// Gets or sets the number of rows in each batch of the bulk copy operation.
+    /// Maps to SqlBulkCopy.BatchSize.
     /// </summary>
     public int BatchSize
     {
@@ -148,7 +169,8 @@ public class BulkCopier : IBulkCopier
     }
 
     /// <summary>
-    /// Number of rows in each batch. Refer to SqlBulkCopy.NotifyAfter.
+    /// Gets or sets the number of rows to process before raising the SqlRowsCopied event.
+    /// Maps to SqlBulkCopy.NotifyAfter.
     /// </summary>
     public int NotifyAfter
     {
@@ -157,41 +179,51 @@ public class BulkCopier : IBulkCopier
     }
 
     /// <summary>
-    /// Number of rows copied. Refer to SqlBulkCopy.RowsCopied.
+    /// Gets the number of rows copied in the current operation.
+    /// Maps to SqlBulkCopy.RowsCopied.
     /// </summary>
     public int RowsCopied => _sqlBulkCopy.RowsCopied;
 
     /// <summary>
-    /// Number of rows copied. Refer to SqlBulkCopy.RowsCopied64.
+    /// Gets the number of rows copied in the current operation as a 64-bit integer.
+    /// Maps to SqlBulkCopy.RowsCopied64.
     /// </summary>
     public long RowsCopied64 => _sqlBulkCopy.RowsCopied64;
 
     /// <summary>
-    /// Write to server asynchronously.
+    /// Performs the bulk copy operation asynchronously.
     /// </summary>
-    /// <param name="stream"></param>
-    /// <param name="encoding"></param>
-    /// <param name="timeout"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
-    /// <exception cref="Exception"></exception>
+    /// <param name="stream">The stream containing the data to be copied.</param>
+    /// <param name="encoding">The encoding to use when reading the stream.</param>
+    /// <param name="timeout">The timeout period for the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when:
+    /// - Retries are enabled with an external transaction
+    /// - Retries are enabled with an external connection
+    /// - Retries are enabled without table truncation
+    /// - The maximum retry count is exceeded
+    /// </exception>
     public async Task WriteToServerAsync(Stream stream, Encoding encoding, TimeSpan timeout)
     {
         _sqlBulkCopy.BulkCopyTimeout = (int)timeout.TotalSeconds;
 
-        // 外部トランザクションが設定されている場合、バルクインサート関連だけリトライしても適切な結果にならないため例外をスロー
+        // Throw exception if retries are configured with an external transaction
+        // as retrying bulk insert operations alone may not produce correct results
         if (_externalTransaction is not null && 0 < MaxRetryCount)
         {
             throw new InvalidOperationException("Cannot retry with an external transaction.");
         }
 
-        // 外部コネクションが設定されている場合、TransactionScopeと併用されている場合などに、バルクインサート関連だけリトライしても適切な結果にならないため例外をスロー
+        // Throw exception if retries are configured with an external connection
+        // as this might interfere with TransactionScope or other transaction management
         if (_connection is not null && 0 < MaxRetryCount)
         {
             throw new InvalidOperationException("Cannot retry with an external connection.");
         }
 
-        // リトライが設定されている場合、テーブルのトランケートが無効だと、リトライ時にデータが重複してしまうため例外をスロー
+        // Throw exception if retries are enabled without table truncation
+        // as this would result in duplicate data during retry attempts
         if (0 < MaxRetryCount && TruncateBeforeBulkInsert is false)
         {
             throw new InvalidOperationException("Cannot retry without truncating the table.");
@@ -203,7 +235,7 @@ public class BulkCopier : IBulkCopier
         {
             try
             {
-                // When truncate before bulk insert is enabled, truncate the table
+                // Truncate the destination table if enabled
                 if (TruncateBeforeBulkInsert)
                 {
                     await TruncateTableAsync();
@@ -211,7 +243,7 @@ public class BulkCopier : IBulkCopier
 
                 await _sqlBulkCopy.WriteToServerAsync(DataReaderBuilder.Build(stream, encoding));
 
-                // Exit the loop when the process is successful
+                // Exit the retry loop on successful completion
                 break;
             }
             catch (Exception ex)
@@ -219,35 +251,34 @@ public class BulkCopier : IBulkCopier
                 currentRetryCount++;
                 if (currentRetryCount > MaxRetryCount)
                 {
-                    // When the retry count exceeds the maximum, throw an exception
                     throw new InvalidOperationException($"BulkCopier failed after {currentRetryCount - 1} retries.", ex);
                 }
 
-                // When use exponential backoff, double the delay time
+                // Apply exponential backoff if enabled and not the first retry
                 if (UseExponentialBackoff && currentRetryCount > 1)
                 {
                     delay = TimeSpan.FromMilliseconds(delay.TotalMilliseconds * 2);
                 }
 
-                // Wait for the delay
+                // Wait before the next retry attempt
                 await Task.Delay(delay);
 
-                // Reset the stream position
+                // Reset the stream position for the next attempt
                 stream.Position = 0;
             }
         }
     }
 
     /// <summary>
-    /// Truncate table before bulk insert.
+    /// Truncates the destination table asynchronously.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>A task representing the asynchronous operation.</returns>
     private async Task TruncateTableAsync()
     {
         var query = $"TRUNCATE TABLE {_sqlBulkCopy.DestinationTableName}";
         if (_externalTransaction is not null)
         {
-            // External transaction is set, execute in that
+            // Execute within the provided external transaction
 #if NET8_0_OR_GREATER
             await using var command = new SqlCommand(query, _connection, _externalTransaction);
 #else
@@ -257,7 +288,7 @@ public class BulkCopier : IBulkCopier
         }
         else if (_connection is not null)
         {
-            // External connection is set, execute in that
+            // Execute using the provided external connection
 #if NET8_0_OR_GREATER
             await using var command = new SqlCommand(query, _connection);
 #else
@@ -267,7 +298,7 @@ public class BulkCopier : IBulkCopier
         }
         else
         {
-            // Otherwise, create a new connection and execute
+            // Create and use a new connection
 #if NET8_0_OR_GREATER
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
@@ -282,7 +313,7 @@ public class BulkCopier : IBulkCopier
     }
 
     /// <summary>
-    /// Dispose the object.
+    /// Releases the resources used by the BulkCopier instance.
     /// </summary>
     void IDisposable.Dispose()
     {
@@ -291,11 +322,11 @@ public class BulkCopier : IBulkCopier
     }
 
     /// <summary>
-    /// Notify the event when rows copied.
+    /// Handles the SqlRowsCopied event from the underlying SqlBulkCopy instance
+    /// and raises the corresponding event on this instance.
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event arguments.</param>
     private void SqlBulkCopyOnSqlRowsCopied(object sender, SqlRowsCopiedEventArgs e)
         => SqlRowsCopied?.Invoke(sender, e);
-
 }
