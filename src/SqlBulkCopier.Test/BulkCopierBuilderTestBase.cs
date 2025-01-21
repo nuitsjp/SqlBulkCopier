@@ -61,6 +61,7 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
             .SetMaxRetryCount(3)
             .SetTruncateBeforeBulkInsert(true)
             .SetUseExponentialBackoff(false)
+            .SetInitialDelay(TimeSpan.MaxValue)
             .Build(SqlBulkCopierConnectionString);
 
         // Assert
@@ -70,6 +71,7 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
         sqlBulkCopier.MaxRetryCount.ShouldBe(3);
         sqlBulkCopier.TruncateBeforeBulkInsert.ShouldBeTrue();
         sqlBulkCopier.UseExponentialBackoff.ShouldBeFalse();
+        sqlBulkCopier.InitialDelay.ShouldBe(TimeSpan.MaxValue);
     }
 
     [Fact]
