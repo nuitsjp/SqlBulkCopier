@@ -2,15 +2,53 @@
 
 namespace SqlBulkCopier;
 
+/// <summary>
+/// Provides builder interface for creating bulk copier instances
+/// </summary>
 public interface IBulkCopierBuilder
 {
+    /// <summary>
+    /// Builds column definitions for bulk copy operation
+    /// </summary>
+    /// <returns>Collection of column definitions</returns>
     IEnumerable<Column> BuildColumns();
+
+    /// <summary>
+    /// Creates a bulk copier instance using the specified SQL connection
+    /// </summary>
+    /// <param name="connection">SQL connection to use for bulk copy</param>
+    /// <returns>Configured bulk copier instance</returns>
     IBulkCopier Build(SqlConnection connection);
+
+    /// <summary>
+    /// Creates a bulk copier instance using the specified connection string
+    /// </summary>
+    /// <param name="connectionString">Connection string to SQL Server</param>
+    /// <returns>Configured bulk copier instance</returns>
     IBulkCopier Build(string connectionString);
+
+    /// <summary>
+    /// Creates a bulk copier instance using the specified connection string and copy options
+    /// </summary>
+    /// <param name="connectionString">Connection string to SQL Server</param>
+    /// <param name="copyOptions">SQL bulk copy options to configure the operation</param>
+    /// <returns>Configured bulk copier instance</returns>
     IBulkCopier Build(string connectionString, SqlBulkCopyOptions copyOptions);
+
+    /// <summary>
+    /// Creates a bulk copier instance with specified connection, options and transaction
+    /// </summary>
+    /// <param name="connection">SQL connection to use for bulk copy</param>
+    /// <param name="copyOptions">SQL bulk copy options to configure the operation</param>
+    /// <param name="externalTransaction">External transaction to use for the bulk copy operation</param>
+    /// <returns>Configured bulk copier instance</returns>
     IBulkCopier Build(SqlConnection connection, SqlBulkCopyOptions copyOptions, SqlTransaction externalTransaction);
 }
 
+/// <summary>
+/// Generic builder interface for creating bulk copier instances with fluent configuration
+/// </summary>
+/// <typeparam name="TBuilder">Type of the concrete builder implementing this interface</typeparam>
 public interface IBulkCopierBuilder<out TBuilder> : IBulkCopierBuilder
     where TBuilder : IBulkCopierBuilder<TBuilder>
 {
