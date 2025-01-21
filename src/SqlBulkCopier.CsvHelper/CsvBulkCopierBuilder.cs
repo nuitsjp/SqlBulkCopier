@@ -174,13 +174,13 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
         {
             DefaultColumnContext(column);
 
-            yield return column.Build();
+            yield return column.Build(DefaultColumnContext);
         }
     }
 
     public IBulkCopier Build(SqlConnection connection)
     {
-        var columns = _columns.Select(x => x.Build());
+        var columns = _columns.Select(x => x.Build(DefaultColumnContext));
         return new BulkCopier(
             _destinationTableName,
             new CsvDataReaderBuilder(_hasHeader, columns, _rowFilter),
@@ -197,7 +197,7 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
 
     public IBulkCopier Build(string connectionString)
     {
-        var columns = _columns.Select(x => x.Build());
+        var columns = _columns.Select(x => x.Build(DefaultColumnContext));
         return new BulkCopier(
             _destinationTableName,
             new CsvDataReaderBuilder(_hasHeader, columns, _rowFilter),
@@ -214,7 +214,7 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
 
     public IBulkCopier Build(string connectionString, SqlBulkCopyOptions copyOptions)
     {
-        var columns = _columns.Select(x => x.Build());
+        var columns = _columns.Select(x => x.Build(DefaultColumnContext));
         return new BulkCopier(
             _destinationTableName,
             new CsvDataReaderBuilder(_hasHeader, columns, _rowFilter),
@@ -232,7 +232,7 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
 
     public IBulkCopier Build(SqlConnection connection, SqlBulkCopyOptions copyOptions, SqlTransaction externalTransaction)
     {
-        var columns = _columns.Select(x => x.Build());
+        var columns = _columns.Select(x => x.Build(DefaultColumnContext));
         return new BulkCopier(
             _destinationTableName,
             new CsvDataReaderBuilder(_hasHeader, columns, _rowFilter),

@@ -5,7 +5,7 @@ public class FixedLengthColumnContext(int ordinal, string name, int offsetBytes,
     public int OffsetBytes { get; } = offsetBytes;
     public int LengthBytes { get; } = lengthBytes;
 
-    public override Column Build()
+    public override Column Build(Action<IColumnContext> setDefaultContext)
     {
         return new FixedLengthColumn(
             Ordinal,

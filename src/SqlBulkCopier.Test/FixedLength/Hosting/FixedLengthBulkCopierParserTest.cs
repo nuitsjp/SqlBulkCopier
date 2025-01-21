@@ -95,7 +95,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.TrimChars.ShouldBeNull();
@@ -123,7 +123,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.TrimChars.ShouldBeEquivalentTo("chars".ToCharArray());
@@ -152,7 +152,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.TrimChars.ShouldBeEquivalentTo("chars".ToCharArray());
@@ -181,7 +181,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.TrimChars.ShouldBeEquivalentTo("chars".ToCharArray());
@@ -210,7 +210,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.TrimMode.ShouldBe(SqlBulkCopier.TrimMode.None);
@@ -238,7 +238,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.TrimMode.ShouldBe(SqlBulkCopier.TrimMode.None);
@@ -266,7 +266,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.TrimMode.ShouldBe(SqlBulkCopier.TrimMode.Trim);
@@ -294,7 +294,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.TrimMode.ShouldBe(SqlBulkCopier.TrimMode.TrimStart);
@@ -322,7 +322,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.TrimMode.ShouldBe(SqlBulkCopier.TrimMode.TrimEnd);
@@ -352,7 +352,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.TreatEmptyStringAsNull.ShouldBeTrue();
@@ -379,7 +379,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.TreatEmptyStringAsNull.ShouldBeFalse();
@@ -405,7 +405,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.TreatEmptyStringAsNull.ShouldBeFalse();
@@ -435,7 +435,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.SqlDbType.ShouldBeNull();
@@ -462,7 +462,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.SqlDbType.ShouldBeNull();
@@ -489,7 +489,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.SqlDbType.ShouldBeNull();
@@ -516,7 +516,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.SqlDbType.ShouldBeNull();
@@ -543,7 +543,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.SqlDbType.ShouldBeNull();
@@ -570,7 +570,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.SqlDbType.ShouldBeNull();
@@ -597,7 +597,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.SqlDbType.ShouldBeNull();
@@ -624,7 +624,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.SqlDbType.ShouldBeNull();
@@ -651,7 +651,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.SqlDbType.ShouldBe(System.Data.SqlDbType.Binary);
@@ -678,7 +678,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.SqlDbType.ShouldBe(System.Data.SqlDbType.Bit);
@@ -705,7 +705,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.SqlDbType.ShouldBe(System.Data.SqlDbType.Image);
@@ -732,7 +732,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.SqlDbType.ShouldBe(System.Data.SqlDbType.UniqueIdentifier);
@@ -759,7 +759,7 @@ public class FixedLengthBulkCopierParserTest
                     var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                     var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                     builder.DefaultColumnContext(context);
-                    var column = context.Build();
+                    var column = context.Build(c => { });
 
                     // Assert
                     column.SqlDbType.ShouldBe(System.Data.SqlDbType.VarBinary);
@@ -788,7 +788,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.BigInt);
@@ -819,7 +819,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.BigInt);
@@ -851,7 +851,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.Decimal);
@@ -882,7 +882,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.Decimal);
@@ -914,7 +914,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.Float);
@@ -945,7 +945,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.Float);
@@ -977,7 +977,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.Int);
@@ -1008,7 +1008,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.Int);
@@ -1040,7 +1040,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.Money);
@@ -1071,7 +1071,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.Money);
@@ -1103,7 +1103,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.Real);
@@ -1134,7 +1134,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.Real);
@@ -1166,7 +1166,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.SmallInt);
@@ -1197,7 +1197,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.SmallInt);
@@ -1229,7 +1229,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.SmallMoney);
@@ -1260,7 +1260,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.SmallMoney);
@@ -1292,7 +1292,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.TinyInt);
@@ -1323,7 +1323,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.TinyInt);
@@ -1355,7 +1355,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.Date);
@@ -1386,7 +1386,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.Date);
@@ -1418,7 +1418,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.DateTime);
@@ -1449,7 +1449,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.DateTime);
@@ -1481,7 +1481,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.DateTime2);
@@ -1512,7 +1512,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.DateTime2);
@@ -1544,7 +1544,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.DateTimeOffset);
@@ -1575,7 +1575,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.DateTimeOffset);
@@ -1607,7 +1607,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.SmallDateTime);
@@ -1638,7 +1638,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.SmallDateTime);
@@ -1670,7 +1670,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.Time);
@@ -1701,7 +1701,7 @@ public class FixedLengthBulkCopierParserTest
                         var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
                         var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
                         builder.DefaultColumnContext(context);
-                        var column = context.Build();
+                        var column = context.Build(c => { });
 
                         // Assert
                         column.SqlDbType.ShouldBe(System.Data.SqlDbType.Time);
@@ -1857,7 +1857,7 @@ public class FixedLengthBulkCopierParserTest
             var builder = (FixedLengthBulkCopierBuilder)FixedLengthBulkCopierParser.BuildBuilder(configuration.GetSection("SqlBulkCopier"));
             var context = new FixedLengthColumnContext(0, string.Empty, 1, 2);
             builder.DefaultColumnContext(context);
-            context.Build();
+            context.Build(c => { });
 
             // Assert
             builder.Columns.Count.ShouldBe(2);

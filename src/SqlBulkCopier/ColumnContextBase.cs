@@ -216,5 +216,5 @@ public abstract class ColumnContextBase(int ordinal, string name) : IColumnConte
         return this;
     }
 
-    public abstract Column Build();
+    public abstract Column Build(Action<IColumnContext> setDefaultContext);
 }

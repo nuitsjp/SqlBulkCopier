@@ -35,5 +35,5 @@ public interface IColumnContext
     IColumnContext TrimEnd(char[]? trimChars = null);
     IColumnContext TreatEmptyStringAsNull();
     IColumnContext Convert(Func<string, object> convert);
-    Column Build();
+    Column Build(Action<IColumnContext> setDefaultContext);
 }

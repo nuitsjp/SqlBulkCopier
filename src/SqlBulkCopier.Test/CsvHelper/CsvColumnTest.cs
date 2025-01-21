@@ -15,7 +15,7 @@ public class CsvColumnTest : ColumnTest
         var options = CreateColumnContext();
 
         // Act
-        var column = (CsvColumn)options.Build();
+        var column = (CsvColumn)options.Build(c => { });
 
         // Assert
         column.Ordinal.ShouldBe(0);

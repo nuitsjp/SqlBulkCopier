@@ -181,9 +181,9 @@ public class FixedLengthDataReaderTest
             using var reader = new FixedLengthDataReader(
                 new FixedLengthReader(stream, new UTF8Encoding(false)),
                 [
-                    (FixedLengthColumn)new FixedLengthColumnContext(0, "CustomerId", 0, 5).TrimStart(['0', '2', '4']).Build(),
-                    (FixedLengthColumn)new FixedLengthColumnContext(1, "Name", 5, 21).TrimEnd().Build(),
-                    (FixedLengthColumn)new FixedLengthColumnContext(2, "Balance", 26, 15).Trim(['0', '1', '2', '4']).Build()
+                    (FixedLengthColumn)new FixedLengthColumnContext(0, "CustomerId", 0, 5).TrimStart(['0', '2', '4']).Build(c => { }),
+                    (FixedLengthColumn)new FixedLengthColumnContext(1, "Name", 5, 21).TrimEnd().Build(c => { }),
+                    (FixedLengthColumn)new FixedLengthColumnContext(2, "Balance", 26, 15).Trim(['0', '1', '2', '4']).Build(c => { })
                 ],
                 DefaultPredicate);
 
@@ -217,16 +217,16 @@ public class FixedLengthDataReaderTest
                     (FixedLengthColumn)new FixedLengthColumnContext(0, "CustomerId", 0, 5)
                         .Trim()
                         .TreatEmptyStringAsNull()
-                        .Build(),
+                        .Build(c => { }),
                     (FixedLengthColumn)new FixedLengthColumnContext(1, "Name", 5, 21)
                         .Trim()
-                        .Build(),
+                        .Build(c => { }),
                     (FixedLengthColumn)new FixedLengthColumnContext(2, "Balance", 26, 10)
                         .Convert(_ => DBNull.Value)
-                        .Build(),
+                        .Build(c => { }),
                     (FixedLengthColumn)new FixedLengthColumnContext(3, "Foo", 36, 5)
                         .Convert(_ => DBNull.Value)
-                        .Build()
+                        .Build(c => { })
                 ],
                 DefaultPredicate);
 
