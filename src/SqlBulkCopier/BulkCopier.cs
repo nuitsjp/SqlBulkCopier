@@ -12,7 +12,6 @@ public class BulkCopier : IBulkCopier
     private readonly string? _connectionString;
     private readonly SqlConnection? _connection;
     private readonly SqlTransaction? _externalTransaction;
-    private readonly SqlBulkCopyOptions _copyOptions;
 
     public BulkCopier(
         string destinationTableName,
@@ -23,7 +22,6 @@ public class BulkCopier : IBulkCopier
         _connectionString = null;
         _connection = connection;
         _externalTransaction = null;
-        _copyOptions = SqlBulkCopyOptions.Default;
     }
 
     public BulkCopier(
@@ -35,7 +33,6 @@ public class BulkCopier : IBulkCopier
         _connectionString = connectionString;
         _connection = null;
         _externalTransaction = null;
-        _copyOptions = SqlBulkCopyOptions.Default;
     }
 
     public BulkCopier(
@@ -48,7 +45,6 @@ public class BulkCopier : IBulkCopier
         _connectionString = connectionString;
         _connection = null;
         _externalTransaction = null;
-        _copyOptions = copyOptions;
     }
 
     public BulkCopier(
@@ -62,7 +58,6 @@ public class BulkCopier : IBulkCopier
         _connectionString = null;
         _connection = connection;
         _externalTransaction = externalTransaction;
-        _copyOptions = copyOptions;
     }
 
     private BulkCopier(
