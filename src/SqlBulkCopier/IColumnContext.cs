@@ -68,22 +68,143 @@ public interface IColumnContext
     /// <returns>The column context for method chaining.</returns>
     IColumnContext AsDate(string? format = null, CultureInfo? cultureInfo = null, DateTimeStyles dateTimeStyles = DateTimeStyles.None);
 
+    /// <summary>
+    /// Configures the column to be mapped as a SQL DATETIME.
+    /// </summary>
+    /// <param name="format">The format string to use when parsing the date string. If null, standard date formats are tried.</param>
+    /// <param name="cultureInfo">The culture-specific formatting information. If null, the current culture is used.</param>
+    /// <param name="dateTimeStyles">The date time styles to use when parsing.</param>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsDateTime(string? format = null, CultureInfo? cultureInfo = null, DateTimeStyles dateTimeStyles = DateTimeStyles.None);
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL DECIMAL.
+    /// </summary>
+    /// <param name="numberStyles">The number styles to use when parsing the source string.</param>
+    /// <param name="cultureInfo">The culture-specific formatting information. If null, the current culture is used.</param>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsDecimal(NumberStyles numberStyles = NumberStyles.None, CultureInfo? cultureInfo = null);
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL FLOAT.
+    /// </summary>
+    /// <param name="numberStyles">The number styles to use when parsing the source string.</param>
+    /// <param name="cultureInfo">The culture-specific formatting information. If null, the current culture is used.</param>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsFloat(NumberStyles numberStyles = NumberStyles.None, CultureInfo? cultureInfo = null);
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL INT.
+    /// </summary>
+    /// <param name="numberStyles">The number styles to use when parsing the source string.</param>
+    /// <param name="cultureInfo">The culture-specific formatting information. If null, the current culture is used.</param>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsInt(NumberStyles numberStyles = NumberStyles.None, CultureInfo? cultureInfo = null);
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL MONEY.
+    /// </summary>
+    /// <param name="numberStyles">The number styles to use when parsing the source string.</param>
+    /// <param name="cultureInfo">The culture-specific formatting information. If null, the current culture is used.</param>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsMoney(NumberStyles numberStyles = NumberStyles.None, CultureInfo? cultureInfo = null);
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL REAL.
+    /// </summary>
+    /// <param name="numberStyles">The number styles to use when parsing the source string.</param>
+    /// <param name="cultureInfo">The culture-specific formatting information. If null, the current culture is used.</param>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsReal(NumberStyles numberStyles = NumberStyles.None, CultureInfo? cultureInfo = null);
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL SMALLDATETIME.
+    /// </summary>
+    /// <param name="format">The format string to use when parsing the date string. If null, standard date formats are tried.</param>
+    /// <param name="cultureInfo">The culture-specific formatting information. If null, the current culture is used.</param>
+    /// <param name="dateTimeStyles">The date time styles to use when parsing.</param>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsSmallDateTime(string? format = null, CultureInfo? cultureInfo = null, DateTimeStyles dateTimeStyles = DateTimeStyles.None);
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL SMALLINT.
+    /// </summary>
+    /// <param name="numberStyles">The number styles to use when parsing the source string.</param>
+    /// <param name="cultureInfo">The culture-specific formatting information. If null, the current culture is used.</param>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsSmallInt(NumberStyles numberStyles = NumberStyles.None, CultureInfo? cultureInfo = null);
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL SMALLMONEY.
+    /// </summary>
+    /// <param name="numberStyles">The number styles to use when parsing the source string.</param>
+    /// <param name="cultureInfo">The culture-specific formatting information. If null, the current culture is used.</param>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsSmallMoney(NumberStyles numberStyles = NumberStyles.None, CultureInfo? cultureInfo = null);
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL TIMESTAMP.
+    /// </summary>
+    /// <param name="format">The format string to use when parsing the timestamp string. If null, standard formats are tried.</param>
+    /// <param name="cultureInfo">The culture-specific formatting information. If null, the current culture is used.</param>
+    /// <param name="style">The date time styles to use when parsing.</param>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsTimestamp(string? format = null, CultureInfo? cultureInfo = null, DateTimeStyles style = DateTimeStyles.None);
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL TINYINT.
+    /// </summary>
+    /// <param name="numberStyles">The number styles to use when parsing the source string.</param>
+    /// <param name="cultureInfo">The culture-specific formatting information. If null, the current culture is used.</param>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsTinyInt(NumberStyles numberStyles = NumberStyles.None, CultureInfo? cultureInfo = null);
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL DATETIME2.
+    /// </summary>
+    /// <param name="format">The format string to use when parsing the date string. If null, standard date formats are tried.</param>
+    /// <param name="cultureInfo">The culture-specific formatting information. If null, the current culture is used.</param>
+    /// <param name="dateTimeStyles">The date time styles to use when parsing.</param>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsDateTime2(string? format = null, CultureInfo? cultureInfo = null, DateTimeStyles dateTimeStyles = DateTimeStyles.None);
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL TIME.
+    /// </summary>
+    /// <param name="format">The format string to use when parsing the time string. If null, standard time formats are tried.</param>
+    /// <param name="cultureInfo">The culture-specific formatting information. If null, the current culture is used.</param>
+    /// <param name="dateTimeStyles">The date time styles to use when parsing.</param>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsTime(string? format = null, CultureInfo? cultureInfo = null, DateTimeStyles dateTimeStyles = DateTimeStyles.None);
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL DATETIMEOFFSET.
+    /// </summary>
+    /// <param name="format">The format string to use when parsing the date string. If null, standard date formats are tried.</param>
+    /// <param name="cultureInfo">The culture-specific formatting information. If null, the current culture is used.</param>
+    /// <param name="dateTimeStyles">The date time styles to use when parsing.</param>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsDateTimeOffset(string? format = null, CultureInfo? cultureInfo = null, DateTimeStyles dateTimeStyles = DateTimeStyles.None);
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL BINARY.
+    /// The source string is expected to be a valid binary representation.
+    /// </summary>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsBinary();
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL VARBINARY.
+    /// The source string is expected to be a valid binary representation.
+    /// </summary>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsVarBinary();
+
+    /// <summary>
+    /// Configures the column to be mapped as a SQL IMAGE.
+    /// The source string is expected to be a valid binary representation.
+    /// </summary>
+    /// <returns>The column context for method chaining.</returns>
     IColumnContext AsImage();
 
     /// <summary>
