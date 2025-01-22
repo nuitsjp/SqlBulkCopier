@@ -3,15 +3,10 @@ using Microsoft.Data.SqlClient;
 
 namespace SqlBulkCopier;
 
-/// <summary>
-/// Provides functionality for bulk copying data into SQL Server tables.
-/// Supports retries, transaction management, and table truncation.
-/// </summary>
+/// <inheritdoc />
 public class BulkCopier : IBulkCopier
 {
-    /// <summary>
-    /// Event that is raised when a specified number of rows have been processed during the bulk copy operation.
-    /// </summary>
+    /// <inheritdoc />
     public event SqlRowsCopiedEventHandler? SqlRowsCopied;
 
     /// <summary>
@@ -132,78 +127,42 @@ public class BulkCopier : IBulkCopier
     /// </summary>
     public IDataReaderBuilder DataReaderBuilder { get; init; }
 
-    /// <summary>
-    /// Gets the name of the destination table for the bulk insert operation.
-    /// </summary>
+    /// <inheritdoc />
     public string DestinationTableName => _sqlBulkCopy.DestinationTableName;
 
-    /// <summary>
-    /// Gets or sets the maximum number of retry attempts for the bulk copy operation.
-    /// </summary>
+    /// <inheritdoc />
     public int MaxRetryCount { get; set; }
 
-    /// <summary>
-    /// Gets or sets whether to truncate the destination table before performing the bulk insert.
-    /// </summary>
+    /// <inheritdoc />
     public bool TruncateBeforeBulkInsert { get; set; }
 
-    /// <summary>
-    /// Gets or sets whether to use exponential backoff for retry delays.
-    /// When enabled, the delay time between retries doubles with each attempt.
-    /// </summary>
+    /// <inheritdoc />
     public bool UseExponentialBackoff { get; set; }
 
-    /// <summary>
-    /// Gets or sets the initial delay time between retry attempts.
-    /// </summary>
+    /// <inheritdoc />
     public TimeSpan InitialDelay { get; set; }
 
-    /// <summary>
-    /// Gets or sets the number of rows in each batch of the bulk copy operation.
-    /// Maps to SqlBulkCopy.BatchSize.
-    /// </summary>
+    /// <inheritdoc />
     public int BatchSize
     {
         get => _sqlBulkCopy.BatchSize;
         set => _sqlBulkCopy.BatchSize = value;
     }
 
-    /// <summary>
-    /// Gets or sets the number of rows to process before raising the SqlRowsCopied event.
-    /// Maps to SqlBulkCopy.NotifyAfter.
-    /// </summary>
+    /// <inheritdoc />
     public int NotifyAfter
     {
         get => _sqlBulkCopy.NotifyAfter;
         set => _sqlBulkCopy.NotifyAfter = value;
     }
 
-    /// <summary>
-    /// Gets the number of rows copied in the current operation.
-    /// Maps to SqlBulkCopy.RowsCopied.
-    /// </summary>
+    /// <inheritdoc />
     public int RowsCopied => _sqlBulkCopy.RowsCopied;
 
-    /// <summary>
-    /// Gets the number of rows copied in the current operation as a 64-bit integer.
-    /// Maps to SqlBulkCopy.RowsCopied64.
-    /// </summary>
+    /// <inheritdoc />
     public long RowsCopied64 => _sqlBulkCopy.RowsCopied64;
 
-    /// <summary>
-    /// Performs the bulk copy operation asynchronously.
-    /// </summary>
-    /// <param name="stream">The stream containing the data to be copied.</param>
-    /// <param name="encoding">The encoding to use when reading the stream.</param>
-    /// <param name="timeout">The timeout period for the operation.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when:
-    /// - Retries are enabled with an external transaction
-    /// - Retries are enabled with an external connection
-    /// - Retries are enabled without table truncation
-    /// - The maximum retry count is exceeded
-    /// </exception>
+    /// <inheritdoc />
     public async Task WriteToServerAsync(Stream stream, Encoding encoding, TimeSpan timeout)
     {
         _sqlBulkCopy.BulkCopyTimeout = (int)timeout.TotalSeconds;
