@@ -7,63 +7,72 @@ namespace SqlBulkCopier;
 /// Provides a base implementation for configuring column contexts with a fluent interface.
 /// Supports configuration of data type conversion, formatting, and string handling options.
 /// </summary>
+/// <remarks>
+/// This abstract class implements the IColumnContext interface and provides common functionality for:
+/// - SQL Server data type mapping
+/// - Format string handling
+/// - Culture-specific parsing
+/// - String trimming operations
+/// - Custom value conversion
+/// 
+/// Derived classes must implement the Build method to create the final Column configuration.
+/// </remarks>
 /// <param name="ordinal">The zero-based position of the column in the data source.</param>
-/// <param name="name">The name of the column.</param>
+/// <param name="name">The name of the column in the destination table.</param>
 public abstract class ColumnContextBase(int ordinal, string name) : IColumnContext
 {
-    /// <summary>
-    /// Gets the zero-based position of the column in the data source.
-    /// </summary>
+    /// <inheritdoc />
     public int Ordinal { get; } = ordinal;
 
-    /// <summary>
-    /// Gets or sets the SQL Server data type of the column.
-    /// </summary>
+    /// <inheritdoc />
     public SqlDbType? SqlDbType { get; private set; }
 
-    /// <summary>
-    /// Gets or sets the format string used for parsing date, time, or custom formatted values.
-    /// </summary>
+    /// <inheritdoc />
     public string? Format { get; private set; }
 
     /// <summary>
     /// Gets or sets the style elements that can be present in numeric string values.
+    /// Controls how numeric strings are parsed during data conversion.
     /// </summary>
     protected NumberStyles NumberStyles = NumberStyles.None;
 
     /// <summary>
     /// Gets or sets the formatting options for parsing date and time strings.
+    /// Controls how date and time strings are interpreted during data conversion.
     /// </summary>
     protected DateTimeStyles DateTimeStyles = DateTimeStyles.None;
 
     /// <summary>
     /// Gets or sets the culture-specific formatting information to use during parsing.
+    /// When null, the current culture is used for parsing operations.
     /// </summary>
     protected CultureInfo? CultureInfo;
 
     /// <summary>
-    /// Gets or sets how whitespace should be trimmed from input strings.
+    /// Gets or sets how whitespace or specific characters should be trimmed from input strings.
+    /// The trimming is applied before any data type conversion is performed.
     /// </summary>
     protected TrimMode TrimMode = TrimMode.None;
 
     /// <summary>
-    /// Gets or sets the set of characters to remove when trimming.
+    /// Gets or sets the specific characters to remove when trimming strings.
+    /// When null, standard whitespace characters are used for trimming operations.
     /// </summary>
     protected char[]? TrimChars;
 
     /// <summary>
     /// Gets or sets whether empty strings should be converted to NULL values.
+    /// When true, empty strings are treated as NULL when writing to the database.
     /// </summary>
     protected bool IsTreatEmptyStringAsNull;
 
     /// <summary>
-    /// Gets or sets the custom conversion function for string values.
+    /// Gets or sets the custom conversion function for the column's values.
+    /// When set, this function is used to convert source strings to the target type.
     /// </summary>
     protected Func<string, object>? Converter;
 
-    /// <summary>
-    /// Gets the name of the column.
-    /// </summary>
+    /// <inheritdoc />
     public string Name { get; } = name;
 
     #region Numeric Type Configuration Methods

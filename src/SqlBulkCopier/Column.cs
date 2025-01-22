@@ -6,17 +6,47 @@ namespace SqlBulkCopier;
 /// <summary>
 /// Defines a column structure for SQL bulk copy operations with conversion capabilities.
 /// </summary>
-/// <param name="Ordinal">The zero-based position of the column in the data source.</param>
-/// <param name="Name">The name of the column.</param>
-/// <param name="SqlDbType">The SQL Server data type of the column. If null, treats data as string.</param>
-/// <param name="NumberStyles">Defines the style elements that can be present in a numeric string.</param>
-/// <param name="DateTimeStyle">Defines the formatting options for parsing date and time strings.</param>
-/// <param name="Format">The format string for parsing date, time, or custom formatted values.</param>
-/// <param name="CultureInfo">The culture-specific formatting information to use during parsing.</param>
-/// <param name="TrimMode">Specifies how whitespace should be trimmed from the input string.</param>
-/// <param name="TrimChars">The set of characters to remove when trimming. If null, removes whitespace.</param>
-/// <param name="TreatEmptyStringAsNull">If true, converts empty strings to DBNull.Value.</param>
-/// <param name="ConvertValue">Custom function for converting string values to the target type.</param>
+/// <remarks>
+/// This record provides functionality for converting string values to appropriate SQL Server data types,
+/// with support for:
+/// - Custom format strings and culture-specific parsing
+/// - String trimming operations
+/// - NULL value handling
+/// - Custom value conversion functions
+/// </remarks>
+/// <param name="Ordinal">
+/// The zero-based position of the column in the data source.
+/// </param>
+/// <param name="Name">
+/// The name of the column in the destination table.
+/// </param>
+/// <param name="SqlDbType">
+/// The SQL Server data type of the column. If null, treats data as string.
+/// </param>
+/// <param name="NumberStyles">
+/// Defines the style elements that can be present in a numeric string.
+/// </param>
+/// <param name="DateTimeStyle">
+/// Defines the formatting options for parsing date and time strings.
+/// </param>
+/// <param name="Format">
+/// The format string for parsing date, time, or custom formatted values.
+/// </param>
+/// <param name="CultureInfo">
+/// The culture-specific formatting information to use during parsing.
+/// </param>
+/// <param name="TrimMode">
+/// Specifies how whitespace should be trimmed from the input string.
+/// </param>
+/// <param name="TrimChars">
+/// The set of characters to remove when trimming. If null, removes whitespace.
+/// </param>
+/// <param name="TreatEmptyStringAsNull">
+/// If true, converts empty strings to DBNull.Value.
+/// </param>
+/// <param name="ConvertValue">
+/// Custom function for converting string values to the target type.
+/// </param>
 public abstract record Column(
     int Ordinal,
     string Name,
@@ -38,6 +68,14 @@ public abstract record Column(
     /// <exception cref="ArgumentOutOfRangeException">Thrown when TrimMode has an invalid value.</exception>
     /// <exception cref="InvalidCastException">Thrown when a string cannot be converted to the specified type.</exception>
     /// <exception cref="InvalidOperationException">Thrown when conversion is attempted for an unsupported SqlDbType.</exception>
+    /// <remarks>
+    /// The conversion process follows these steps:
+    /// 1. Applies configured trimming operations to the input string
+    /// 2. Uses custom conversion function if provided
+    /// 3. Converts to specified SQL type if SqlDbType is set
+    /// 4. Handles empty strings according to TreatEmptyStringAsNull setting
+    /// 5. Returns the string as-is if no other conversion applies
+    /// </remarks>
     public object Convert(string s)
     {
         // Apply the specified trimming operation to the input string
@@ -79,8 +117,25 @@ public abstract record Column(
     /// </summary>
     /// <param name="trimValue">The pre-trimmed string value to convert.</param>
     /// <returns>The converted value as an object, or DBNull.Value for null/empty strings.</returns>
-    /// <exception cref="InvalidCastException">Thrown when the string cannot be converted to the specified type.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when trimValue is null.</exception>
+    /// <exception cref="InvalidCastException">
+    /// Thrown when:
+    /// - A numeric string contains invalid characters
+    /// - A date/time string has an invalid format
+    /// - A binary string is not valid Base64
+    /// - A bit value is not a valid boolean representation
+    /// </exception>
     /// <exception cref="InvalidOperationException">Thrown when conversion is attempted for an unsupported SqlDbType.</exception>
+    /// <remarks>
+    /// This method handles conversion to all supported SQL Server data types, including:
+    /// - Numeric types (INT, BIGINT, DECIMAL, etc.)
+    /// - Date and time types (DATE, DATETIME, TIME, etc.)
+    /// - Binary types (BINARY, VARBINARY, IMAGE)
+    /// - Special types (BIT, UNIQUEIDENTIFIER)
+    /// 
+    /// Each type conversion respects the configured format strings, culture information,
+    /// and style settings where applicable.
+    /// </remarks>
     private object ConvertSqlDbType(string trimValue)
     {
         // Return DBNull for empty strings to maintain SQL NULL semantics
