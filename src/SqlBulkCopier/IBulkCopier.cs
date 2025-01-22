@@ -8,12 +8,21 @@ namespace SqlBulkCopier;
 /// Provides functionality for efficiently inserting large amounts of data into SQL Server tables
 /// with support for batching, retry logic, and progress notification.
 /// </summary>
+/// <remarks>
+/// This interface encapsulates the bulk copy functionality, providing a robust way to perform
+/// high-performance data insertions into SQL Server tables. It supports features such as
+/// batch processing, automatic retries, progress tracking, and configurable error handling.
+/// </remarks>
 public interface IBulkCopier : IDisposable
 {
     /// <summary>
     /// Event that fires when a specified number of rows have been copied to the server.
     /// The number of rows is determined by the NotifyAfter property.
     /// </summary>
+    /// <remarks>
+    /// This event can be used to track the progress of large bulk copy operations
+    /// and implement progress reporting in client applications.
+    /// </remarks>
     event SqlRowsCopiedEventHandler SqlRowsCopied;
 
     /// <summary>
@@ -72,10 +81,10 @@ public interface IBulkCopier : IDisposable
     /// <summary>
     /// Asynchronously writes the data from the specified stream to the server.
     /// </summary>
-    /// <param name="stream">The stream containing the data to be copied to the server.</param>
-    /// <param name="encoding">The character encoding to use when reading the stream.</param>
-    /// <param name="timeout">The time to wait for each batch to complete before generating an error.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
+    /// <param name="stream">The stream containing the data to be copied to the server. The stream should contain properly formatted data that matches the destination table schema.</param>
+    /// <param name="encoding">The character encoding to use when reading the stream. This should match the encoding of the data in the stream.</param>
+    /// <param name="timeout">The time to wait for each batch to complete before generating an error. Use TimeSpan.Zero for no timeout.</param>
+    /// <returns>A task that represents the asynchronous operation. The task completes when all data has been copied to the server.</returns>
     /// <exception cref="InvalidOperationException">
     /// Thrown when:
     /// - Retries are configured with an external transaction
@@ -83,5 +92,7 @@ public interface IBulkCopier : IDisposable
     /// - Retries are enabled without table truncation
     /// - The maximum retry count is exceeded
     /// </exception>
+    /// <exception cref="SqlException">Thrown when a SQL Server error occurs during the bulk copy operation.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when stream or encoding is null.</exception>
     Task WriteToServerAsync(Stream stream, Encoding encoding, TimeSpan timeout);
 }

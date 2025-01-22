@@ -3,7 +3,19 @@ using Microsoft.Data.SqlClient;
 
 namespace SqlBulkCopier;
 
-/// <inheritdoc />
+/// <summary>
+/// Implements the bulk copy operations for SQL Server, providing efficient data transfer capabilities.
+/// This class encapsulates SqlBulkCopy functionality with additional features such as retry logic,
+/// progress tracking, and transaction support.
+/// </summary>
+/// <remarks>
+/// This implementation supports various initialization scenarios including:
+/// - Using an existing SQL connection
+/// - Using a connection string
+/// - Using bulk copy options
+/// - Using an external transaction
+/// The class manages resources properly and implements IDisposable pattern.
+/// </remarks>
 public class BulkCopier : IBulkCopier
 {
     /// <inheritdoc />
@@ -11,30 +23,35 @@ public class BulkCopier : IBulkCopier
 
     /// <summary>
     /// The underlying SqlBulkCopy instance that performs the actual bulk copy operations.
+    /// This instance is managed internally and disposed when the BulkCopier is disposed.
     /// </summary>
     private readonly SqlBulkCopy _sqlBulkCopy;
 
     /// <summary>
     /// The connection string used to connect to the database when no external connection is provided.
+    /// This is stored to manage connection lifecycle when using connection string-based initialization.
     /// </summary>
     private readonly string? _connectionString;
 
     /// <summary>
     /// The external SQL connection, if provided.
+    /// When using an external connection, the lifecycle is managed by the caller.
     /// </summary>
     private readonly SqlConnection? _connection;
 
     /// <summary>
     /// The external transaction, if provided.
+    /// When using an external transaction, the transaction scope is managed by the caller.
     /// </summary>
     private readonly SqlTransaction? _externalTransaction;
 
     /// <summary>
     /// Initializes a new instance of the BulkCopier class using an existing SQL connection.
     /// </summary>
-    /// <param name="destinationTableName">The name of the destination table.</param>
+    /// <param name="destinationTableName">The name of the destination table where the data will be copied.</param>
     /// <param name="dataReaderBuilder">The data reader builder that will construct the data reader for the bulk copy operation.</param>
-    /// <param name="connection">The SQL connection to use.</param>
+    /// <param name="connection">The SQL connection to use. The connection must be opened before calling WriteToServerAsync.</param>
+    /// <exception cref="ArgumentNullException">Thrown when any parameter is null.</exception>
     public BulkCopier(
         string destinationTableName,
         IDataReaderBuilder dataReaderBuilder,
@@ -124,6 +141,7 @@ public class BulkCopier : IBulkCopier
 
     /// <summary>
     /// Gets the data reader builder used to construct the data reader for the bulk copy operation.
+    /// The builder is responsible for creating a data reader that matches the destination table schema.
     /// </summary>
     public IDataReaderBuilder DataReaderBuilder { get; init; }
 
@@ -162,7 +180,30 @@ public class BulkCopier : IBulkCopier
     /// <inheritdoc />
     public long RowsCopied64 => _sqlBulkCopy.RowsCopied64;
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Asynchronously writes data from the specified stream to the SQL Server table.
+    /// Supports automatic retries, table truncation, and progress notification through events.
+    /// </summary>
+    /// <param name="stream">The stream containing the data to be copied. The stream must be readable and seekable.</param>
+    /// <param name="encoding">The character encoding to use when reading the stream. Must match the encoding of the data in the stream.</param>
+    /// <param name="timeout">The time to wait for each batch to complete before generating an error. Use TimeSpan.Zero for no timeout.</param>
+    /// <returns>A task that represents the asynchronous bulk copy operation.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when:
+    /// - Retries are configured with an external transaction
+    /// - Retries are configured with an external connection
+    /// - Retries are enabled without table truncation
+    /// - The maximum retry count is exceeded during retry attempts
+    /// </exception>
+    /// <exception cref="SqlException">Thrown when a SQL Server error occurs during the bulk copy operation.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when stream or encoding is null.</exception>
+    /// <remarks>
+    /// This method implements a retry mechanism with optional exponential backoff.
+    /// When retries are enabled:
+    /// - The stream position is reset to the beginning for each retry attempt
+    /// - The destination table is truncated before each attempt if TruncateBeforeBulkInsert is true
+    /// - The delay between retries increases exponentially if UseExponentialBackoff is true
+    /// </remarks>
     public async Task WriteToServerAsync(Stream stream, Encoding encoding, TimeSpan timeout)
     {
         _sqlBulkCopy.BulkCopyTimeout = (int)timeout.TotalSeconds;
@@ -230,8 +271,10 @@ public class BulkCopier : IBulkCopier
 
     /// <summary>
     /// Truncates the destination table asynchronously.
+    /// This operation is performed within the same transaction context as the bulk copy operation if available.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
+    /// <exception cref="SqlException">Thrown when the TRUNCATE TABLE operation fails.</exception>
     private async Task TruncateTableAsync()
     {
         var query = $"TRUNCATE TABLE {_sqlBulkCopy.DestinationTableName}";
@@ -281,11 +324,13 @@ public class BulkCopier : IBulkCopier
     }
 
     /// <summary>
-    /// Handles the SqlRowsCopied event from the underlying SqlBulkCopy instance
-    /// and raises the corresponding event on this instance.
+    /// Event handler for the SqlBulkCopy.SqlRowsCopied event.
+    /// Propagates the event to subscribers of this class's SqlRowsCopied event.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
-    /// <param name="e">The event arguments.</param>
-    private void SqlBulkCopyOnSqlRowsCopied(object sender, SqlRowsCopiedEventArgs e)
-        => SqlRowsCopied?.Invoke(sender, e);
+    /// <param name="args">The event arguments containing the number of rows copied.</param>
+    private void SqlBulkCopyOnSqlRowsCopied(object sender, SqlRowsCopiedEventArgs args)
+    {
+        SqlRowsCopied?.Invoke(this, args);
+    }
 }
