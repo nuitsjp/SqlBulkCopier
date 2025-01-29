@@ -1,5 +1,10 @@
 ﻿namespace SqlBulkCopier.FixedLength;
 
+/// <summary>
+/// Provides extension methods for byte arrays to perform common operations such as
+/// checking if the array starts with or ends with a specific pattern, and comparing
+/// two byte arrays for equality.
+/// </summary>
 public static class ByteArrayExtensions
 {
     /// <summary>
@@ -8,6 +13,7 @@ public static class ByteArrayExtensions
     /// <param name="source">The source byte array to search within.</param>
     /// <param name="pattern">The pattern to search for.</param>
     /// <returns>true if the start of the array matches the pattern; otherwise, false.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when the source or pattern is null.</exception>
     public static bool StartsWith(this byte[] source, byte[] pattern)
     {
         if (source == null) throw new ArgumentNullException(nameof(source));
@@ -24,6 +30,7 @@ public static class ByteArrayExtensions
     /// <param name="source">The source byte array to search within.</param>
     /// <param name="pattern">The pattern to search for.</param>
     /// <returns>true if the end of the array matches the pattern; otherwise, false.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when the source or pattern is null.</exception>
     public static bool EndsWith(this byte[] source, byte[] pattern)
     {
         if (source == null) throw new ArgumentNullException(nameof(source));
@@ -39,6 +46,7 @@ public static class ByteArrayExtensions
     /// <param name="source">The source byte array to compare.</param>
     /// <param name="other">The byte array to compare against.</param>
     /// <returns>true if the arrays are equal; otherwise, false.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when the source or other is null.</exception>
     public static bool SequenceEqualsOptimized(this byte[] source, byte[] other)
     {
         if (source == null) throw new ArgumentNullException(nameof(source));
