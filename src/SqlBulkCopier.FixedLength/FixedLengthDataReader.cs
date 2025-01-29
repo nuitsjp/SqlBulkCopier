@@ -4,41 +4,41 @@ using FixedLengthHelper;
 namespace SqlBulkCopier.FixedLength;
 
 /// <summary>
-/// IDataReader implementation for fixed-length files.
+/// Provides an IDataReader implementation for reading data from fixed-length files.
 /// </summary>
 public class FixedLengthDataReader : IDataReader
 {
     /// <summary>
-    /// IFixedLengthReader instance.
+    /// The IFixedLengthReader instance used to read the fixed-length file.
     /// </summary>
     private readonly IFixedLengthReader _fixedLengthReader;
-    
+
     /// <summary>
-    /// Name and ordinal of columns.
+    /// A dictionary mapping column names to their ordinal positions.
     /// </summary>
     private readonly IReadOnlyDictionary<string, int> _columnOrdinals;
-    
+
     /// <summary>
-    /// Columns.
+    /// A list of columns in the fixed-length file.
     /// </summary>
     private readonly IReadOnlyList<FixedLengthColumn> _columns;
 
     /// <summary>
-    /// Row filter.
+    /// A predicate used to filter rows.
     /// </summary>
     private readonly Predicate<IFixedLengthReader> _rowFilter;
-    
+
     /// <summary>
-    /// Disposed flag.
+    /// A flag indicating whether the reader has been disposed.
     /// </summary>
     private bool _isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FixedLengthDataReader"/> class.
     /// </summary>
-    /// <param name="fixedLengthReader"></param>
-    /// <param name="columns"></param>
-    /// <param name="rowFilter"></param>
+    /// <param name="fixedLengthReader">The fixed-length reader instance.</param>
+    /// <param name="columns">The list of columns in the fixed-length file.</param>
+    /// <param name="rowFilter">The predicate used to filter rows.</param>
     public FixedLengthDataReader(
         IFixedLengthReader fixedLengthReader,
         IReadOnlyList<FixedLengthColumn> columns,
@@ -83,7 +83,7 @@ public class FixedLengthDataReader : IDataReader
     public object GetValue(int i)
     {
         if (_columns.Count <= i) throw new IndexOutOfRangeException($"Field with ordinal '{i}' was not found.");
-        
+
         var column = _columns[i];
         return column.Convert(_fixedLengthReader.GetField(column.OffsetBytes, column.LengthBytes));
     }
@@ -105,6 +105,10 @@ public class FixedLengthDataReader : IDataReader
         Dispose(true);
     }
 
+    /// <summary>
+    /// Disposes the reader and releases any resources.
+    /// </summary>
+    /// <param name="disposing">True if called from Dispose; false if called from a finalizer.</param>
     private void Dispose(bool disposing)
     {
         if (disposing)
@@ -248,7 +252,7 @@ public class FixedLengthDataReader : IDataReader
     {
         while (_fixedLengthReader.Read())
         {
-            if(_rowFilter(_fixedLengthReader))
+            if (_rowFilter(_fixedLengthReader))
             {
                 return true;
             }
