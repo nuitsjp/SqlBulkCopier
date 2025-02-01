@@ -8,8 +8,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="FixedLengthHelper" Version="1.5.0" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+		<PackageReference Include="FixedLengthHelper" Version="1.6.0" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
