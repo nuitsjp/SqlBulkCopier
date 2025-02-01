@@ -36,6 +36,9 @@ public static class CsvBulkCopierParser
             builder.AddColumnMapping(column.Key, SetupContext(column));
         }
 
+        var truncateBeforeBulkInsert = sqlBulkCopier.GetValue<bool?>("TruncateBeforeBulkInsert") ?? false;
+        builder.SetTruncateBeforeBulkInsert(truncateBeforeBulkInsert);
+
         return builder;
     }
 
@@ -61,6 +64,9 @@ public static class CsvBulkCopierParser
             }
             builder.AddColumnMapping(column.Key, ordinal.Value, SetupContext(column));
         }
+
+        var truncateBeforeBulkInsert = sqlBulkCopier.GetValue<bool?>("TruncateBeforeBulkInsert") ?? false;
+        builder.SetTruncateBeforeBulkInsert(truncateBeforeBulkInsert);
 
         return builder;
 
