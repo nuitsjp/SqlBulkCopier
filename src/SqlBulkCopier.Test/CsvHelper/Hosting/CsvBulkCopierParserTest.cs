@@ -169,6 +169,265 @@ public class CsvBulkCopierParserTest
             var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
             bulkCopier.TruncateBeforeBulkInsert.ShouldBeFalse();
         }
+
+        [Fact]
+        public void MaxRetryCount_SetCorrectly()
+        {
+            // Arrange
+            const string settings = """
+                                    {
+                                      "SqlBulkCopier": {
+                                        "DestinationTableName": "[dbo].[Customer]",
+                                        "HasHeader": true,
+                                        "MaxRetryCount": 5
+                                      }
+                                    }
+                                    """;
+            var configuration = BuildJsonConfig(settings);
+
+            // Act
+            var bulkCopierBuilder = CsvBulkCopierParser.Parse(configuration);
+
+            // Assert
+            using var connection = OpenConnection();
+            var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
+            bulkCopier.MaxRetryCount.ShouldBe(5);
+        }
+
+        [Fact]
+        public void MaxRetryCount_NotExists()
+        {
+            // Arrange
+            const string settings = """
+                                    {
+                                      "SqlBulkCopier": {
+                                        "DestinationTableName": "[dbo].[Customer]",
+                                        "HasHeader": true
+                                      }
+                                    }
+                                    """;
+            var configuration = BuildJsonConfig(settings);
+
+            // Act
+            var bulkCopierBuilder = CsvBulkCopierParser.Parse(configuration);
+
+            // Assert
+            using var connection = OpenConnection();
+            var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
+            bulkCopier.MaxRetryCount.ShouldBe(0); // Assuming default is 0
+        }
+
+        [Fact]
+        public void InitialDelay_SetCorrectly()
+        {
+            // Arrange
+            const string settings = """
+                                    {
+                                      "SqlBulkCopier": {
+                                        "DestinationTableName": "[dbo].[Customer]",
+                                        "HasHeader": true,
+                                        "InitialDelay": "00:00:05"
+                                      }
+                                    }
+                                    """;
+            var configuration = BuildJsonConfig(settings);
+
+            // Act
+            var bulkCopierBuilder = CsvBulkCopierParser.Parse(configuration);
+
+            // Assert
+            using var connection = OpenConnection();
+            var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
+            bulkCopier.InitialDelay.ShouldBe(TimeSpan.FromSeconds(5));
+        }
+
+        [Fact]
+        public void InitialDelay_NotExists()
+        {
+            // Arrange
+            const string settings = """
+                                    {
+                                      "SqlBulkCopier": {
+                                        "DestinationTableName": "[dbo].[Customer]",
+                                        "HasHeader": true
+                                      }
+                                    }
+                                    """;
+            var configuration = BuildJsonConfig(settings);
+
+            // Act
+            var bulkCopierBuilder = CsvBulkCopierParser.Parse(configuration);
+
+            // Assert
+            using var connection = OpenConnection();
+            var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
+            bulkCopier.InitialDelay.ShouldBe(TimeSpan.Zero); // Assuming default is TimeSpan.Zero
+        }
+
+        [Fact]
+        public void UseExponentialBackoff_SetCorrectly()
+        {
+            // Arrange
+            const string settings = """
+                                    {
+                                      "SqlBulkCopier": {
+                                        "DestinationTableName": "[dbo].[Customer]",
+                                        "HasHeader": true,
+                                        "UseExponentialBackoff": true
+                                      }
+                                    }
+                                    """;
+            var configuration = BuildJsonConfig(settings);
+
+            // Act
+            var bulkCopierBuilder = CsvBulkCopierParser.Parse(configuration);
+
+            // Assert
+            using var connection = OpenConnection();
+            var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
+            bulkCopier.UseExponentialBackoff.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void UseExponentialBackoff_False()
+        {
+            // Arrange
+            const string settings = """
+                                    {
+                                      "SqlBulkCopier": {
+                                        "DestinationTableName": "[dbo].[Customer]",
+                                        "HasHeader": true,
+                                        "UseExponentialBackoff": false
+                                      }
+                                    }
+                                    """;
+            var configuration = BuildJsonConfig(settings);
+
+            // Act
+            var bulkCopierBuilder = CsvBulkCopierParser.Parse(configuration);
+
+            // Assert
+            using var connection = OpenConnection();
+            var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
+            bulkCopier.UseExponentialBackoff.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void UseExponentialBackoff_NotExists()
+        {
+            // Arrange
+            const string settings = """
+                                    {
+                                      "SqlBulkCopier": {
+                                        "DestinationTableName": "[dbo].[Customer]",
+                                        "HasHeader": true
+                                      }
+                                    }
+                                    """;
+            var configuration = BuildJsonConfig(settings);
+
+            // Act
+            var bulkCopierBuilder = CsvBulkCopierParser.Parse(configuration);
+
+            // Assert
+            using var connection = OpenConnection();
+            var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
+            bulkCopier.UseExponentialBackoff.ShouldBeFalse(); // Assuming default is false
+        }
+
+        [Fact]
+        public void BatchSize_SetCorrectly()
+        {
+            // Arrange
+            const string settings = """
+                                    {
+                                      "SqlBulkCopier": {
+                                        "DestinationTableName": "[dbo].[Customer]",
+                                        "HasHeader": true,
+                                        "BatchSize": 1000
+                                      }
+                                    }
+                                    """;
+            var configuration = BuildJsonConfig(settings);
+
+            // Act
+            var bulkCopierBuilder = CsvBulkCopierParser.Parse(configuration);
+
+            // Assert
+            using var connection = OpenConnection();
+            var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
+            bulkCopier.BatchSize.ShouldBe(1000);
+        }
+
+        [Fact]
+        public void BatchSize_NotExists()
+        {
+            // Arrange
+            const string settings = """
+                                    {
+                                      "SqlBulkCopier": {
+                                        "DestinationTableName": "[dbo].[Customer]",
+                                        "HasHeader": true
+                                      }
+                                    }
+                                    """;
+            var configuration = BuildJsonConfig(settings);
+
+            // Act
+            var bulkCopierBuilder = CsvBulkCopierParser.Parse(configuration);
+
+            // Assert
+            using var connection = OpenConnection();
+            var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
+            bulkCopier.BatchSize.ShouldBe(0); // Assuming default is 0
+        }
+
+        [Fact]
+        public void NotifyAfter_SetCorrectly()
+        {
+            // Arrange
+            const string settings = """
+                                    {
+                                      "SqlBulkCopier": {
+                                        "DestinationTableName": "[dbo].[Customer]",
+                                        "HasHeader": true,
+                                        "NotifyAfter": 500
+                                      }
+                                    }
+                                    """;
+            var configuration = BuildJsonConfig(settings);
+
+            // Act
+            var bulkCopierBuilder = CsvBulkCopierParser.Parse(configuration);
+
+            // Assert
+            using var connection = OpenConnection();
+            var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
+            bulkCopier.NotifyAfter.ShouldBe(500);
+        }
+
+        [Fact]
+        public void NotifyAfter_NotExists()
+        {
+            // Arrange
+            const string settings = """
+                                    {
+                                      "SqlBulkCopier": {
+                                        "DestinationTableName": "[dbo].[Customer]",
+                                        "HasHeader": true
+                                      }
+                                    }
+                                    """;
+            var configuration = BuildJsonConfig(settings);
+
+            // Act
+            var bulkCopierBuilder = CsvBulkCopierParser.Parse(configuration);
+
+            // Assert
+            using var connection = OpenConnection();
+            var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
+            bulkCopier.NotifyAfter.ShouldBe(0); // Assuming default is 0
+        }
     }
     public class ParseHasHeaderBulkCopier
     {

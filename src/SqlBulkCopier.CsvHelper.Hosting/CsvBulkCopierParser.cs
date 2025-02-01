@@ -39,6 +39,21 @@ public static class CsvBulkCopierParser
         var truncateBeforeBulkInsert = sqlBulkCopier.GetValue<bool?>("TruncateBeforeBulkInsert") ?? false;
         builder.SetTruncateBeforeBulkInsert(truncateBeforeBulkInsert);
 
+        var maxRetryCount = sqlBulkCopier.GetValue<int?>("MaxRetryCount") ?? 0;
+        builder.SetMaxRetryCount(maxRetryCount);
+
+        var initialDelay = sqlBulkCopier.GetValue<TimeSpan?>("InitialDelay") ?? TimeSpan.Zero;
+        builder.SetInitialDelay(initialDelay);
+
+        var useExponentialBackoff = sqlBulkCopier.GetValue<bool?>("UseExponentialBackoff") ?? false;
+        builder.SetUseExponentialBackoff(useExponentialBackoff);
+
+        var batchSize = sqlBulkCopier.GetValue<int?>("BatchSize") ?? 0;
+        builder.SetBatchSize(batchSize);
+
+        var notifyAfter = sqlBulkCopier.GetValue<int?>("NotifyAfter") ?? 0;
+        builder.SetNotifyAfter(notifyAfter);
+
         return builder;
     }
 
@@ -67,6 +82,21 @@ public static class CsvBulkCopierParser
 
         var truncateBeforeBulkInsert = sqlBulkCopier.GetValue<bool?>("TruncateBeforeBulkInsert") ?? false;
         builder.SetTruncateBeforeBulkInsert(truncateBeforeBulkInsert);
+
+        var maxRetryCount = sqlBulkCopier.GetValue<int?>("MaxRetryCount") ?? 0;
+        builder.SetMaxRetryCount(maxRetryCount);
+
+        var initialDelay = sqlBulkCopier.GetValue<TimeSpan?>("InitialDelay") ?? TimeSpan.Zero;
+        builder.SetInitialDelay(initialDelay);
+
+        var useExponentialBackoff = sqlBulkCopier.GetValue<bool?>("UseExponentialBackoff") ?? false;
+        builder.SetUseExponentialBackoff(useExponentialBackoff);
+
+        var batchSize = sqlBulkCopier.GetValue<int?>("BatchSize") ?? 0;
+        builder.SetBatchSize(batchSize);
+
+        var notifyAfter = sqlBulkCopier.GetValue<int?>("NotifyAfter") ?? 0;
+        builder.SetNotifyAfter(notifyAfter);
 
         return builder;
 
