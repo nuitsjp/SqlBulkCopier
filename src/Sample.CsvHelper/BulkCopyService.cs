@@ -19,7 +19,8 @@ public class BulkCopyService(
         await using var connection = await sqlConnectionProvider.OpenAsync();
 
         // Write data to the database using the bulk copier
-        await using Stream stream = File.OpenRead(@"Assets\Customer.csv");
+        await using var stream = File.OpenRead(
+            Path.Combine(AppContext.BaseDirectory, "Assets", "Customer.csv"));
 
         // Bulk copy to the database
         var bulkCopier = bulkCopierBuilder.Build(connection);
