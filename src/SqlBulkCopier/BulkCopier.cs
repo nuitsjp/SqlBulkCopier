@@ -246,6 +246,14 @@ public class BulkCopier : IBulkCopier
                 // Exit the retry loop on successful completion
                 break;
             }
+            catch (ArgumentException)
+            {
+                throw;
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 currentRetryCount++;

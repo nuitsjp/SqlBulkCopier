@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "Benchmark\Benc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.CsvHelper.FromApi", "Sample.CsvHelper.FromApi\Sample.CsvHelper.FromApi.csproj", "{81C2A223-72FC-4B74-BCC3-5F7F8155DF56}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.FixedLength.FromApi", "Sample.FixedLength.FromApi\Sample.FixedLength.FromApi.csproj", "{4CFBD239-3E01-4328-9B4C-4EEF05AE252D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,10 @@ Global
 		{81C2A223-72FC-4B74-BCC3-5F7F8155DF56}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81C2A223-72FC-4B74-BCC3-5F7F8155DF56}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81C2A223-72FC-4B74-BCC3-5F7F8155DF56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CFBD239-3E01-4328-9B4C-4EEF05AE252D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CFBD239-3E01-4328-9B4C-4EEF05AE252D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CFBD239-3E01-4328-9B4C-4EEF05AE252D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CFBD239-3E01-4328-9B4C-4EEF05AE252D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -93,6 +99,7 @@ Global
 		{DDDD4647-ED1D-4B83-94F5-FD1A343C37D6} = {514A3C1E-4F5C-44EB-9E51-9F58DD4A5CC3}
 		{17DCDEE7-8F00-460D-919C-1FF19AE94EE4} = {514A3C1E-4F5C-44EB-9E51-9F58DD4A5CC3}
 		{81C2A223-72FC-4B74-BCC3-5F7F8155DF56} = {514A3C1E-4F5C-44EB-9E51-9F58DD4A5CC3}
+		{4CFBD239-3E01-4328-9B4C-4EEF05AE252D} = {514A3C1E-4F5C-44EB-9E51-9F58DD4A5CC3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EF09E00D-B913-4C37-9CB3-9FE140D1D1B2}
