@@ -25,7 +25,7 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
     /// <summary>
     /// List of column contexts for mapping fixed-length columns to database columns.
     /// </summary>
-    private readonly List<FixedLengthColumnContext> _columnsContext = new();
+    private readonly List<FixedLengthColumnContext> _columnsContext = [];
 
     /// <summary>
     /// Gets the read-only list of column contexts.

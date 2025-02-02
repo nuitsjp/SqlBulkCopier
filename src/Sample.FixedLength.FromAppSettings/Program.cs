@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Sample.FixedLength;
 using Sample.FixedLength.FromAppSettings;
 using SqlBulkCopier.FixedLength.Hosting;
 

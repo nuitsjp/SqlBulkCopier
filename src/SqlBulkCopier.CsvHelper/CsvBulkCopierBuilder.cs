@@ -38,7 +38,7 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
     /// <summary>
     /// List of column contexts for mapping CSV columns to database columns.
     /// </summary>
-    private readonly List<CsvColumnContext> _columnContexts = new();
+    private readonly List<CsvColumnContext> _columnContexts = [];
 
     /// <summary>
     /// Gets the read-only list of column contexts.
