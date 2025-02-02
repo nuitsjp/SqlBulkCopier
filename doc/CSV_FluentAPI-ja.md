@@ -101,6 +101,10 @@ public class BulkCopyService(
 |------|------|----------|
 | CSVファイルをヘッダー有りで処理する | `CreateWithHeader` | [使用方法](#createwithheader) |
 | CSVファイルをヘッダー無しで処理する | `CreateNoHeader` | [使用方法](#createnoheader) |
+| データ型の設定 | `AsInt`, `AsDate`, `AsDecimal`, etc. | [使用方法](#データ型の設定) |
+| トリム操作 | `Trim`, `TrimStart`, `TrimEnd` | [使用方法](#トリム操作) |
+| 空文字列のNULL扱い | `TreatEmptyStringAsNull` | [使用方法](#空文字列のnull扱い) |
+| カスタム変換 | `Convert` | [使用方法](#カスタム変換) |
 | `IBulkCopier`のインスタンスを作成する | `Build` | [使用方法](#buildメソッド) |
 | 事前にテーブルをトランケートする | `SetTruncateBeforeBulkInsert` | [使用方法](#settruncatebeforebulkinsert) |
 | 行ごとに取り込み対象を判定する | `SetRowFilter` | [使用方法](#setrowfilter) |
@@ -136,6 +140,75 @@ var bulkCopier = CsvBulkCopierBuilder
 ```
 
 この関数は、CSVファイルの列位置を使用して、データベース列にマッピングします。
+
+#### データ型の設定
+`IColumnContext`を使用して、CSVデータをSQL Serverのデータ型にマッピングすることができます。
+
+```csharp
+var bulkCopier = CsvBulkCopierBuilder
+    .CreateWithHeader("[dbo].[Customer]")
+    .AddColumnMapping("CustomerId", c => c.AsInt())
+    .AddColumnMapping("BirthDate", c => c.AsDate("yyyy-MM-dd"))
+    .AddColumnMapping("Salary", c => c.AsDecimal())
+    .Build(configuration.GetConnectionString("DefaultConnection")!);
+```
+
+利用可能なデータ型：
+
+すべての型を明示的に設定する必要はありません。文字列から自動変換できる型は記述を省略することができます。
+
+- **AsBigInt**: SQL BIGINT型にマッピング
+- **AsBit**: SQL BIT型にマッピング
+- **AsUniqueIdentifier**: SQL UNIQUEIDENTIFIER型にマッピング
+- **AsDate**: SQL DATE型にマッピング
+- **AsDateTime**: SQL DATETIME型にマッピング
+- **AsDecimal**: SQL DECIMAL型にマッピング
+- **AsFloat**: SQL FLOAT型にマッピング
+- **AsInt**: SQL INT型にマッピング
+- **AsMoney**: SQL MONEY型にマッピング
+- **AsReal**: SQL REAL型にマッピング
+- **AsSmallDateTime**: SQL SMALLDATETIME型にマッピング
+- **AsSmallInt**: SQL SMALLINT型にマッピング
+- **AsSmallMoney**: SQL SMALLMONEY型にマッピング
+- **AsTimestamp**: SQL TIMESTAMP型にマッピング
+- **AsTinyInt**: SQL TINYINT型にマッピング
+- **AsDateTime2**: SQL DATETIME2型にマッピング
+- **AsTime**: SQL TIME型にマッピング
+- **AsDateTimeOffset**: SQL DATETIMEOFFSET型にマッピング
+- **AsBinary**: SQL BINARY型にマッピング
+- **AsVarBinary**: SQL VARBINARY型にマッピング
+- **AsImage**: SQL IMAGE型にマッピング
+
+#### トリム操作
+文字列のトリム操作を行うことができます。これにより、データの前後の空白や特定の文字を削除できます。
+
+```csharp
+var bulkCopier = CsvBulkCopierBuilder
+    .CreateWithHeader("[dbo].[Customer]")
+    .AddColumnMapping("FirstName", c => c.Trim())
+    .AddColumnMapping("LastName", c => c.TrimEnd())
+    .Build(configuration.GetConnectionString("DefaultConnection")!);
+```
+
+#### 空文字列のNULL扱い
+空の文字列をデータベースに挿入する際にNULLとして扱うことができます。
+
+```csharp
+var bulkCopier = CsvBulkCopierBuilder
+    .CreateWithHeader("[dbo].[Customer]")
+    .AddColumnMapping("MiddleName", c => c.TreatEmptyStringAsNull())
+    .Build(configuration.GetConnectionString("DefaultConnection")!);
+```
+
+#### カスタム変換
+カスタム変換関数を指定することができます。これにより、文字列を任意のオブジェクトに変換することができます。
+
+```csharp
+var bulkCopier = CsvBulkCopierBuilder
+    .CreateWithHeader("[dbo].[Customer]")
+    .AddColumnMapping("CustomField", c => c.Convert(value => CustomConversion(value)))
+    .Build(configuration.GetConnectionString("DefaultConnection")!);
+```
 
 #### Buildメソッド
 `Build`メソッドは、`IBulkCopier`のインスタンスを作成するための重要なメソッドです。以下の4つのオーバーロードがあります：
