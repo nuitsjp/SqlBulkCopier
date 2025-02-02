@@ -99,6 +99,7 @@ public class BulkCopyService(
 
 | 目的 | 関数 | 使用方法 |
 |------|------|----------|
+| `IBulkCopier`のインスタンスを作成する | `Build` | [使用方法](#buildメソッド) |
 | 事前にテーブルをトランケートする | `SetTruncateBeforeBulkInsert` | [使用方法](#settruncatebeforebulkinsert) |
 | 行ごとに取り込み対象を判定する | `SetRowFilter` | [使用方法](#setrowfilter) |
 | CSV列をデータベース列にマッピング（ヘッダーあり） | `AddColumnMapping` | [使用方法](#addcolumnmapping-ヘッダーあり) |
@@ -204,6 +205,34 @@ var bulkCopier = CsvBulkCopierBuilder
     .SetDefaultColumnContext(c => c.TrimEnd().TreatEmptyStringAsNull())
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
+
+#### Buildメソッド
+`Build`メソッドは、`IBulkCopier`のインスタンスを作成するための重要なメソッドです。以下の4つのオーバーロードがあります：
+
+1. **`Build(SqlConnection connection)`**:
+   - 指定されたSQL接続を使用して`IBulkCopier`のインスタンスを作成します。
+   - `connection`パラメータは、バルクコピー操作を実行する前に開かれている必要があります。
+   - `ArgumentNullException`が、`connection`が`null`の場合にスローされます。
+
+2. **`Build(string connectionString)`**:
+   - 指定された接続文字列を使用して`IBulkCopier`のインスタンスを作成します。
+   - `connectionString`パラメータは、SQL Serverへの接続を確立するために必要なすべての情報を含んでいる必要があります。
+   - `ArgumentNullException`が、`connectionString`が`null`または空の場合にスローされます。
+   - `ArgumentException`が、`connectionString`が無効な場合にスローされます。
+
+3. **`Build(string connectionString, SqlBulkCopyOptions copyOptions)`**:
+   - 指定された接続文字列とコピーオプションを使用して`IBulkCopier`のインスタンスを作成します。
+   - `connectionString`パラメータは、SQL Serverへの接続を確立するために必要なすべての情報を含んでいる必要があります。
+   - `copyOptions`は、操作の動作を構成するためのSQLバルクコピーオプションです。
+   - `ArgumentNullException`が、`connectionString`が`null`または空の場合にスローされます。
+   - `ArgumentException`が、`connectionString`が無効な場合にスローされます。
+
+4. **`Build(SqlConnection connection, SqlBulkCopyOptions copyOptions, SqlTransaction externalTransaction)`**:
+   - 指定された接続、オプション、およびトランザクションを使用して`IBulkCopier`のインスタンスを作成します。
+   - `connection`パラメータは、バルクコピー操作を実行する前に開かれている必要があります。
+   - `copyOptions`は、操作の動作を構成するためのSQLバルクコピーオプションです。
+   - `externalTransaction`は、バルクコピー操作のために使用される外部トランザクションです。すべてのバルクコピー操作はこのトランザクションの一部となります。
+   - `ArgumentNullException`が、`connection`または`externalTransaction`が`null`の場合にスローされます。
 
 ### ICsvBulkCopierBuilder
 - **概要**: CSVデータを扱うバルクコピーユーティリティのビルダーインターフェース。
