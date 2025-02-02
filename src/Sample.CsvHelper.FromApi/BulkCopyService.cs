@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using SqlBulkCopier.CsvHelper;
