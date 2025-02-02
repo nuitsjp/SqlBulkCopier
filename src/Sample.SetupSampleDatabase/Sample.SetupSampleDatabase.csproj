@@ -16,7 +16,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="..\Sample.CsvHelper\appsettings.json" Link="appsettings.json">
+		<Content Include="..\Sample.CsvHelper.FromApi\appsettings.json" Link="appsettings.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
