@@ -99,17 +99,71 @@ public class BulkCopyService(
 
 | 目的 | 関数 | 使用方法 |
 |------|------|----------|
+| CSVファイルをヘッダー有りで処理する | `CreateWithHeader` | [使用方法](#createwithheader) |
+| CSVファイルをヘッダー無しで処理する | `CreateNoHeader` | [使用方法](#createnoheader) |
 | `IBulkCopier`のインスタンスを作成する | `Build` | [使用方法](#buildメソッド) |
 | 事前にテーブルをトランケートする | `SetTruncateBeforeBulkInsert` | [使用方法](#settruncatebeforebulkinsert) |
 | 行ごとに取り込み対象を判定する | `SetRowFilter` | [使用方法](#setrowfilter) |
-| CSV列をデータベース列にマッピング（ヘッダーあり） | `AddColumnMapping` | [使用方法](#addcolumnmapping-ヘッダーあり) |
-| CSV列をデータベース列にマッピング（ヘッダーなし） | `AddColumnMapping` | [使用方法](#addcolumnmapping-ヘッダーなし) |
 | リトライ設定 | `SetMaxRetryCount`, `SetInitialDelay`, `SetUseExponentialBackoff` | [使用方法](#リトライ設定) |
 | バッチサイズを設定する | `SetBatchSize` | [使用方法](#setbatchsize) |
 | 通知イベントの行数を設定する | `SetNotifyAfter` | [使用方法](#setnotifyafter) |
 | デフォルトのカラムコンテキストを設定する | `SetDefaultColumnContext` | [使用方法](#setdefaultcolumncontext) |
 
 ### 使用方法
+
+#### CreateWithHeader
+このメソッドは、ヘッダーを持つCSVファイルを処理するためのビルダーを作成します。
+
+```csharp
+var bulkCopier = CsvBulkCopierBuilder
+    .CreateWithHeader("[dbo].[Customer]")
+    .AddColumnMapping("CustomerId")
+    .AddColumnMapping("FirstName")
+    .Build(configuration.GetConnectionString("DefaultConnection")!);
+```
+
+この関数は、CSVファイルのヘッダー名を使用して、データベース列にマッピングします。
+
+#### CreateNoHeader
+このメソッドは、ヘッダーを持たないCSVファイルを処理するためのビルダーを作成します。
+
+```csharp
+var bulkCopier = CsvBulkCopierBuilder
+    .CreateNoHeader("[dbo].[Customer]")
+    .AddColumnMapping("CustomerId", 0)
+    .AddColumnMapping("FirstName", 1)
+    .Build(configuration.GetConnectionString("DefaultConnection")!);
+```
+
+この関数は、CSVファイルの列位置を使用して、データベース列にマッピングします。
+
+#### Buildメソッド
+`Build`メソッドは、`IBulkCopier`のインスタンスを作成するための重要なメソッドです。以下の4つのオーバーロードがあります：
+
+1. **`Build(SqlConnection connection)`**:
+   - 指定されたSQL接続を使用して`IBulkCopier`のインスタンスを作成します。
+   - `connection`パラメータは、バルクコピー操作を実行する前に開かれている必要があります。
+   - `ArgumentNullException`が、`connection`が`null`の場合にスローされます。
+
+2. **`Build(string connectionString)`**:
+   - 指定された接続文字列を使用して`IBulkCopier`のインスタンスを作成します。
+   - `connectionString`パラメータは、SQL Serverへの接続を確立するために必要なすべての情報を含んでいる必要があります。
+   - `ArgumentNullException`が、`connectionString`が`null`または空の場合にスローされます。
+   - `ArgumentException`が、`connectionString`が無効な場合にスローされます。
+
+3. **`Build(string connectionString, SqlBulkCopyOptions copyOptions)`**:
+   - 指定された接続文字列とコピーオプションを使用して`IBulkCopier`のインスタンスを作成します。
+   - `connectionString`パラメータは、SQL Serverへの接続を確立するために必要なすべての情報を含んでいる必要があります。
+   - `copyOptions`は、操作の動作を構成するためのSQLバルクコピーオプションです。
+   - `ArgumentNullException`が、`connectionString`が`null`または空の場合にスローされます。
+   - `ArgumentException`が、`connectionString`が無効な場合にスローされます。
+
+4. **`Build(SqlConnection connection, SqlBulkCopyOptions copyOptions, SqlTransaction externalTransaction)`**:
+   - 指定された接続、オプション、およびトランザクションを使用して`IBulkCopier`のインスタンスを作成します。
+   - `connection`パラメータは、バルクコピー操作を実行する前に開かれている必要があります。
+   - `copyOptions`は、操作の動作を構成するためのSQLバルクコピーオプションです。
+   - `externalTransaction`は、バルクコピー操作のために使用される外部トランザクションです。すべてのバルクコピー操作はこのトランザクションの一部となります。
+   - `ArgumentNullException`が、`connection`または`externalTransaction`が`null`の場合にスローされます。
 
 #### SetTruncateBeforeBulkInsert
 この関数は、バルクコピーを実行する前に、指定したテーブルをトランケートするために使用します。
@@ -132,28 +186,6 @@ var bulkCopier = CsvBulkCopierBuilder
 ```
 
 この例では、`Status`列の値が`"Active"`である行のみを取り込み対象としています。
-
-#### AddColumnMapping (ヘッダーあり)
-この関数は、CSVファイルのヘッダー名を使用して、データベース列にマッピングします。
-
-```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateWithHeader("[dbo].[Customer]")
-    .AddColumnMapping("CustomerId")
-    .AddColumnMapping("FirstName")
-    .Build(configuration.GetConnectionString("DefaultConnection")!);
-```
-
-#### AddColumnMapping (ヘッダーなし)
-この関数は、CSVファイルの列位置を使用して、データベース列にマッピングします。
-
-```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateNoHeader("[dbo].[Customer]")
-    .AddColumnMapping("CustomerId", 0)
-    .AddColumnMapping("FirstName", 1)
-    .Build(configuration.GetConnectionString("DefaultConnection")!);
-```
 
 #### リトライ設定
 リトライ設定を使用することで、特定の条件下で自動的にリトライを実行することができます。リトライが可能な条件は以下の通りです：
@@ -206,46 +238,3 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
-#### Buildメソッド
-`Build`メソッドは、`IBulkCopier`のインスタンスを作成するための重要なメソッドです。以下の4つのオーバーロードがあります：
-
-1. **`Build(SqlConnection connection)`**:
-   - 指定されたSQL接続を使用して`IBulkCopier`のインスタンスを作成します。
-   - `connection`パラメータは、バルクコピー操作を実行する前に開かれている必要があります。
-   - `ArgumentNullException`が、`connection`が`null`の場合にスローされます。
-
-2. **`Build(string connectionString)`**:
-   - 指定された接続文字列を使用して`IBulkCopier`のインスタンスを作成します。
-   - `connectionString`パラメータは、SQL Serverへの接続を確立するために必要なすべての情報を含んでいる必要があります。
-   - `ArgumentNullException`が、`connectionString`が`null`または空の場合にスローされます。
-   - `ArgumentException`が、`connectionString`が無効な場合にスローされます。
-
-3. **`Build(string connectionString, SqlBulkCopyOptions copyOptions)`**:
-   - 指定された接続文字列とコピーオプションを使用して`IBulkCopier`のインスタンスを作成します。
-   - `connectionString`パラメータは、SQL Serverへの接続を確立するために必要なすべての情報を含んでいる必要があります。
-   - `copyOptions`は、操作の動作を構成するためのSQLバルクコピーオプションです。
-   - `ArgumentNullException`が、`connectionString`が`null`または空の場合にスローされます。
-   - `ArgumentException`が、`connectionString`が無効な場合にスローされます。
-
-4. **`Build(SqlConnection connection, SqlBulkCopyOptions copyOptions, SqlTransaction externalTransaction)`**:
-   - 指定された接続、オプション、およびトランザクションを使用して`IBulkCopier`のインスタンスを作成します。
-   - `connection`パラメータは、バルクコピー操作を実行する前に開かれている必要があります。
-   - `copyOptions`は、操作の動作を構成するためのSQLバルクコピーオプションです。
-   - `externalTransaction`は、バルクコピー操作のために使用される外部トランザクションです。すべてのバルクコピー操作はこのトランザクションの一部となります。
-   - `ArgumentNullException`が、`connection`または`externalTransaction`が`null`の場合にスローされます。
-
-### ICsvBulkCopierBuilder
-- **概要**: CSVデータを扱うバルクコピーユーティリティのビルダーインターフェース。
-- **主な機能**: CSV行のフィルタリング、Fluent APIパターンでの設定。
-
-### ICsvBulkCopierNoHeaderBuilder
-- **概要**: ヘッダーなしのCSVファイルを処理するためのビルダーインターフェース。
-- **主な機能**: CSV列をデータベース列にマッピングするための機能を提供。
-
-### ICsvBulkCopierWithHeaderBuilder
-- **概要**: ヘッダー付きのCSVファイルを処理するためのビルダーインターフェース。
-- **主な機能**: CSVヘッダー名を使用してデータベース列にマッピング。
-
-### テストケース
-- **CsvBulkCopierNoHeaderBuilderTest**: ヘッダーなしのCSVファイルのテストケース。
-- **CsvBulkCopierWithHeaderBuilderTest**: ヘッダー付きのCSVファイルのテストケース。
