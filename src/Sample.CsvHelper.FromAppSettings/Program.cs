@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Sample.CsvHelper;
+using Sample.CsvHelper.FromAppSettings;
 using SqlBulkCopier.CsvHelper.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);

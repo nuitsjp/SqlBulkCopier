@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 using SqlBulkCopier;
 using SqlBulkCopier.Hosting;
 
-namespace Sample.FixedLength;
+namespace Sample.FixedLength.FromAppSettings;
 
 /// <summary>
 /// A service that uses the bulk copier to write data to the database.
