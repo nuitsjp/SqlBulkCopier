@@ -3,7 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using SqlBulkCopier.FixedLength.Hosting;
-using SqlBulkCopier.Hosting;
 
 namespace SqlBulkCopier.Test.FixedLength.Hosting;
 
@@ -40,7 +39,6 @@ public class ServiceCollectionExtensionsTests
 
         // Assert
         var provider = services.BuildServiceProvider();
-        provider.GetService<SqlConnectionProvider>().ShouldNotBeNull();
         provider.GetService<IBulkCopierBuilder>().ShouldNotBeNull();
     }
 

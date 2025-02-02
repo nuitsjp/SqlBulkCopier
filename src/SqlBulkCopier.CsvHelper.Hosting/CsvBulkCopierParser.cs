@@ -1,7 +1,6 @@
 ﻿using System.Data;
 using System.Globalization;
 using Microsoft.Extensions.Configuration;
-using SqlBulkCopier.Hosting;
 
 namespace SqlBulkCopier.CsvHelper.Hosting;
 

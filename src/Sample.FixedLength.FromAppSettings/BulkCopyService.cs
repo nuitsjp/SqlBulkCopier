@@ -3,7 +3,6 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using SqlBulkCopier;
-using SqlBulkCopier.Hosting;
 
 namespace Sample.FixedLength.FromAppSettings;
 

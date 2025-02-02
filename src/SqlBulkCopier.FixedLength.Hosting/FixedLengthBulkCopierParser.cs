@@ -2,7 +2,6 @@
 using System.Globalization;
 using FixedLengthHelper;
 using Microsoft.Extensions.Configuration;
-using SqlBulkCopier.Hosting;
 
 namespace SqlBulkCopier.FixedLength.Hosting;
 
