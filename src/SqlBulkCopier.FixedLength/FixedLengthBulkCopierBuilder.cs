@@ -33,6 +33,7 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
     public IReadOnlyList<IColumnContext> ColumnContexts => _columnsContext;
 
     /// <summary>
+    /// 
     /// Row filter predicate.
     /// </summary>
     public Predicate<IFixedLengthReader> RowFilter { get; private set; } = _ => true;

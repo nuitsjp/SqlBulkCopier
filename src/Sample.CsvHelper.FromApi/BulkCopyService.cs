@@ -12,10 +12,6 @@ public class BulkCopyService(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Open a connection to the database
-        await using var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection"));
-        await connection.OpenAsync(stoppingToken);
-
         var bulkCopier = CsvBulkCopierBuilder
             .CreateWithHeader("[dbo].[Customer]")
             .SetTruncateBeforeBulkInsert(true)
@@ -25,7 +21,7 @@ public class BulkCopyService(
             .AddColumnMapping("LastName")
             .AddColumnMapping("BirthDate", c => c.AsDate("yyyy-MM-dd"))
             .AddColumnMapping("IsActive", c => c.AsBit())
-            .Build(connection);
+            .Build(configuration.GetConnectionString("DefaultConnection")!);
 
         await using var stream = File.OpenRead(
             Path.Combine(AppContext.BaseDirectory, "Assets", "Customer.csv"));
