@@ -4,19 +4,6 @@
 - [はじめに](#はじめに)
 - [Getting Started](#getting-started)
 - [APIの詳細](#apiの詳細)
-  - [CreateWithHeader](#createwithheader)
-  - [CreateNoHeader](#createnoheader)
-  - [データ型の設定](#データ型の設定)
-  - [トリム操作](#トリム操作)
-  - [空文字列のNULL扱い](#空文字列のnull扱い)
-  - [カスタム変換](#カスタム変換)
-  - [Buildメソッド](#buildメソッド)
-  - [SetTruncateBeforeBulkInsert](#settruncatebeforebulkinsert)
-  - [SetRowFilter](#setrowfilter)
-  - [リトライ設定](#リトライ設定)
-  - [SetBatchSize](#setbatchsize)
-  - [SetNotifyAfter](#setnotifyafter)
-  - [SetDefaultColumnContext](#setdefaultcolumncontext)
 
 ## はじめに
 このドキュメントでは、SqlBulkCopierライブラリのCSV用Fluent APIの使い方について説明します。Fluent APIを使用することで、CSVデータを効率的にデータベースにバルクコピーすることができます。
@@ -110,25 +97,25 @@ public class BulkCopyService(
 
 以下の表は、CSVのFluent APIを使用する際の目的別に、関連する関数とその使用方法へのリンクを示しています。
 
-| 目的 | 関数 | 使用方法 |
-|------|------|----------|
-| CSVファイルをヘッダー有りで処理する | `CreateWithHeader` | [使用方法](#createwithheader) |
-| CSVファイルをヘッダー無しで処理する | `CreateNoHeader` | [使用方法](#createnoheader) |
-| データ型の設定 | `AsInt`, `AsDate`, `AsDecimal`, etc. | [使用方法](#データ型の設定) |
-| トリム操作 | `Trim`, `TrimStart`, `TrimEnd` | [使用方法](#トリム操作) |
-| 空文字列のNULL扱い | `TreatEmptyStringAsNull` | [使用方法](#空文字列のnull扱い) |
-| カスタム変換 | `Convert` | [使用方法](#カスタム変換) |
-| `IBulkCopier`のインスタンスを作成する | `Build` | [使用方法](#buildメソッド) |
-| 事前にテーブルをトランケートする | `SetTruncateBeforeBulkInsert` | [使用方法](#settruncatebeforebulkinsert) |
-| 行ごとに取り込み対象を判定する | `SetRowFilter` | [使用方法](#setrowfilter) |
-| リトライ設定 | `SetMaxRetryCount`, `SetInitialDelay`, `SetUseExponentialBackoff` | [使用方法](#リトライ設定) |
-| バッチサイズを設定する | `SetBatchSize` | [使用方法](#setbatchsize) |
-| 通知イベントの行数を設定する | `SetNotifyAfter` | [使用方法](#setnotifyafter) |
-| デフォルトのカラムコンテキストを設定する | `SetDefaultColumnContext` | [使用方法](#setdefaultcolumncontext) |
+| 目的 | 関数 |
+|------|------|
+| [CSVファイルをヘッダー有りで処理する](#CSVファイルをヘッダー有りで処理する) | `CreateWithHeader` |
+| [CSVファイルをヘッダー無しで処理する](#createnoheader) | `CreateNoHeader` |
+| [データ型の設定](#データ型の設定) | `AsInt`, `AsDate`, `AsDecimal`, etc. |
+| [トリム操作](#トリム操作) | `Trim`, `TrimStart`, `TrimEnd` |
+| [空文字列のNULL扱い](#空文字列のnull扱い) | `TreatEmptyStringAsNull` |
+| [カスタム変換](#カスタム変換) | `Convert` |
+| [`IBulkCopier`のインスタンスを作成する](#`IBulkCopier`のインスタンスを作成する) | `Build` |
+| [事前にテーブルをトランケートする](#settruncatebeforebulkinsert) | `SetTruncateBeforeBulkInsert` |
+| [行ごとに取り込み対象を判定する](#setrowfilter) | `SetRowFilter` |
+| [リトライ設定](#リトライ設定) | `SetMaxRetryCount`, `SetInitialDelay`, `SetUseExponentialBackoff` |
+| [バッチサイズを設定する](#setbatchsize) | `SetBatchSize` |
+| [通知イベントの行数を設定する](#setnotifyafter) | `SetNotifyAfter` |
+| [デフォルトのカラムコンテキストを設定する](#setdefaultcolumncontext) | `SetDefaultColumnContext` |
 
 ### 使用方法
 
-#### CreateWithHeader
+#### CSVファイルをヘッダー有りで処理する
 このメソッドは、ヘッダーを持つCSVファイルを処理するためのビルダーを作成します。以下のコード例は、CSVファイルのヘッダー名を使用してデータベース列にマッピングする方法を示しています。
 
 ```csharp
@@ -220,7 +207,7 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
-#### Buildメソッド
+#### `IBulkCopier`のインスタンスを作成する
 `Build`メソッドは、`IBulkCopier`のインスタンスを作成するための重要なメソッドです。以下の4つのオーバーロードがあります：
 
 1. **`Build(SqlConnection connection)`**:
