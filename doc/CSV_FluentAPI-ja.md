@@ -105,7 +105,7 @@ public class BulkCopyService(
 | [トリム操作](#トリム操作) | `Trim`, `TrimStart`, `TrimEnd` |
 | [空文字列のNULL扱い](#空文字列のnull扱い) | `TreatEmptyStringAsNull` |
 | [カスタム変換](#カスタム変換) | `Convert` |
-| [`IBulkCopier`のインスタンスを作成する](#`IBulkCopier`のインスタンスを作成する) | `Build` |
+| [`IBulkCopier`のインスタンスを作成する](#IBulkCopierのインスタンスを作成する) | `Build` |
 | [事前にテーブルをトランケートする](#settruncatebeforebulkinsert) | `SetTruncateBeforeBulkInsert` |
 | [行ごとに取り込み対象を判定する](#setrowfilter) | `SetRowFilter` |
 | [リトライ設定](#リトライ設定) | `SetMaxRetryCount`, `SetInitialDelay`, `SetUseExponentialBackoff` |
