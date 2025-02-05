@@ -1,25 +1,55 @@
-# CSVのFluent APIの使い方
+# はじめに
+SqlBulkCopierライブラリを使用することで、CSVおよび固定長ファイルを効率的にデータベースにバルクコピーすることができます。ここではCSVに対する利用方法を説明します。
+
+CSV利用時の設定方法として、以下の2つのアプローチを提供しています：
+
+1. **Fluent API アプローチ**
+   - コードでの設定を好む場合に適しています
+   - より詳細な制御が可能で、動的な設定が必要な場合に適しています
+   - IntelliSenseのサポートにより、設定オプションを確認しやすい利点があります
+
+2. **Configuration アプローチ**
+   - 設定をappsettings.jsonで管理したい場合に適しています
+   - より簡潔なコードで実装が可能です
+   - 設定の変更に再コンパイルが不要です
+   - 環境ごとの設定変更が容易です
 
 ## 目次
-- [はじめに](#はじめに)
 - [Getting Started](#getting-started)
-- [APIの詳細](#apiの詳細)
-
-## はじめに
-このドキュメントでは、SqlBulkCopierライブラリのCSV用Fluent APIの使い方について説明します。Fluent APIを使用することで、CSVデータを効率的にデータベースにバルクコピーすることができます。
+  - [Fluent APIアプローチのサンプル](#fluent-apiアプローチのサンプル)
+  - [Configuration アプローチ](#configuration-アプローチ)
+- [設定の詳細](#設定の詳細)
 
 ## Getting Started
-
 このライブラリは、.NET 8.0 または .NET Framework 4.8が必要です。NuGetから以下のパッケージをインストールしてください：
 
-### CSV用パッケージ
 ```
 Install-Package SqlBulkCopier.CsvHelper
 ```
 
-以下は、CSVファイルをFluent APIで設定し、`Microsoft.Extensions.Hosting`を使用してGeneric Hostに対応したコンソールアプリケーションを構築する簡単なサンプルコードです。詳細な設定やその他の例については、該当する詳細ドキュメントページをご参照ください。
+このドキュメントで説明する2つのアプローチのサンプルコードを以下に示します。どちらも`Microsoft.Extensions.Hosting`を使用してGeneric Hostに対応したコンソールアプリケーションを構築する例です。
 
-### Program.cs
+### Fluent APIアプローチのサンプル
+
+Fluent APIを使用する場合、以下の手順で実装します：
+
+1. appsettings.jsonにSQL Serverへの接続文字列を追加
+2. Program.csでSqlBulkCopierサービスを登録（AddSqlBulkCopier()）
+3. CsvBulkCopierBuilderを利用して詳細を設定し、CSVを取り込む
+
+実装例の詳細は以下の通りです。
+
+#### appsettings.json
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "YourDatabaseConnectionString"
+  }
+}
+```
+
+#### Program.cs
 
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
@@ -38,10 +68,12 @@ builder.Services
     .AddHostedService<BulkCopyService>()
     .AddSqlBulkCopier();
 
-await builder.Build().RunAsync();
+await builder
+    .Build()
+    .RunAsync();
 ```
 
-### BulkCopyService.cs
+#### BulkCopyService.cs
 
 ```csharp
 using System.Text;
@@ -58,6 +90,7 @@ public class BulkCopyService(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Create a bulk copier instance
         var bulkCopier = CsvBulkCopierBuilder
             .CreateWithHeader("[dbo].[Customer]")
             .SetTruncateBeforeBulkInsert(true)
@@ -69,11 +102,12 @@ public class BulkCopyService(
             .AddColumnMapping("IsActive", c => c.AsBit())
             .Build(configuration.GetConnectionString("DefaultConnection")!);
 
+        // Open the CSV file
         await using var stream = File.OpenRead(
             Path.Combine(AppContext.BaseDirectory, "Assets", "Customer.csv"));
-        await bulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
-        Console.WriteLine("Bulk copy completed");
+        // Start the bulk copy operation
+        await bulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
         // Stop the application when the task is completed
         applicationLifetime.StopApplication();
@@ -81,37 +115,128 @@ public class BulkCopyService(
 }
 ```
 
-### appsettings.json
+詳細は「[設定の詳細](#設定の詳細)」を参照
+
+### Configuration アプローチ
+
+設定ファイルを使用する場合、以下の手順で実装します：
+
+1. appsettings.jsonにバルクコピーの設定を追加
+2. Program.csでSqlBulkCopierサービスを登録（AddSqlBulkCopier()）
+3. DIでIBulkCopierProviderを注入し、Provideメソッドで設定を読み込み
+
+各実装例の詳細は以下の通りです。
+
+#### appsettings.json
 
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "YourDatabaseConnectionString"
+    "DefaultConnection": "Data Source=.;Initial Catalog=SqlBulkCopier;Integrated Security=True;Trust Server Certificate=True"
+  },
+  "SqlBulkCopier1": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": true,
+    "TruncateBeforeBulkInsert": true,
+    "DefaultColumnSettings": {
+      "TrimMode": "TrimEnd",
+      "TreatEmptyStringAsNull": true
+    },
+    "Columns": {
+      "CustomerId": {},
+      "FirstName": {},
+      "LastName": {},
+      "BirthDate": {
+        "SqlDbType": "Date",
+        "Format": "yyyy-MM-dd"
+      },
+      "IsActive": { "SqlDbType": "Bit" }
+    }
   }
 }
 ```
 
-このサンプルでは、`appsettings.json`を使用してデータベース接続文字列を設定し、`BulkCopyService`をホストしています。`BulkCopyService`は、データベースへの接続を開き、CSVファイルを読み込んでバルクコピーを実行します。`AddSqlBulkCopier`メソッドを使用して、必要なサービスをDIコンテナに追加しています。
+詳細は「[設定の詳細](#設定の詳細)」を参照
 
-## APIの詳細
+#### Program.cs
 
-以下の表は、CSVのFluent APIを使用する際の目的別に、関連する関数とその使用方法へのリンクを示しています。
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
+using Sample.CsvHelper.FromAppSettings;
+using SqlBulkCopier.CsvHelper.Hosting;
 
-| 目的 | 関数 |
-|------|------|
-| [CSVファイルをヘッダー有りで処理する](#CSVファイルをヘッダー有りで処理する) | `CreateWithHeader` |
-| [CSVファイルをヘッダー無しで処理する](#CSVファイルをヘッダー無しで処理する) | `CreateNoHeader` |
-| [データ型の設定](#データ型の設定) | `AsInt`, `AsDate`, `AsDecimal`, etc. |
-| [トリム操作](#トリム操作) | `Trim`, `TrimStart`, `TrimEnd` |
-| [空文字列のNULL扱い](#空文字列のnull扱い) | `TreatEmptyStringAsNull` |
-| [カスタム変換](#カスタム変換) | `Convert` |
-| [`IBulkCopier`のインスタンスを作成する](#IBulkCopierのインスタンスを作成する) | `Build` |
-| [事前にテーブルをトランケートする](#事前にテーブルをトランケートする) | `SetTruncateBeforeBulkInsert` |
-| [行ごとに取り込み対象を判定する](#行ごとに取り込み対象を判定する) | `SetRowFilter` |
-| [リトライ設定](#リトライ設定) | `SetMaxRetryCount`, `SetInitialDelay`, `SetUseExponentialBackoff` |
-| [バッチサイズを設定する](#バッチサイズを設定する) | `SetBatchSize` |
-| [通知イベントの行数を設定する](#通知イベントの行数を設定する) | `SetNotifyAfter` |
-| [デフォルトのカラムコンテキストを設定する](#デフォルトのカラムコンテキストを設定する) | `SetDefaultColumnContext` |
+var builder = Host.CreateApplicationBuilder(args);
+
+builder.Configuration
+    .SetBasePath(AppContext.BaseDirectory)
+    .AddJsonFile("appsettings.json");
+
+builder.Services
+    .AddHostedService<BulkCopyService>()
+    .AddSqlBulkCopier();
+
+await builder
+    .Build()
+    .RunAsync();
+```
+
+#### BulkCopyService.cs
+
+```csharp
+using System.Text;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using SqlBulkCopier.Hosting;
+
+namespace Sample.CsvHelper.FromAppSettings;
+
+public class BulkCopyService(
+    IConfiguration configuration,
+    IBulkCopierProvider bulkCopierProvider,
+    IHostApplicationLifetime applicationLifetime) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        // Provide the bulk copier
+        var bulkCopier = bulkCopierProvider
+            .Provide("SqlBulkCopier1", configuration.GetConnectionString("DefaultConnection")!);
+        
+        // Write data to the database using the bulk copier
+        await using var stream = File.OpenRead(
+            Path.Combine(AppContext.BaseDirectory, "Assets", "Customer.csv"));
+
+        // Bulk copy to the database
+        await bulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
+
+        // Stop the application when the task is completed
+        applicationLifetime.StopApplication();
+    }
+}
+```
+
+## 設定の詳細
+
+以下の表は、CSVのバルクコピー設定において実現可能な機能と、それぞれのアプローチでの設定方法を示しています。
+
+| 目的 | Fluent API | appsettings.json |
+|------|------------|------------------|
+| [CSVファイルをヘッダー有りで処理する](#CSVファイルをヘッダー有りで処理する) | `CreateWithHeader` | `"HasHeader": true` |
+| [CSVファイルをヘッダー無しで処理する](#CSVファイルをヘッダー無しで処理する) | `CreateNoHeader` | `"HasHeader": false` |
+| [データ型の設定](#データ型の設定) | `AsInt`, `AsDate`, `AsDecimal`, etc. | `"SqlDbType": "Int"`, `"Date"`, `"Decimal"`, etc. |
+| [トリム操作](#トリム操作) | `Trim`, `TrimStart`, `TrimEnd` | `"TrimMode": "Trim"`, `"TrimStart"`, `"TrimEnd"` |
+| [空文字列のNULL扱い](#空文字列のnull扱い) | `TreatEmptyStringAsNull` | `"TreatEmptyStringAsNull": true`, `false` |
+| [カスタム変換](#カスタム変換) | `Convert` | 設定ファイルでは未対応 |
+| [`IBulkCopier`のインスタンスを作成する](#IBulkCopierのインスタンスを作成する) | `Build` | DIで`IBulkCopierProvider`から取得 |
+| [事前にテーブルをトランケートする](#事前にテーブルをトランケートする) | `SetTruncateBeforeBulkInsert` | `"TruncateBeforeBulkInsert": true/false` |
+| [行ごとに取り込み対象を判定する](#行ごとに取り込み対象を判定する) | `SetRowFilter` | 設定ファイルでは未対応 |
+| [リトライ設定](#リトライ設定) | `SetMaxRetryCount`, `SetInitialDelay`, `SetUseExponentialBackoff` | `"MaxRetryCount": 3`, `"InitialDelay": "00:00:05"`, `"UseExponentialBackoff": true` |
+| [バッチサイズを設定する](#バッチサイズを設定する) | `SetBatchSize` | `"BatchSize": 1000` |
+| [通知イベントの行数を設定する](#通知イベントの行数を設定する) | `SetNotifyAfter` | `"NotifyAfter": 500` |
+| [デフォルトのカラムコンテキストを設定する](#デフォルトのカラムコンテキストを設定する) | `SetDefaultColumnContext` | `"DefaultColumnSettings": { ... }` |
+| [文字列の変換設定](#文字列の変換設定) | `c => c.AsInt(style: NumberStyles.Any, culture: "en-US")` | "CultureInfo": "en-US", "NumberStyles": "Any" |
+| [日付時刻の変換設定](#日付時刻の変換設定) | `c => c.AsDate(format: "yyyy-MM-dd", style: DateTimeStyles.AllowWhiteSpaces)` | "Format": "yyyy-MM-dd", "DateTimeStyles": "AllowWhiteSpaces" |
 
 ### 使用方法
 
@@ -141,9 +266,6 @@ var bulkCopier = CsvBulkCopierBuilder
 `IColumnContext`を使用して、CSVデータをSQL Serverのデータ型にマッピングすることができます。以下のコード例は、いくつかの代表的なデータ型へのマッピング方法を示しています。
 
 ```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateWithHeader("[dbo].[Customer]")
-    .AddColumnMapping("CustomerId", c => c.AsInt())
     .AddColumnMapping("BirthDate", c => c.AsDate("yyyy-MM-dd"))
     .AddColumnMapping("Salary", c => c.AsDecimal())
     .Build(configuration.GetConnectionString("DefaultConnection")!);

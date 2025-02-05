@@ -11,6 +11,7 @@ public class BulkCopyService(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Create a bulk copier instance
         var bulkCopier = CsvBulkCopierBuilder
             .CreateWithHeader("[dbo].[Customer]")
             .SetTruncateBeforeBulkInsert(true)
@@ -22,11 +23,12 @@ public class BulkCopyService(
             .AddColumnMapping("IsActive", c => c.AsBit())
             .Build(configuration.GetConnectionString("DefaultConnection")!);
 
+        // Open the CSV file
         await using var stream = File.OpenRead(
             Path.Combine(AppContext.BaseDirectory, "Assets", "Customer.csv"));
-        await bulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
-        Console.WriteLine("Bulk copy completed");
+        // Start the bulk copy operation
+        await bulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
         // Stop the application when the task is completed
         applicationLifetime.StopApplication();
