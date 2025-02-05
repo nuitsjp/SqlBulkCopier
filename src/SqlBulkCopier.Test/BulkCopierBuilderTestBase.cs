@@ -448,20 +448,26 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
         mainConnection.Execute(
             // ReSharper disable StringLiteralTypo
             $"""
-             -- 自分自身の接続を除いたユーザープロセスを対象にした接続の強制切断
-             DECLARE @kill varchar(8000) = '';
-             DECLARE @spid int;
-
-             -- 自分自身のプロセスIDを取得
-             SET @spid = @@SPID;
-
-             SELECT @kill = @kill + 'kill ' + CONVERT(varchar(5), spid) + ';'
-             FROM master.dbo.sysprocesses 
-             WHERE DB_NAME(dbid) = '{DatabaseName}'
-             AND spid <> @spid
-             AND spid > 50;  -- システムプロセスを除外するため、spid が 50 より大きいものを対象
-
-             EXEC(@kill);
+             -- 対象データベース名を指定
+             DECLARE @target_database_name VARCHAR(128);
+             SET @target_database_name = '{DatabaseName}'; -- ここに対象データベース名を指定
+             
+             -- 現在のセッションIDを取得
+             DECLARE @current_session_id INT;
+             SELECT @current_session_id = @@SPID;
+             
+             -- 現在のセッション以外のセッションIDをKILLする
+             DECLARE @kill_command VARCHAR(MAX);
+             SET @kill_command = '';
+             
+             SELECT @kill_command = @kill_command + 'KILL ' + CAST(session_id AS VARCHAR(10)) + '; '
+             FROM sys.dm_exec_sessions
+             WHERE session_id != @current_session_id
+             AND is_user_process = 1
+             AND database_id = DB_ID(@target_database_name);
+             
+             -- KILLコマンドを実行
+             EXEC(@kill_command);
              """);
         mainConnection.Execute($"DROP DATABASE IF EXISTS [{DatabaseName}]");
         mainConnection.Execute($"CREATE DATABASE [{DatabaseName}]");
