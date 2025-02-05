@@ -235,8 +235,6 @@ public class BulkCopyService(
 | [バッチサイズを設定する](#バッチサイズを設定する) | `SetBatchSize` | `"BatchSize": 1000` |
 | [通知イベントの行数を設定する](#通知イベントの行数を設定する) | `SetNotifyAfter` | `"NotifyAfter": 500` |
 | [デフォルトのカラムコンテキストを設定する](#デフォルトのカラムコンテキストを設定する) | `SetDefaultColumnContext` | `"DefaultColumnSettings": { ... }` |
-| [文字列の変換設定](#文字列の変換設定) | `c => c.AsInt(style: NumberStyles.Any, culture: "en-US")` | "CultureInfo": "en-US", "NumberStyles": "Any" |
-| [日付時刻の変換設定](#日付時刻の変換設定) | `c => c.AsDate(format: "yyyy-MM-dd", style: DateTimeStyles.AllowWhiteSpaces)` | "Format": "yyyy-MM-dd", "DateTimeStyles": "AllowWhiteSpaces" |
 
 ### 使用方法
 
