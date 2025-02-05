@@ -249,6 +249,21 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
+appsettings.jsonでの設定例:
+
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": true,
+    "Columns": {
+      "CustomerId": {},
+      "FirstName": {}
+    }
+  }
+}
+```
+
 #### [CSVファイルをヘッダー無しで処理する](#apiの詳細)
 このメソッドは、ヘッダーを持たないCSVファイルを処理するためのビルダーを作成します。以下のコード例は、CSVファイルの列位置を使用してデータベース列にマッピングする方法を示しています。
 
@@ -260,6 +275,21 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
+appsettings.jsonでの設定例:
+
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": false,
+    "Columns": {
+      "CustomerId": { "Ordinal": 0 },
+      "FirstName": { "Ordinal": 1 }
+    }
+  }
+}
+```
+
 #### [データ型の設定](#apiの詳細)
 `IColumnContext`を使用して、CSVデータをSQL Serverのデータ型にマッピングすることができます。以下のコード例は、いくつかの代表的なデータ型へのマッピング方法を示しています。
 
@@ -269,31 +299,25 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
-利用可能なデータ型：
+appsettings.jsonでの設定例:
 
-すべての型を明示的に設定する必要はありません。文字列から自動変換できる型は記述を省略することができます。
-
-- **AsBigInt**: SQL BIGINT型にマッピング
-- **AsBit**: SQL BIT型にマッピング
-- **AsUniqueIdentifier**: SQL UNIQUEIDENTIFIER型にマッピング
-- **AsDate**: SQL DATE型にマッピング
-- **AsDateTime**: SQL DATETIME型にマッピング
-- **AsDecimal**: SQL DECIMAL型にマッピング
-- **AsFloat**: SQL FLOAT型にマッピング
-- **AsInt**: SQL INT型にマッピング
-- **AsMoney**: SQL MONEY型にマッピング
-- **AsReal**: SQL REAL型にマッピング
-- **AsSmallDateTime**: SQL SMALLDATETIME型にマッピング
-- **AsSmallInt**: SQL SMALLINT型にマッピング
-- **AsSmallMoney**: SQL SMALLMONEY型にマッピング
-- **AsTimestamp**: SQL TIMESTAMP型にマッピング
-- **AsTinyInt**: SQL TINYINT型にマッピング
-- **AsDateTime2**: SQL DATETIME2型にマッピング
-- **AsTime**: SQL TIME型にマッピング
-- **AsDateTimeOffset**: SQL DATETIMEOFFSET型にマッピング
-- **AsBinary**: SQL BINARY型にマッピング
-- **AsVarBinary**: SQL VARBINARY型にマッピング
-- **AsImage**: SQL IMAGE型にマッピング
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": true,
+    "Columns": {
+      "BirthDate": {
+        "SqlDbType": "Date",
+        "Format": "yyyy-MM-dd"
+      },
+      "Salary": {
+        "SqlDbType": "Decimal"
+      }
+    }
+  }
+}
+```
 
 #### [トリム操作](#apiの詳細)
 文字列のトリム操作を行うことができます。これにより、データの前後の空白や特定の文字を削除できます。以下のコード例は、トリム操作の使用方法を示しています。
@@ -306,6 +330,27 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
+appsettings.jsonでの設定例:
+
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": true,
+    "DefaultColumnSettings": {
+      "TrimMode": "Trim",
+      "TrimChars": " "
+    },
+    "Columns": {
+      "FirstName": {},
+      "LastName": {
+        "TrimMode": "TrimEnd"
+      }
+    }
+  }
+}
+```
+
 #### [空文字列のNULL扱い](#apiの詳細)
 空の文字列をデータベースに挿入する際にNULLとして扱うことができます。以下のコード例は、その方法を示しています。
 
@@ -314,6 +359,23 @@ var bulkCopier = CsvBulkCopierBuilder
     .CreateWithHeader("[dbo].[Customer]")
     .AddColumnMapping("MiddleName", c => c.TreatEmptyStringAsNull())
     .Build(configuration.GetConnectionString("DefaultConnection")!);
+```
+
+appsettings.jsonでの設定例:
+
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": true,
+    "DefaultColumnSettings": {
+      "TreatEmptyStringAsNull": true
+    },
+    "Columns": {
+      "MiddleName": {}
+    }
+  }
+}
 ```
 
 #### [カスタム変換](#apiの詳細)
@@ -325,6 +387,8 @@ var bulkCopier = CsvBulkCopierBuilder
     .AddColumnMapping("CustomField", c => c.Convert(value => CustomConversion(value)))
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
+
+appsettings.jsonでの設定例は未対応です。
 
 #### [`IBulkCopier`のインスタンスを作成する](#apiの詳細)
 `Build`メソッドは、`IBulkCopier`のインスタンスを作成するための重要なメソッドです。以下の4つのオーバーロードがあります：
@@ -354,6 +418,18 @@ var bulkCopier = CsvBulkCopierBuilder
    - `externalTransaction`は、バルクコピー操作のために使用される外部トランザクションです。すべてのバルクコピー操作はこのトランザクションの一部となります。
    - `ArgumentNullException`が、`connection`または`externalTransaction`が`null`の場合にスローされます。
 
+appsettings.jsonでの設定例:
+
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": true,
+    "ConnectionString": "YourDatabaseConnectionString"
+  }
+}
+```
+
 #### [事前にテーブルをトランケートする](#apiの詳細)
 この関数は、バルクコピーを実行する前に、指定したテーブルをトランケートするために使用します。以下のコード例は、その方法を示しています。
 
@@ -362,6 +438,18 @@ var bulkCopier = CsvBulkCopierBuilder
     .CreateWithHeader("[dbo].[Customer]")
     .SetTruncateBeforeBulkInsert(true)
     .Build(configuration.GetConnectionString("DefaultConnection")!);
+```
+
+appsettings.jsonでの設定例:
+
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": true,
+    "TruncateBeforeBulkInsert": true
+  }
+}
 ```
 
 #### [行ごとに取り込み対象を判定する](#apiの詳細)
@@ -375,6 +463,8 @@ var bulkCopier = CsvBulkCopierBuilder
 ```
 
 この例では、`Status`列の値が`"Active"`である行のみを取り込み対象としています。
+
+appsettings.jsonでの設定例は未対応です。
 
 #### [リトライ設定](#apiの詳細)
 リトライ設定を使用することで、特定の条件下で自動的にリトライを実行することができます。リトライが可能な条件は以下の通りです：
@@ -395,6 +485,20 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
+appsettings.jsonでの設定例:
+
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": true,
+    "MaxRetryCount": 3,
+    "InitialDelay": "00:00:05",
+    "UseExponentialBackoff": true
+  }
+}
+```
+
 #### [バッチサイズを設定する](#apiの詳細)
 この関数は、バルクコピー操作のバッチサイズを設定します。以下のコード例は、その方法を示しています。
 
@@ -403,6 +507,18 @@ var bulkCopier = CsvBulkCopierBuilder
     .CreateWithHeader("[dbo].[Customer]")
     .SetBatchSize(1000)
     .Build(configuration.GetConnectionString("DefaultConnection")!);
+```
+
+appsettings.jsonでの設定例:
+
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": true,
+    "BatchSize": 1000
+  }
+}
 ```
 
 #### [通知イベントの行数を設定する](#apiの詳細)
@@ -415,8 +531,22 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
+appsettings.jsonでの設定例:
+
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": true,
+    "NotifyAfter": 500
+  }
+}
+```
+
 #### [デフォルトのカラムコンテキストを設定する](#apiの詳細)
 この関数は、すべてのカラムに対するデフォルトのコンテキストを設定します。以下のコード例は、その方法を示しています。
+
+個別のカラムに異なる設定がされていた場合は、そちらが優先されます。
 
 ```csharp
 var bulkCopier = CsvBulkCopierBuilder
@@ -425,4 +555,17 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
-個別のカラムに異なる設定がされていた場合は、そちらが優先されます。
+appsettings.jsonでの設定例:
+
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": true,
+    "DefaultColumnSettings": {
+      "TrimMode": "TrimEnd",
+      "TreatEmptyStringAsNull": true
+    }
+  }
+}
+```
