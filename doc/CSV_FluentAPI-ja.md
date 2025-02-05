@@ -115,7 +115,7 @@ public class BulkCopyService(
 
 ### 使用方法
 
-#### CSVファイルをヘッダー有りで処理する
+#### [CSVファイルをヘッダー有りで処理する](#apiの詳細)
 このメソッドは、ヘッダーを持つCSVファイルを処理するためのビルダーを作成します。以下のコード例は、CSVファイルのヘッダー名を使用してデータベース列にマッピングする方法を示しています。
 
 ```csharp
@@ -126,7 +126,7 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
-#### CSVファイルをヘッダー無しで処理する
+#### [CSVファイルをヘッダー無しで処理する](#apiの詳細)
 このメソッドは、ヘッダーを持たないCSVファイルを処理するためのビルダーを作成します。以下のコード例は、CSVファイルの列位置を使用してデータベース列にマッピングする方法を示しています。
 
 ```csharp
@@ -137,7 +137,7 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
-#### データ型の設定
+#### [データ型の設定](#apiの詳細)
 `IColumnContext`を使用して、CSVデータをSQL Serverのデータ型にマッピングすることができます。以下のコード例は、いくつかの代表的なデータ型へのマッピング方法を示しています。
 
 ```csharp
@@ -151,8 +151,7 @@ var bulkCopier = CsvBulkCopierBuilder
 
 利用可能なデータ型：
 
-すべての型を明示的に設定する必要はありません。文字列から自動変換できる型は記述を省略することができま
-す。
+すべての型を明示的に設定する必要はありません。文字列から自動変換できる型は記述を省略することができます。
 
 - **AsBigInt**: SQL BIGINT型にマッピング
 - **AsBit**: SQL BIT型にマッピング
@@ -176,7 +175,7 @@ var bulkCopier = CsvBulkCopierBuilder
 - **AsVarBinary**: SQL VARBINARY型にマッピング
 - **AsImage**: SQL IMAGE型にマッピング
 
-#### トリム操作
+#### [トリム操作](#apiの詳細)
 文字列のトリム操作を行うことができます。これにより、データの前後の空白や特定の文字を削除できます。以下のコード例は、トリム操作の使用方法を示しています。
 
 ```csharp
@@ -187,7 +186,7 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
-#### 空文字列のNULL扱い
+#### [空文字列のNULL扱い](#apiの詳細)
 空の文字列をデータベースに挿入する際にNULLとして扱うことができます。以下のコード例は、その方法を示しています。
 
 ```csharp
@@ -197,7 +196,7 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
-#### カスタム変換
+#### [カスタム変換](#apiの詳細)
 カスタム変換関数を指定することができます。これにより、文字列を任意のオブジェクトに変換することができます。以下のコード例は、カスタム変換の使用方法を示しています。
 
 ```csharp
@@ -207,7 +206,7 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
-#### `IBulkCopier`のインスタンスを作成する
+#### [`IBulkCopier`のインスタンスを作成する](#apiの詳細)
 `Build`メソッドは、`IBulkCopier`のインスタンスを作成するための重要なメソッドです。以下の4つのオーバーロードがあります：
 
 1. **`Build(SqlConnection connection)`**:
@@ -235,7 +234,7 @@ var bulkCopier = CsvBulkCopierBuilder
    - `externalTransaction`は、バルクコピー操作のために使用される外部トランザクションです。すべてのバルクコピー操作はこのトランザクションの一部となります。
    - `ArgumentNullException`が、`connection`または`externalTransaction`が`null`の場合にスローされます。
 
-#### 事前にテーブルをトランケートする
+#### [事前にテーブルをトランケートする](#apiの詳細)
 この関数は、バルクコピーを実行する前に、指定したテーブルをトランケートするために使用します。以下のコード例は、その方法を示しています。
 
 ```csharp
@@ -245,7 +244,7 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
-#### 行ごとに取り込み対象を判定する
+#### [行ごとに取り込み対象を判定する](#apiの詳細)
 この関数は、CSVデータの各行を評価し、取り込み対象とするかどうかを判定するために使用します。指定した条件に合致する行のみをデータベースにコピーします。以下のコード例は、その方法を示しています。
 
 ```csharp
@@ -257,23 +256,15 @@ var bulkCopier = CsvBulkCopierBuilder
 
 この例では、`Status`列の値が`"Active"`である行のみを取り込み対象としています。
 
-#### リトライ設定
-リトライ設定を使用することで、特定の条件下で自動的にリトライを実行することができます。リトライが可能
-な条件は以下の通りです：
-
-- **接続文字列を使用している場合**: 外部接続ではなく、接続文字列を使用してデータベースに接続している
-場合、リトライが可能です。
-- **テーブルのトランケートが有効である場合**: テーブルのトランケートが有効である場合、リトライが可能
-です。
+#### [リトライ設定](#apiの詳細)
+リトライ設定を使用することで、特定の条件下で自動的にリトライを実行することができます。リトライが可能な条件は以下の通りです：
+- **接続文字列を使用している場合**: 外部接続ではなく、接続文字列を使用してデータベースに接続している場合、リトライが可能です。
+- **テーブルのトランケートが有効である場合**: テーブルのトランケートが有効である場合、リトライが可能です。
 
 リトライ設定には、以下のオプションがあります：
-
 - **SetMaxRetryCount**: リトライの最大回数を設定します。
 - **SetInitialDelay**: リトライ間の初期遅延時間を設定します。
-- **SetUseExponentialBackoff**: この設定を有効にすると、リトライ間の待機時間が指数関数的に増加し
-ます。例えば、最初のリトライで5秒待機した場合、次のリトライでは10秒、さらにその次では20秒といった具
-合に待機時間が増加します。これにより、短時間での連続的なリトライを避け、システムの負荷を軽減すること
-ができます。
+- **SetUseExponentialBackoff**: この設定を有効にすると、リトライ間の待機時間が指数関数的に増加します。例えば、最初のリトライで5秒待機した場合、次のリトライでは10秒、さらにその次では20秒といった具合に待機時間が増加します。これにより、短時間での連続的なリトライを避け、システムの負荷を軽減することができます。
 
 ```csharp
 var bulkCopier = CsvBulkCopierBuilder
@@ -284,7 +275,7 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
-#### バッチサイズを設定する
+#### [バッチサイズを設定する](#apiの詳細)
 この関数は、バルクコピー操作のバッチサイズを設定します。以下のコード例は、その方法を示しています。
 
 ```csharp
@@ -294,7 +285,7 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
-#### 通知イベントの行数を設定する
+#### [通知イベントの行数を設定する](#apiの詳細)
 この関数は、通知イベントを発生させる行数を設定します。以下のコード例は、その方法を示しています。
 
 ```csharp
@@ -304,7 +295,7 @@ var bulkCopier = CsvBulkCopierBuilder
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
-#### デフォルトのカラムコンテキストを設定する
+#### [デフォルトのカラムコンテキストを設定する](#apiの詳細)
 この関数は、すべてのカラムに対するデフォルトのコンテキストを設定します。以下のコード例は、その方法を示しています。
 
 ```csharp
@@ -315,4 +306,3 @@ var bulkCopier = CsvBulkCopierBuilder
 ```
 
 個別のカラムに異なる設定がされていた場合は、そちらが優先されます。
-

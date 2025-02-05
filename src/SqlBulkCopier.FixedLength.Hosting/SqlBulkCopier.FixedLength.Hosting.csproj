@@ -13,6 +13,7 @@
 
 	<ItemGroup>
     <ProjectReference Include="..\SqlBulkCopier.FixedLength\SqlBulkCopier.FixedLength.csproj" />
+    <ProjectReference Include="..\SqlBulkCopier.Hosting\SqlBulkCopier.Hosting.csproj" />
   </ItemGroup>
 
 </Project>

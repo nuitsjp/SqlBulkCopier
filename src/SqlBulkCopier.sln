@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.CsvHelper.FromAppSet
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.FixedLength.FromAppSettings", "Sample.FixedLength.FromAppSettings\Sample.FixedLength.FromAppSettings.csproj", "{91CF14D2-2775-73DD-EA68-4CFCCA280723}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlBulkCopier.Hosting", "SqlBulkCopier.Hosting\SqlBulkCopier.Hosting.csproj", "{0288EA2D-DC49-4733-8333-CC4249180F3D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,10 @@ Global
 		{91CF14D2-2775-73DD-EA68-4CFCCA280723}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91CF14D2-2775-73DD-EA68-4CFCCA280723}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91CF14D2-2775-73DD-EA68-4CFCCA280723}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0288EA2D-DC49-4733-8333-CC4249180F3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0288EA2D-DC49-4733-8333-CC4249180F3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0288EA2D-DC49-4733-8333-CC4249180F3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0288EA2D-DC49-4733-8333-CC4249180F3D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -14,4 +14,6 @@ builder.Services
     .AddHostedService<BulkCopyService>()
     .AddSqlBulkCopier();
 
-await builder.Build().RunAsync();
+await builder
+    .Build()
+    .RunAsync();
