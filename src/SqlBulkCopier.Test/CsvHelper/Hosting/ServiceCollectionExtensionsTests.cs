@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using SqlBulkCopier.CsvHelper.Hosting;
+using SqlBulkCopier.Hosting;
 
 namespace SqlBulkCopier.Test.CsvHelper.Hosting;
 
@@ -39,7 +40,7 @@ public class ServiceCollectionExtensionsTests
 
         // Assert
         var provider = services.BuildServiceProvider();
-        provider.GetService<IBulkCopierBuilder>().ShouldNotBeNull();
+        provider.GetService<IBulkCopierProvider>().ShouldNotBeNull();
     }
 
     static IConfiguration BuildJsonConfig(string json)

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using SqlBulkCopier.FixedLength.Hosting;
+using SqlBulkCopier.Hosting;
 
 namespace SqlBulkCopier.Test.FixedLength.Hosting;
 
@@ -34,12 +35,13 @@ public class ServiceCollectionExtensionsTests
         var configuration = BuildJsonConfig(settings);
         services.AddSingleton(configuration);
 
+
         // Act
         services.AddSqlBulkCopier();
 
         // Assert
         var provider = services.BuildServiceProvider();
-        provider.GetService<IBulkCopierBuilder>().ShouldNotBeNull();
+        provider.GetService<IBulkCopierProvider>().ShouldNotBeNull();
     }
 
     static IConfiguration BuildJsonConfig(string json)
