@@ -9,7 +9,9 @@ using System.Text;
 
 namespace SqlBulkCopier.Test;
 
-public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierBuilder<TBuilder>
+public abstract class WriteToServerAsync<TBuilder> 
+    : IDisposable
+    where TBuilder : IBulkCopierBuilder<TBuilder>
 {
     protected const int RowNumber = 100;
 
@@ -125,9 +127,10 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
     public async Task NoRetry_WithConnection_BeforeTruncate_ShouldSucceed()
     {
         // Arrange
+        using var connection = await OpenConnectionAsync();
         using var sqlBulkCopier = ProvideBuilder()
             .SetTruncateBeforeBulkInsert(true)
-            .Build(await OpenConnectionAsync());
+            .Build(connection);
 
         await sqlBulkCopier.WriteToServerAsync(
             await CreateBulkInsertStreamAsync(Targets),
@@ -144,6 +147,7 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
 
         // Assert
         await AssertAsync();
+        connection.Close();
     }
 
     [Fact]
@@ -550,6 +554,45 @@ public abstract class WriteToServerAsync<TBuilder> where TBuilder : IBulkCopierB
             )
             """);
     }
+
+    public void Dispose()
+    {
+        using SqlConnection mainConnection = new(new SqlConnectionStringBuilder
+        {
+            DataSource = ".",
+            InitialCatalog = "master",
+            IntegratedSecurity = true,
+            TrustServerCertificate = true
+        }.ToString());
+        mainConnection.Open();
+        mainConnection.Execute(
+            // ReSharper disable StringLiteralTypo
+            $"""
+             -- 対象データベース名を指定
+             DECLARE @target_database_name VARCHAR(128);
+             SET @target_database_name = '{DatabaseName}'; -- ここに対象データベース名を指定
+
+             -- 現在のセッションIDを取得
+             DECLARE @current_session_id INT;
+             SELECT @current_session_id = @@SPID;
+
+             -- 現在のセッション以外のセッションIDをKILLする
+             DECLARE @kill_command VARCHAR(MAX);
+             SET @kill_command = '';
+
+             SELECT @kill_command = @kill_command + 'KILL ' + CAST(session_id AS VARCHAR(10)) + '; '
+             FROM sys.dm_exec_sessions
+             WHERE session_id != @current_session_id
+             AND is_user_process = 1
+             AND database_id = DB_ID(@target_database_name);
+
+             -- KILLコマンドを実行
+             EXEC(@kill_command);
+             """);
+        mainConnection.Execute($"DROP DATABASE IF EXISTS [{DatabaseName}]");
+        mainConnection.Close();
+    }
+
 
     protected async Task<SqlConnection> OpenConnectionAsync()
     {
