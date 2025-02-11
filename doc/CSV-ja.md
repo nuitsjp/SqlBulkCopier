@@ -1,5 +1,5 @@
 # はじめに
-SqlBulkCopierライブラリを使用することで、CSVおよび固定長ファイルを効率的にデータベースにバルクコピーすることができます。ここではCSVに対する利用方法を説明します。
+SqlBulkCopierは、CSVおよび固定長ファイルを効率的にデータベースにバルクコピーすることができます。ここではCSVに対する利用方法を説明します。
 
 CSV利用時の設定方法として、以下の2つのアプローチを提供しています：
 
@@ -27,7 +27,7 @@ CSV利用時の設定方法として、以下の2つのアプローチを提供�
 Install-Package SqlBulkCopier.CsvHelper
 ```
 
-このドキュメントで説明する2つのアプローチのサンプルコードを以下に示します。どちらも`Microsoft.Extensions.Hosting`を使用してGeneric Hostに対応したコンソールアプリケーションを構築する例です。
+このドキュメントで説明する2つのアプローチのサンプルコードを以下に示します。どちらも`Microsoft.Extensions.Hosting`を使用してGeneric Hostに対応したコンソールアプリケーションを構築する例です。コンソールアプリケーションプロジェクトで作成する前提となります。
 
 ### Fluent APIアプローチのサンプル
 
@@ -224,11 +224,11 @@ public class BulkCopyService(
 |------|------------|------------------|
 | [CSVファイルをヘッダー有りで処理する](#CSVファイルをヘッダー有りで処理する) | `CreateWithHeader` | `"HasHeader": true` |
 | [CSVファイルをヘッダー無しで処理する](#CSVファイルをヘッダー無しで処理する) | `CreateNoHeader` | `"HasHeader": false` |
+| [`IBulkCopier`のインスタンスを作成する](#IBulkCopierのインスタンスを作成する) | `Build` | DIで`IBulkCopierProvider`から取得 |
 | [データ型の設定](#データ型の設定) | `AsInt`, `AsDate`, `AsDecimal`, etc. | `"SqlDbType": "Int"`, `"Date"`, `"Decimal"`, etc. |
 | [トリム操作](#トリム操作) | `Trim`, `TrimStart`, `TrimEnd` | `"TrimMode": "Trim"`, `"TrimStart"`, `"TrimEnd"` |
 | [空文字列のNULL扱い](#空文字列のnull扱い) | `TreatEmptyStringAsNull` | `"TreatEmptyStringAsNull": true`, `false` |
 | [カスタム変換](#カスタム変換) | `Convert` | 設定ファイルでは未対応 |
-| [`IBulkCopier`のインスタンスを作成する](#IBulkCopierのインスタンスを作成する) | `Build` | DIで`IBulkCopierProvider`から取得 |
 | [事前にテーブルをトランケートする](#事前にテーブルをトランケートする) | `SetTruncateBeforeBulkInsert` | `"TruncateBeforeBulkInsert": true/false` |
 | [行ごとに取り込み対象を判定する](#行ごとに取り込み対象を判定する) | `SetRowFilter` | 設定ファイルでは未対応 |
 | [リトライ設定](#リトライ設定) | `SetMaxRetryCount`, `SetInitialDelay`, `SetUseExponentialBackoff` | `"MaxRetryCount": 3`, `"InitialDelay": "00:00:05"`, `"UseExponentialBackoff": true` |
@@ -290,106 +290,6 @@ appsettings.jsonでの設定例:
 }
 ```
 
-#### [データ型の設定](#設定の詳細)
-`IColumnContext`を使用して、CSVデータをSQL Serverのデータ型にマッピングすることができます。以下のコード例は、いくつかの代表的なデータ型へのマッピング方法を示しています。
-
-```csharp
-    .AddColumnMapping("BirthDate", c => c.AsDate("yyyy-MM-dd"))
-    .AddColumnMapping("Salary", c => c.AsDecimal())
-    .Build(configuration.GetConnectionString("DefaultConnection")!);
-```
-
-appsettings.jsonでの設定例:
-
-```json
-{
-  "SqlBulkCopier": {
-    "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": true,
-    "Columns": {
-      "BirthDate": {
-        "SqlDbType": "Date",
-        "Format": "yyyy-MM-dd"
-      },
-      "Salary": {
-        "SqlDbType": "Decimal"
-      }
-    }
-  }
-}
-```
-
-#### [トリム操作](#設定の詳細)
-文字列のトリム操作を行うことができます。これにより、データの前後の空白や特定の文字を削除できます。以下のコード例は、トリム操作の使用方法を示しています。
-
-```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateWithHeader("[dbo].[Customer]")
-    .AddColumnMapping("FirstName", c => c.Trim())
-    .AddColumnMapping("LastName", c => c.TrimEnd())
-    .Build(configuration.GetConnectionString("DefaultConnection")!);
-```
-
-appsettings.jsonでの設定例:
-
-```json
-{
-  "SqlBulkCopier": {
-    "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": true,
-    "DefaultColumnSettings": {
-      "TrimMode": "Trim",
-      "TrimChars": " "
-    },
-    "Columns": {
-      "FirstName": {},
-      "LastName": {
-        "TrimMode": "TrimEnd"
-      }
-    }
-  }
-}
-```
-
-#### [空文字列のNULL扱い](#設定の詳細)
-空の文字列をデータベースに挿入する際にNULLとして扱うことができます。以下のコード例は、その方法を示しています。
-
-```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateWithHeader("[dbo].[Customer]")
-    .AddColumnMapping("MiddleName", c => c.TreatEmptyStringAsNull())
-    .Build(configuration.GetConnectionString("DefaultConnection")!);
-```
-
-appsettings.jsonでの設定例:
-
-```json
-{
-  "SqlBulkCopier": {
-    "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": true,
-    "DefaultColumnSettings": {
-      "TreatEmptyStringAsNull": true
-    },
-    "Columns": {
-      "MiddleName": {}
-    }
-  }
-}
-```
-
-#### [カスタム変換](#設定の詳細)
-カスタム変換関数を指定することができます。これにより、文字列を任意のオブジェクトに変換することができます。以下のコード例は、カスタム変換の使用方法を示しています。
-
-```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateWithHeader("[dbo].[Customer]")
-    .AddColumnMapping("CustomField", c => c.Convert(value => CustomConversion(value)))
-    .Build(configuration.GetConnectionString("DefaultConnection")!);
-```
-
-appsettings.jsonでの設定例は未対応です。
-
 #### [`IBulkCopier`のインスタンスを作成する](#設定の詳細)
 `Build`メソッドは、`IBulkCopier`のインスタンスを作成するための重要なメソッドです。以下の4つのオーバーロードがあります：
 
@@ -418,6 +318,17 @@ appsettings.jsonでの設定例は未対応です。
    - `externalTransaction`は、バルクコピー操作のために使用される外部トランザクションです。すべてのバルクコピー操作はこのトランザクションの一部となります。
    - `ArgumentNullException`が、`connection`または`externalTransaction`が`null`の場合にスローされます。
 
+#### [データ型の設定](#設定の詳細)
+`IColumnContext`を使用して、CSVデータをSQL Serverのデータ型にマッピングすることができます。以下のコード例は、いくつかの代表的なデータ型へのマッピング方法を示しています。
+
+SqlBulkcopyで自動的な変換が可能な場合、必ずしも個別に指定する必要はありません。
+
+```csharp
+    .AddColumnMapping("BirthDate", c => c.AsDate("yyyy-MM-dd"))
+    .AddColumnMapping("Salary", c => c.AsDecimal())
+    .Build(configuration.GetConnectionString("DefaultConnection")!);
+```
+
 appsettings.jsonでの設定例:
 
 ```json
@@ -425,10 +336,127 @@ appsettings.jsonでの設定例:
   "SqlBulkCopier": {
     "DestinationTableName": "[dbo].[Customer]",
     "HasHeader": true,
-    "ConnectionString": "YourDatabaseConnectionString"
+    "Columns": {
+      "BirthDate": {
+        "SqlDbType": "Date",
+        "Format": "yyyy-MM-dd"
+      },
+      "Salary": {
+        "SqlDbType": "Decimal"
+      }
+    }
   }
 }
 ```
+
+##### 型の対応表
+
+詳細な型の対応表は下記の通りです。下記以外の型は、基本的にSqlBulkcopyの自動変換に任せてください。
+
+| SQL Server 型     | Fluent API (IColumnContext) | appsettings.json 設定例                      |
+|-------------------|-----------------------------|----------------------------------------------|
+| BIGINT            | AsBigInt                    | "SqlDbType": "BigInt"                         |
+| BIT               | AsBit                       | "SqlDbType": "Bit"                            |
+| UNIQUEIDENTIFIER  | AsUniqueIdentifier          | "SqlDbType": "UniqueIdentifier"               |
+| DATE              | AsDate                      | "SqlDbType": "Date", "Format": "yyyy-MM-dd"    |
+| DATETIME          | AsDateTime                  | "SqlDbType": "DateTime", "Format": "..."       |
+| DECIMAL           | AsDecimal                   | "SqlDbType": "Decimal"                        |
+| FLOAT             | AsFloat                     | "SqlDbType": "Float"                          |
+| INT               | AsInt                       | "SqlDbType": "Int"                            |
+| MONEY             | AsMoney                     | "SqlDbType": "Money"                          |
+| REAL              | AsReal                      | "SqlDbType": "Real"                           |
+
+#### [トリム操作](#設定の詳細)
+文字列のトリム操作を行うことができます。以下のコード例は、トリム操作の使用方法を示しています。
+
+【簡略な記述】
+```csharp
+var bulkCopier = CsvBulkCopierBuilder
+    .CreateWithHeader("[dbo].[Customer]")
+    .AddColumnMapping("FirstName", c => c.Trim())
+    .AddColumnMapping("LastName", c => c.TrimEnd())
+    .Build(configuration.GetConnectionString("DefaultConnection")!);
+```
+
+【詳細な設定方法】  
+- c.Trim()  
+  → 両端の空白文字（スペース、タブ、改行など）を除去  
+  例: "  Hello  " → "Hello"  
+
+- c.Trim("012".ToCharArray())  
+  → 両端から指定した文字のみ除去  
+  例: "012Hello012" → "Hello"  
+
+- c.TrimStart() および c.TrimStart("012".ToCharArray())  
+  → 文字列先頭の空白または指定文字を除去  
+  例: "  Hello  " → "Hello  "  
+       "012Hello012" → "Hello012"  
+
+- c.TrimEnd() および c.TrimEnd("012".ToCharArray())  
+  → 文字列末尾の空白または指定文字を除去  
+  例: "  Hello  " → "  Hello"  
+       "012Hello012" → "012Hello"  
+
+【appsettings.jsonでの設定方法】  
+appsettings.jsonでは、デフォルト設定および各カラムごとにトリム動作を以下のように指定できます。  
+- 全カラムのデフォルト設定の場合は "DefaultColumnSettings" 内で "TrimMode"（"Trim", "TrimStart", "TrimEnd"）と任意で "TrimChars" を指定  
+- 個別カラムでは、Columns内に "TrimMode" を設定できます  
+
+例:
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": true,
+    "DefaultColumnSettings": {
+      "TrimMode": "Trim",       // 両端トリム
+      "TrimChars": " "          // 除去対象文字(必要に応じて記述)
+    },
+    "Columns": {
+      "FirstName": {},
+      "LastName": { "TrimMode": "TrimEnd" }
+    }
+  }
+}
+```
+
+#### [空文字列のNULL扱い](#設定の詳細)
+空の文字列をデータベースに挿入する際にNULLとして扱うことができます。以下のコード例は、その方法を示しています。
+
+```csharp
+var bulkCopier = CsvBulkCopierBuilder
+    .CreateWithHeader("[dbo].[Customer]")
+    .AddColumnMapping("MiddleName", c => c.TreatEmptyStringAsNull())
+    .Build(configuration.GetConnectionString("DefaultConnection")!);
+```
+
+appsettings.jsonでの設定例:
+
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": true,
+    "Columns": {
+      "MiddleName": {
+              "TreatEmptyStringAsNull": true
+      }
+    }
+  }
+}
+```
+
+#### [カスタム変換](#設定の詳細)
+カスタム変換関数を指定することができます。これにより、文字列を任意のオブジェクトに変換することができます。以下のコード例は、カスタム変換の使用方法を示しています。
+
+```csharp
+var bulkCopier = CsvBulkCopierBuilder
+    .CreateWithHeader("[dbo].[Customer]")
+    .AddColumnMapping("CustomField", c => c.Convert(value => CustomConversion(value)))
+    .Build(configuration.GetConnectionString("DefaultConnection")!);
+```
+
+appsettings.jsonでの設定例は未対応です。
 
 #### [事前にテーブルをトランケートする](#設定の詳細)
 この関数は、バルクコピーを実行する前に、指定したテーブルをトランケートするために使用します。以下のコード例は、その方法を示しています。
