@@ -37,7 +37,7 @@ CSV利用時の設定方法として、以下の2つのアプローチを提供�
 このライブラリは、.NET 8.0 または .NET Framework 4.8が必要です。NuGetから以下のパッケージをインストールしてください：
 
 ```
-Install-Package SqlBulkCopier.CsvHelper
+Install-Package SqlBulkCopier.CsvHelper.Hosting
 ```
 
 このドキュメントで説明する2つのアプローチのサンプルコードを以下に示します。どちらも`Microsoft.Extensions.Hosting`を使用してGeneric Hostに対応したコンソールアプリケーションを構築する例です。コンソールアプリケーションプロジェクトで作成する前提となります。
