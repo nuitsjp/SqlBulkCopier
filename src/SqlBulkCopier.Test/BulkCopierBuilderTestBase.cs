@@ -17,7 +17,7 @@ public abstract class WriteToServerAsync<TBuilder>
 
     protected List<BulkInsertTestTarget> Targets { get; } = GenerateTestData(RowNumber);
 
-    private string DatabaseName => GetType().Name;
+    private string DatabaseName { get; }
 
     protected string SqlBulkCopierConnectionString => new SqlConnectionStringBuilder
     {
@@ -29,6 +29,7 @@ public abstract class WriteToServerAsync<TBuilder>
 
     protected WriteToServerAsync()
     {
+        DatabaseName = $"WriteToServerAsync_{GetType().Name}_{Guid.NewGuid().ToString("N")}";
         InitDatabase();
     }
 

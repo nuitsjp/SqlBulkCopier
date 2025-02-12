@@ -18,7 +18,6 @@ namespace SqlBulkCopier;
 /// </remarks>
 public class BulkCopier : IBulkCopier
 {
-    あ
     /// <inheritdoc />
     public event SqlRowsCopiedEventHandler? SqlRowsCopied;
 
