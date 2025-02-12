@@ -60,7 +60,7 @@ jobs:
     - name: Extract version from tag
       id: extract_version
       run: |
-        if (startsWith($env:GITHUB_REF, 'refs/tags/Release')) {
+        if ($env:GITHUB_REF -like 'refs/tags/Release*') {
           $version = $env:GITHUB_REF -replace 'refs/tags/Release-', ''
         } else {
           $version = '1.0.0'
@@ -79,7 +79,7 @@ jobs:
     #   run: dotnet test src/SqlBulkCopier.sln --configuration Release --no-build --verbosity normal
 
     - name: Pack and Publish to NuGet
-      if: startsWith(github.ref, 'refs/tags/Release')
+      if: github.ref == 'refs/tags/Release*'
       run: |
         dotnet pack src/SqlBulkCopier/SqlBulkCopier.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
         dotnet pack src/SqlBulkCopier.CsvHelper/SqlBulkCopier.CsvHelper.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
