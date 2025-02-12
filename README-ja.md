@@ -15,12 +15,8 @@ SqlBulkCopierは、SQL Serverの高速なバルクコピー機能であるSqlBul
 ## 目次
 - [サポート対象](#サポート対象)
 - [Getting Started](#getting-started)
-- CSVの詳細設定
-  - [CSV - appsettings.json編](doc/CSV_Appsettings.md)
-  - [CSV - Fluent API編](doc/CSV_FluentAPI.md)
-- 固定長ファイルの詳細設定
-  - [固定長 - appsettings.json編](doc/FixedLength_Appsettings.md)
-  - [固定長 - Fluent API編](doc/FixedLength_FluentAPI.md)
+- [CSVの詳細設定](doc/CSV-ja.md)
+- [固定長ファイルの詳細設定](doc/FixedLength-ja.md)
 - [ライセンス](#ライセンス)
 
 ## サポート対象
@@ -31,16 +27,37 @@ SqlBulkCopierは、SQL Serverの高速なバルクコピー機能であるSqlBul
 
 ## Getting Started
 
+ここではCSVをFluent APIを利用して取り込む方法を紹介します。詳細はCSVと固定長のそれぞれのドキュメントを参照してください。
+
 NuGetから以下のパッケージをインストールしてください：
 
-### CSV用パッケージ
 ```
-Install-Package SqlBulkCopier.CsvHelper
+Install-Package SqlBulkCopier.CsvHelper.Hosting
 ```
 
-以下は、CSVファイルをFluent APIで設定し、`Microsoft.Extensions.Hosting`を使用してGeneric Hostに対応したコンソールアプリケーションを構築する簡単なサンプルコードです。詳細な設定やその他の例については、該当する詳細ドキュメントページをご参照ください。
+このドキュメントで説明する2つのアプローチのサンプルコードを以下に示します。どちらも`Microsoft.Extensions.Hosting`を使用してGeneric Hostに対応したコンソールアプリケーションを構築する例です。コンソールアプリケーションプロジェクトで作成する前提となります。
 
-### Program.cs
+### Fluent APIアプローチのサンプル
+
+Fluent APIを使用する場合、以下の手順で実装します：
+
+1. appsettings.jsonにSQL Serverへの接続文字列を追加
+2. Program.csでSqlBulkCopierサービスを登録（AddSqlBulkCopier()）
+3. CsvBulkCopierBuilderを利用して詳細を設定し、CSVを取り込む
+
+実装例の詳細は以下の通りです。
+
+#### appsettings.json
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "YourDatabaseConnectionString"
+  }
+}
+```
+
+#### Program.cs
 
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
@@ -59,10 +76,12 @@ builder.Services
     .AddHostedService<BulkCopyService>()
     .AddSqlBulkCopier();
 
-await builder.Build().RunAsync();
+await builder
+    .Build()
+    .RunAsync();
 ```
 
-### BulkCopyService.cs
+#### BulkCopyService.cs
 
 ```csharp
 using System.Text;
@@ -79,10 +98,7 @@ public class BulkCopyService(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Open a connection to the database
-        await using var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection"));
-        await connection.OpenAsync(stoppingToken);
-
+        // Create a bulk copier instance
         var bulkCopier = CsvBulkCopierBuilder
             .CreateWithHeader("[dbo].[Customer]")
             .SetTruncateBeforeBulkInsert(true)
@@ -92,31 +108,20 @@ public class BulkCopyService(
             .AddColumnMapping("LastName")
             .AddColumnMapping("BirthDate", c => c.AsDate("yyyy-MM-dd"))
             .AddColumnMapping("IsActive", c => c.AsBit())
-            .Build(connection);
+            .Build(configuration.GetConnectionString("DefaultConnection")!);
 
+        // Open the CSV file
         await using var stream = File.OpenRead(
             Path.Combine(AppContext.BaseDirectory, "Assets", "Customer.csv"));
-        await bulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
-        Console.WriteLine("Bulk copy completed");
+        // Start the bulk copy operation
+        await bulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
 
         // Stop the application when the task is completed
         applicationLifetime.StopApplication();
     }
 }
 ```
-
-### appsettings.json
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "YourDatabaseConnectionString"
-  }
-}
-```
-
-このサンプルでは、`appsettings.json`を使用してデータベース接続文字列を設定し、`BulkCopyService`をホストしています。`BulkCopyService`は、データベースへの接続を開き、CSVファイルを読み込んでバルクコピーを実行します。`AddSqlBulkCopier`メソッドを使用して、必要なサービスをDIコンテナに追加しています。
 
 ## ライセンス
 このプロジェクトは [MITライセンス](LICENSE) の下で提供されています。
