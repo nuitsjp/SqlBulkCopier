@@ -21,7 +21,7 @@ public abstract class WriteToServerAsync<TBuilder>
 
     protected string SqlBulkCopierConnectionString => new SqlConnectionStringBuilder
     {
-        DataSource = ".",
+        DataSource = @"(localdb)\MSSQLLocalDB",
         InitialCatalog = DatabaseName,
         IntegratedSecurity = true,
         TrustServerCertificate = true
@@ -443,7 +443,7 @@ public abstract class WriteToServerAsync<TBuilder>
     {
         using SqlConnection mainConnection = new(new SqlConnectionStringBuilder
         {
-            DataSource = ".",
+            DataSource = @"(localdb)\MSSQLLocalDB",
             InitialCatalog = "master",
             IntegratedSecurity = true,
             TrustServerCertificate = true
@@ -560,7 +560,7 @@ public abstract class WriteToServerAsync<TBuilder>
     {
         using SqlConnection mainConnection = new(new SqlConnectionStringBuilder
         {
-            DataSource = ".",
+            DataSource = @"(localdb)\MSSQLLocalDB",
             InitialCatalog = "master",
             IntegratedSecurity = true,
             TrustServerCertificate = true
