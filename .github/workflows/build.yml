@@ -5,6 +5,8 @@ on:
     paths:
       - 'src/**'
       - '.github/**'
+    tags:
+      - 'Release*'
   pull_request:
     paths:
       - 'src/**'
@@ -63,3 +65,43 @@ jobs:
 
     - name: Run tests
       run: dotnet test src/SqlBulkCopier.sln --configuration Release --no-build --verbosity normal
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/Release')
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore src/SqlBulkCopier.sln
+
+    - name: Build solution
+      run: dotnet build src/SqlBulkCopier.sln --configuration Release --no-restore
+
+    - name: Pack SqlBulkCopier
+      run: dotnet pack src/SqlBulkCopier/SqlBulkCopier.csproj --configuration Release --output ./nupkg
+
+    - name: Pack SqlBulkCopier.CsvHelper
+      run: dotnet pack src/SqlBulkCopier.CsvHelper/SqlBulkCopier.CsvHelper.csproj --configuration Release --output ./nupkg
+
+    - name: Pack SqlBulkCopier.CsvHelper.Hosting
+      run: dotnet pack src/SqlBulkCopier.CsvHelper.Hosting/SqlBulkCopier.CsvHelper.Hosting.csproj --configuration Release --output ./nupkg
+
+    - name: Pack SqlBulkCopier.FixedLength
+      run: dotnet pack src/SqlBulkCopier.FixedLength/SqlBulkCopier.FixedLength.csproj --configuration Release --output ./nupkg
+
+    - name: Pack SqlBulkCopier.FixedLength.Hosting
+      run: dotnet pack src/SqlBulkCopier.FixedLength.Hosting/SqlBulkCopier.FixedLength.Hosting.csproj --configuration Release --output ./nupkg
+
+    - name: Pack SqlBulkCopier.Hosting
+      run: dotnet pack src/SqlBulkCopier.Hosting/SqlBulkCopier.Hosting.csproj --configuration Release --output ./nupkg
+
+    - name: Publish to NuGet
+      run: dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
