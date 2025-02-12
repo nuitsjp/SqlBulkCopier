@@ -1,14 +1,54 @@
+﻿using System.Globalization;
+using System.Text;
+using CsvHelper;
+using CsvHelper.Configuration;
 using SqlBulkCopier.CsvHelper;
+using SqlBulkCopier.Test.CsvHelper.Util;
 
 // ReSharper disable UseAwaitUsing
 
 namespace SqlBulkCopier.Test.CsvHelper;
 
 // ReSharper disable once UnusedMember.Global
-public class CsvBulkCopierNoHeaderBuilderTest() : CsvBulkCopierBuilderTest<ICsvBulkCopierNoHeaderBuilder>(false)
+public class CsvBulkCopierNoHeaderBuilderTest() : WriteToServerAsync<ICsvBulkCopierNoHeaderBuilder>
 {
     public override WithRetryDataReaderBuilder CreateWithRetryDataReaderBuilder(ICsvBulkCopierNoHeaderBuilder builder, int retryCount) 
         => new(new CsvDataReaderBuilder(false, builder.BuildColumns(), _ => true), retryCount);
+
+    /// <summary>
+    /// 生成したデータを固定長でファイル出力(バイト数でパディング)する
+    /// </summary>
+    // ReSharper disable once UnusedMember.Local
+    protected override async Task<Stream> CreateBulkInsertStreamAsync(List<BulkInsertTestTarget> dataList, bool withHeaderAndFooter = false)
+    {
+        var encoding = new UTF8Encoding(false);
+        using var stream = new MemoryStream();
+        // ReSharper disable once UseAwaitUsing
+        using var writer = new StreamWriter(stream, encoding);
+        var csvWriter = new CsvWriter(
+            writer,
+            new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = false
+            });
+        csvWriter.Context.RegisterClassMap<BulkInsertTestTargetMap>();
+        await csvWriter.WriteRecordsAsync(Targets, CancellationToken.None);
+        await csvWriter.FlushAsync();
+
+        if (withHeaderAndFooter == false)
+        {
+            // csvWriterなどを閉じると、streamも閉じられるため作り直す
+            return new MemoryStream(stream.ToArray());
+        }
+
+        return new MemoryStream(
+            encoding.GetBytes(
+                $"""
+                 Header
+                 {encoding.GetString(stream.ToArray())}
+                 Footer
+                 """));
+    }
 
     protected override ICsvBulkCopierNoHeaderBuilder ProvideBuilder(bool withRowFilter = false)
     {
