@@ -25,9 +25,28 @@ jobs:
 
     - name: Install SQL Server LocalDB
       run: |
-        choco install sql-server-express-localdb -y --no-progress
-        # バージョン情報の表示
-        sqllocaldb v
+        # VS Build Toolsインストーラーのダウンロード
+        Invoke-WebRequest -Uri https://aka.ms/vs/17/release/vs_buildtools.exe -OutFile vs_buildtools.exe
+        
+        # LocalDBを含むSQL Server開発ツールのインストール
+        Start-Process -Wait -FilePath .\vs_buildtools.exe -ArgumentList `
+          "--quiet", `
+          "--wait", `
+          "--norestart", `
+          "--nocache", `
+          "--installPath", "C:\BuildTools", `
+          "--add", "Microsoft.VisualStudio.Workload.DataBuildTools", `
+          "--add", "Microsoft.VisualStudio.Component.SQL.LocalDB.Runtime"
+          
+        # インストール確認
+        Write-Host "Checking LocalDB installation..."
+        $localDBPath = "C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe"
+        if (Test-Path $localDBPath) {
+            & $localDBPath v
+        } else {
+            Write-Host "LocalDB executable not found at expected path"
+            exit 1
+        }
       shell: pwsh
 
     - name: Start LocalDB Instance
