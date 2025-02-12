@@ -23,14 +23,9 @@ jobs:
       with:
         dotnet-version: '9.0.x'
 
-    - name: Switch to Linux containers
-      run: |
-        & $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine
-        docker info
-      shell: pwsh
-
     - name: Start SQL Server Container
       run: |
+        docker pull mcr.microsoft.com/mssql/server:2019-latest
         docker run -d `
           -e "ACCEPT_EULA=Y" `
           -e "SA_PASSWORD=Password12!" `
@@ -41,7 +36,7 @@ jobs:
         Write-Host "Waiting for SQL Server to start..."
         Start-Sleep -Seconds 30
         
-        docker ps -a
+        docker ps
         docker logs sql2019
       shell: pwsh
 
