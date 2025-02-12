@@ -23,81 +23,63 @@ jobs:
       with:
         dotnet-version: '9.0.x'
 
-    - name: Check SQL Server Services
-      run: |
-        Write-Host "Checking available SQL Server services..."
-        Get-Service | Where-Object {$_.Name -like '*SQL*'} | Select-Object Name, DisplayName, Status
-        
-        Write-Host "`nChecking SQL Server installation..."
-        $sqlInstance = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server' | Select-Object InstalledInstances -ErrorAction SilentlyContinue
-        if ($sqlInstance) {
-            Write-Host "Found SQL Server instances: $($sqlInstance.InstalledInstances)"
-        } else {
-            Write-Host "No SQL Server instances found in registry"
-        }
-        
-        Write-Host "`nChecking Program Files..."
-        Get-ChildItem 'C:\Program Files\Microsoft SQL Server' -ErrorAction SilentlyContinue
-        Get-ChildItem 'C:\Program Files (x86)\Microsoft SQL Server' -ErrorAction SilentlyContinue
-      shell: pwsh
-
-    - name: Install SQL Server Express
-      run: |
-        Write-Host "Downloading SQL Server Express..."
-        Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/?LinkID=866658" -OutFile "SQL2019-SSEI-Expr.exe"
-        
-        Write-Host "Installing SQL Server Express..."
-        Start-Process -Wait -FilePath "SQL2019-SSEI-Expr.exe" -ArgumentList "/ACTION=INSTALL", "/IACCEPTSQLSERVERLICENSETERMS", "/Q"
-        
-        Write-Host "Installation completed. Checking services..."
-        Get-Service | Where-Object {$_.Name -like '*SQL*'} | Select-Object Name, DisplayName, Status
-      shell: pwsh
-
     - name: Test SQL Server Connection
       run: |
-        Write-Host "Waiting for SQL Server to be ready..."
-        Start-Sleep -Seconds 30
+        # SQLCmdツールのインストール
+        Write-Host "Installing SQL Server Command Line Tools..."
+        choco install sqlserver-cmdlineutils -y
         
-        $connectionString = "Server=.;Database=master;Trusted_Connection=True;"
-        $query = "SELECT @@VERSION as Version;"
+        # 各種接続文字列でテスト
+        $testQueries = @(
+          @{
+            server = "(local)";
+            desc = "Local default instance"
+          },
+          @{
+            server = "(local)\SQLEXPRESS";
+            desc = "Local SQL Express instance"
+          },
+          @{
+            server = ".";
+            desc = "Local dot notation"
+          },
+          @{
+            server = "localhost";
+            desc = "Localhost"
+          }
+        )
         
-        $maxAttempts = 3
-        $attempt = 0
         $success = $false
-        
-        while ($attempt -lt $maxAttempts -and -not $success) {
-            $attempt++
-            try {
-                $connection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
-                $command = New-Object System.Data.SqlClient.SqlCommand($query, $connection)
-                
-                $connection.Open()
-                $reader = $command.ExecuteReader()
-                while ($reader.Read()) {
-                    Write-Host "SQL Server Version:" $reader["Version"]
-                }
-                $reader.Close()
-                Write-Host "Connection test successful!"
-                $success = $true
+        foreach ($test in $testQueries) {
+          Write-Host "`nTesting connection to $($test.desc) ($($test.server))..."
+          try {
+            sqlcmd -S "$($test.server)" -Q "SELECT @@VERSION" -C -t 5
+            if ($LASTEXITCODE -eq 0) {
+              Write-Host "Successfully connected to $($test.server)!"
+              $success = $true
+              $global:workingServer = $test.server
+              break
             }
-            catch {
-                Write-Host "Attempt $attempt failed: $_"
-                if ($attempt -lt $maxAttempts) {
-                    Write-Host "Waiting before retry..."
-                    Start-Sleep -Seconds 10
-                }
-            }
-            finally {
-                if ($connection) {
-                    $connection.Close()
-                }
-            }
+          }
+          catch {
+            Write-Host "Failed to connect to $($test.server): $_"
+          }
         }
         
         if (-not $success) {
-            Write-Host "Failed to connect to SQL Server after $maxAttempts attempts"
-            exit 1
+          Write-Host "Could not connect to any SQL Server instance"
+          Write-Host "Available SQL Server tools:"
+          Get-Command sqlcmd -ErrorAction SilentlyContinue
+          Get-Command osql -ErrorAction SilentlyContinue
+          exit 1
         }
+      shell: pwsh
+
+    - name: Create Test Database
+      if: success()
+      run: |
+        Write-Host "Creating test database using $global:workingServer..."
+        sqlcmd -S "$global:workingServer" -Q "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'TestDB') CREATE DATABASE TestDB;"
       shell: pwsh
 
     - name: Restore dependencies
