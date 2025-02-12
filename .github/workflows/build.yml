@@ -1,0 +1,30 @@
+name: Build Solution
+
+on:
+  push:
+    paths:
+      - 'src/**'
+      - '.github/**'
+  pull_request:
+    paths:
+      - 'src/**'
+      - '.github/**'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore src/SqlBulkCopier.sln
+
+    - name: Build solution
+      run: dotnet build src/SqlBulkCopier.sln --configuration Release --no-restore
