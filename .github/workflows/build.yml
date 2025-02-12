@@ -5,7 +5,7 @@ on:
     paths:
       - 'src/**'
       - '.github/**'
-    tags:
+    tags-ignore:
       - 'Release*'
   pull_request:
     paths:
@@ -82,31 +82,31 @@ jobs:
 
     - name: Extract version from tag
       id: extract_version
-      run: echo "::set-output name=version::${GITHUB_REF#refs/tags/Release-}"
+      run: echo "version=${GITHUB_REF#refs/tags/Release-}" >> $GITHUB_ENV
 
     - name: Restore dependencies
       run: dotnet restore src/SqlBulkCopier.sln
 
     - name: Build solution
-      run: dotnet build src/SqlBulkCopier.sln --configuration Release --no-restore /p:PackageVersion=${{ steps.extract_version.outputs.version }}
+      run: dotnet build src/SqlBulkCopier.sln --configuration Release --no-restore /p:PackageVersion=${{ env.version }}
 
     - name: Pack SqlBulkCopier
-      run: dotnet pack src/SqlBulkCopier/SqlBulkCopier.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ steps.extract_version.outputs.version }}
+      run: dotnet pack src/SqlBulkCopier/SqlBulkCopier.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ env.version }}
 
     - name: Pack SqlBulkCopier.CsvHelper
-      run: dotnet pack src/SqlBulkCopier.CsvHelper/SqlBulkCopier.CsvHelper.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ steps.extract_version.outputs.version }}
+      run: dotnet pack src/SqlBulkCopier.CsvHelper/SqlBulkCopier.CsvHelper.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ env.version }}
 
     - name: Pack SqlBulkCopier.CsvHelper.Hosting
-      run: dotnet pack src/SqlBulkCopier.CsvHelper.Hosting/SqlBulkCopier.CsvHelper.Hosting.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ steps.extract_version.outputs.version }}
+      run: dotnet pack src/SqlBulkCopier.CsvHelper.Hosting/SqlBulkCopier.CsvHelper.Hosting.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ env.version }}
 
     - name: Pack SqlBulkCopier.FixedLength
-      run: dotnet pack src/SqlBulkCopier.FixedLength/SqlBulkCopier.FixedLength.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ steps.extract_version.outputs.version }}
+      run: dotnet pack src/SqlBulkCopier.FixedLength/SqlBulkCopier.FixedLength.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ env.version }}
 
     - name: Pack SqlBulkCopier.FixedLength.Hosting
-      run: dotnet pack src/SqlBulkCopier.FixedLength.Hosting/SqlBulkCopier.FixedLength.Hosting.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ steps.extract_version.outputs.version }}
+      run: dotnet pack src/SqlBulkCopier.FixedLength.Hosting/SqlBulkCopier.FixedLength.Hosting.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ env.version }}
 
     - name: Pack SqlBulkCopier.Hosting
-      run: dotnet pack src/SqlBulkCopier.Hosting/SqlBulkCopier.Hosting.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ steps.extract_version.outputs.version }}
+      run: dotnet pack src/SqlBulkCopier.Hosting/SqlBulkCopier.Hosting.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ env.version }}
 
     - name: Publish to NuGet
       run: dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
