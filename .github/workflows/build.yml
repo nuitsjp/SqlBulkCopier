@@ -21,7 +21,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: '9.0.x'
+        dotnet-version: '8.0.x'
 
     - name: Install SQL Server LocalDB
       run: |
