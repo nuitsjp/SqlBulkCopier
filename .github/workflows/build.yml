@@ -83,9 +83,10 @@ jobs:
     - name: Extract version from tag
       id: extract_version
       run: |
-        VERSION=${GITHUB_REF#refs/tags/Release-}
-        echo "version=$VERSION" >> $GITHUB_ENV
-        echo "Extracted version: $VERSION"
+        $version = $env:GITHUB_REF -replace 'refs/tags/Release-', ''
+        echo "version=$version" >> $env:GITHUB_ENV
+        echo "Extracted version: $version"
+      shell: pwsh
 
     - name: Restore dependencies
       run: dotnet restore src/SqlBulkCopier.sln
