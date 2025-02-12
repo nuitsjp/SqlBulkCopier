@@ -32,6 +32,9 @@
 		<PackageId>SqlBulkCopier.FixedLength</PackageId>
 		<Description>SqlBulkCopier is a library that makes the high-speed bulk copy feature of SQL Server, SqlBulkCopy, more manageable with CSV files and fixed-length files.</Description>
 		<PackageVersion>$(Version)</PackageVersion>
+		<Version>$(PackageVersion)</Version>
+		<AssemblyVersion>$(PackageVersion)</AssemblyVersion>
+		<FileVersion>$(PackageVersion)</FileVersion>
 		<Authors>nuits.jp</Authors>
 		<Copyright>© 2025 nuits.jp</Copyright>
 		<PackageTags>SqlBulkCopy csv fixedlength</PackageTags>
