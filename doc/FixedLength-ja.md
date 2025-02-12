@@ -46,7 +46,7 @@ Fluent APIを使用する場合、以下の手順で実装します：
 
 1. appsettings.jsonにSQL Serverへの接続文字列を追加
 2. Program.csでSqlBulkCopierサービスを登録（AddSqlBulkCopier()）
-3. CsvBulkCopierBuilderを利用して詳細を設定し、CSVを取り込む
+3. FixedLengthBulkCopierBuilderを利用して詳細を設定し、固定長ファイルを取り込む
 
 実装例の詳細は以下の通りです。
 
@@ -66,8 +66,8 @@ Fluent APIを使用する場合、以下の手順で実装します：
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
-using Sample.CsvHelper.FromApi;
-using SqlBulkCopier.CsvHelper.Hosting;
+using Sample.FixedLength.FromApi;
+using SqlBulkCopier.FixedLength.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -76,7 +76,7 @@ builder.Configuration
     .AddJsonFile("appsettings.json");
 
 builder.Services
-    .AddHostedService<BulkCopyService>()
+    .AddHostedService<FixedLengthBulkCopyService>()
     .AddSqlBulkCopier();
 
 await builder
@@ -84,41 +84,41 @@ await builder
     .RunAsync();
 ```
 
-#### BulkCopyService.cs
+#### FixedLengthBulkCopyService.cs
 
 ```csharp
 using System.Text;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using SqlBulkCopier.CsvHelper;
+using SqlBulkCopier.FixedLength;
 
-namespace Sample.CsvHelper.FromApi;
+namespace Sample.FixedLength.FromApi;
 
-public class BulkCopyService(
+public class FixedLengthBulkCopyService(
     IConfiguration configuration,
     IHostApplicationLifetime applicationLifetime) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // Create a bulk copier instance
-        var bulkCopier = CsvBulkCopierBuilder
-            .CreateWithHeader("[dbo].[Customer]")
+        var bulkCopier = FixedLengthBulkCopierBuilder
+            .Create("[dbo].[Customer]")
             .SetTruncateBeforeBulkInsert(true)
             .SetDefaultColumnContext(c => c.TrimEnd().TreatEmptyStringAsNull())
-            .AddColumnMapping("CustomerId")
-            .AddColumnMapping("FirstName")
-            .AddColumnMapping("LastName")
-            .AddColumnMapping("BirthDate", c => c.AsDate("yyyy-MM-dd"))
-            .AddColumnMapping("IsActive", c => c.AsBit())
+            .AddColumnMapping("CustomerId", 0, 10)
+            .AddColumnMapping("FirstName", 10, 50)
+            .AddColumnMapping("LastName", 60, 50)
+            .AddColumnMapping("BirthDate", 590, 10, c => c.AsDate("yyyy-MM-dd"))
+            .AddColumnMapping("IsActive", 727, 1, c => c.AsBit())
             .Build(configuration.GetConnectionString("DefaultConnection")!);
 
-        // Open the CSV file
+        // Open the fixed length file
         await using var stream = File.OpenRead(
-            Path.Combine(AppContext.BaseDirectory, "Assets", "Customer.csv"));
+            Path.Combine(AppContext.BaseDirectory, "Assets", "Customer.dat"));
 
         // Start the bulk copy operation
-        await bulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
+        await bulkCopier.WriteToServerAsync(stream, new UTF8Encoding(false), TimeSpan.FromMinutes(30));
 
         // Stop the application when the task is completed
         applicationLifetime.StopApplication();
@@ -147,21 +147,22 @@ public class BulkCopyService(
   },
   "SqlBulkCopier1": {
     "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": true,
     "TruncateBeforeBulkInsert": true,
     "DefaultColumnSettings": {
       "TrimMode": "TrimEnd",
       "TreatEmptyStringAsNull": true
     },
     "Columns": {
-      "CustomerId": {},
-      "FirstName": {},
-      "LastName": {},
+      "CustomerId": { "Start": 0, "Length": 10 },
+      "FirstName": { "Start": 10, "Length": 50 },
+      "LastName": { "Start": 60, "Length": 50 },
       "BirthDate": {
+        "Start": 590,
+        "Length": 10,
         "SqlDbType": "Date",
         "Format": "yyyy-MM-dd"
       },
-      "IsActive": { "SqlDbType": "Bit" }
+      "IsActive": { "Start": 727, "Length": 1, "SqlDbType": "Bit" }
     }
   }
 }
@@ -175,8 +176,8 @@ public class BulkCopyService(
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
-using Sample.CsvHelper.FromAppSettings;
-using SqlBulkCopier.CsvHelper.Hosting;
+using Sample.FixedLength.FromAppSettings;
+using SqlBulkCopier.FixedLength.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -185,7 +186,7 @@ builder.Configuration
     .AddJsonFile("appsettings.json");
 
 builder.Services
-    .AddHostedService<BulkCopyService>()
+    .AddHostedService<FixedLengthBulkCopyService>()
     .AddSqlBulkCopier();
 
 await builder
@@ -193,7 +194,7 @@ await builder
     .RunAsync();
 ```
 
-#### BulkCopyService.cs
+#### FixedLengthBulkCopyService.cs
 
 ```csharp
 using System.Text;
@@ -201,9 +202,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using SqlBulkCopier.Hosting;
 
-namespace Sample.CsvHelper.FromAppSettings;
+namespace Sample.FixedLength.FromAppSettings;
 
-public class BulkCopyService(
+public class FixedLengthBulkCopyService(
     IConfiguration configuration,
     IBulkCopierProvider bulkCopierProvider,
     IHostApplicationLifetime applicationLifetime) : BackgroundService
@@ -216,10 +217,10 @@ public class BulkCopyService(
         
         // Write data to the database using the bulk copier
         await using var stream = File.OpenRead(
-            Path.Combine(AppContext.BaseDirectory, "Assets", "Customer.csv"));
+            Path.Combine(AppContext.BaseDirectory, "Assets", "Customer.dat"));
 
         // Bulk copy to the database
-        await bulkCopier.WriteToServerAsync(stream, Encoding.UTF8, TimeSpan.FromMinutes(30));
+        await bulkCopier.WriteToServerAsync(stream, new UTF8Encoding(false), TimeSpan.FromMinutes(30));
 
         // Stop the application when the task is completed
         applicationLifetime.StopApplication();
@@ -229,12 +230,10 @@ public class BulkCopyService(
 
 ## 設定の詳細
 
-以下の表は、CSVのバルクコピー設定において実現可能な機能と、それぞれのアプローチでの設定方法を示しています。
+以下の表は、固定長ファイルのバルクコピー設定において実現可能な機能と、それぞれのアプローチでの設定方法を示しています。
 
 | 目的 | Fluent API | appsettings.json |
 |------|------------|------------------|
-| [CSVファイルをヘッダー有りで処理する](#CSVファイルをヘッダー有りで処理する) | `CreateWithHeader` | `"HasHeader": true` |
-| [CSVファイルをヘッダー無しで処理する](#CSVファイルをヘッダー無しで処理する) | `CreateNoHeader` | `"HasHeader": false` |
 | [データ型の設定](#データ型の設定) | `AsInt`, `AsDate`, `AsDecimal`, etc. | `"SqlDbType": "Int"`, `"Date"`, `"Decimal"`, etc. |
 | [トリム操作](#トリム操作) | `Trim`, `TrimStart`, `TrimEnd` | `"TrimMode": "Trim"`, `"TrimStart"`, `"TrimEnd"` |
 | [空文字列のNULL扱い](#空文字列のnull扱い) | `TreatEmptyStringAsNull` | `"TreatEmptyStringAsNull": true`, `false` |
@@ -249,66 +248,14 @@ public class BulkCopyService(
 
 ### 使用方法
 
-#### [CSVファイルをヘッダー有りで処理する](#設定の詳細)
-このメソッドは、ヘッダーを持つCSVファイルを処理するためのビルダーを作成します。以下のコード例は、CSVファイルのヘッダー名を使用してデータベース列にマッピングする方法を示しています。
-
-```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateWithHeader("[dbo].[Customer]")
-    .AddColumnMapping("CustomerId")
-    .AddColumnMapping("FirstName")
-    .Build(configuration.GetConnectionString("DefaultConnection")!);
-```
-
-appsettings.jsonでの設定例:
-
-```json
-{
-  "SqlBulkCopier": {
-    "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": true,
-    "Columns": {
-      "CustomerId": {},
-      "FirstName": {}
-    }
-  }
-}
-```
-
-#### [CSVファイルをヘッダー無しで処理する](#設定の詳細)
-このメソッドは、ヘッダーを持たないCSVファイルを処理するためのビルダーを作成します。以下のコード例は、CSVファイルの列位置を使用してデータベース列にマッピングする方法を示しています。
-
-```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateNoHeader("[dbo].[Customer]")
-    .AddColumnMapping("CustomerId", 0)
-    .AddColumnMapping("FirstName", 1)
-    .Build(configuration.GetConnectionString("DefaultConnection")!);
-```
-
-appsettings.jsonでの設定例:
-
-```json
-{
-  "SqlBulkCopier": {
-    "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": false,
-    "Columns": {
-      "CustomerId": { "Ordinal": 0 },
-      "FirstName": { "Ordinal": 1 }
-    }
-  }
-}
-```
-
 #### [データ型の設定](#設定の詳細)
-`IColumnContext`を使用して、CSVデータをSQL Serverのデータ型にマッピングすることができます。以下のコード例は、いくつかの代表的なデータ型へのマッピング方法を示しています。
+`IColumnContext`を使用して、固定長ファイルデータをSQL Serverのデータ型にマッピングすることができます。以下のコード例は、いくつかの代表的なデータ型へのマッピング方法を示しています。
 
 SqlBulkcopyで自動的な変換が可能な場合、必ずしも個別に指定する必要はありません。
 
 ```csharp
-    .AddColumnMapping("BirthDate", c => c.AsDate("yyyy-MM-dd"))
-    .AddColumnMapping("Salary", c => c.AsDecimal())
+    .AddColumnMapping("BirthDate", 590, 10, c => c.AsDate("yyyy-MM-dd"))
+    .AddColumnMapping("Salary", 600, 10, c => c.AsDecimal())
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
@@ -318,13 +265,16 @@ appsettings.jsonでの設定例:
 {
   "SqlBulkCopier": {
     "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": true,
     "Columns": {
       "BirthDate": {
+        "Start": 590,
+        "Length": 10,
         "SqlDbType": "Date",
         "Format": "yyyy-MM-dd"
       },
       "Salary": {
+        "Start": 600,
+        "Length": 10,
         "SqlDbType": "Decimal"
       }
     }
@@ -352,10 +302,10 @@ appsettings.jsonでの設定例:
 文字列のトリム操作を行うことができます。これにより、データの前後の空白や特定の文字を削除できます。以下のコード例は、トリム操作の使用方法を示しています。
 
 ```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateWithHeader("[dbo].[Customer]")
-    .AddColumnMapping("FirstName", c => c.Trim())
-    .AddColumnMapping("LastName", c => c.TrimEnd())
+var bulkCopier = FixedLengthBulkCopierBuilder
+    .Create("[dbo].[Customer]")
+    .AddColumnMapping("FirstName", 10, 50, c => c.Trim())
+    .AddColumnMapping("LastName", 60, 50, c => c.TrimEnd())
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
@@ -365,14 +315,15 @@ appsettings.jsonでの設定例:
 {
   "SqlBulkCopier": {
     "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": true,
     "DefaultColumnSettings": {
       "TrimMode": "Trim",
       "TrimChars": " "
     },
     "Columns": {
-      "FirstName": {},
+      "FirstName": { "Start": 10, "Length": 50 },
       "LastName": {
+        "Start": 60,
+        "Length": 50,
         "TrimMode": "TrimEnd"
       }
     }
@@ -384,9 +335,9 @@ appsettings.jsonでの設定例:
 空の文字列をデータベースに挿入する際にNULLとして扱うことができます。以下のコード例は、その方法を示しています。
 
 ```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateWithHeader("[dbo].[Customer]")
-    .AddColumnMapping("MiddleName", c => c.TreatEmptyStringAsNull())
+var bulkCopier = FixedLengthBulkCopierBuilder
+    .Create("[dbo].[Customer]")
+    .AddColumnMapping("MiddleName", 110, 50, c => c.TreatEmptyStringAsNull())
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
@@ -396,12 +347,11 @@ appsettings.jsonでの設定例:
 {
   "SqlBulkCopier": {
     "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": true,
     "DefaultColumnSettings": {
       "TreatEmptyStringAsNull": true
     },
     "Columns": {
-      "MiddleName": {}
+      "MiddleName": { "Start": 110, "Length": 50 }
     }
   }
 }
@@ -411,9 +361,9 @@ appsettings.jsonでの設定例:
 カスタム変換関数を指定することができます。これにより、文字列を任意のオブジェクトに変換することができます。以下のコード例は、カスタム変換の使用方法を示しています。
 
 ```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateWithHeader("[dbo].[Customer]")
-    .AddColumnMapping("CustomField", c => c.Convert(value => CustomConversion(value)))
+var bulkCopier = FixedLengthBulkCopierBuilder
+    .Create("[dbo].[Customer]")
+    .AddColumnMapping("CustomField", 160, 50, c => c.Convert(value => CustomConversion(value)))
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
@@ -453,7 +403,6 @@ appsettings.jsonでの設定例:
 {
   "SqlBulkCopier": {
     "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": true,
     "ConnectionString": "YourDatabaseConnectionString"
   }
 }
@@ -463,8 +412,8 @@ appsettings.jsonでの設定例:
 この関数は、バルクコピーを実行する前に、指定したテーブルをトランケートするために使用します。以下のコード例は、その方法を示しています。
 
 ```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateWithHeader("[dbo].[Customer]")
+var bulkCopier = FixedLengthBulkCopierBuilder
+    .Create("[dbo].[Customer]")
     .SetTruncateBeforeBulkInsert(true)
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
@@ -475,7 +424,6 @@ appsettings.jsonでの設定例:
 {
   "SqlBulkCopier": {
     "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": true,
     "TruncateBeforeBulkInsert": true
   }
 }
@@ -483,15 +431,15 @@ appsettings.jsonでの設定例:
 
 #### [行ごとに取り込み対象を判定する](#設定の詳細)
 
-この機能を使用すると、CSVデータの各行を評価し、取り込み対象とするかどうかを判定できます。指定した条件に合致する行のみをデータベースにコピーします。
+この機能を使用すると、固定長ファイルデータの各行を評価し、取り込み対象とするかどうかを判定できます。指定した条件に合致する行のみをデータベースにコピーします。
 
 以下は、Fluent APIと`appsettings.json`の両方での設定例です。
 
 ##### Fluent APIでの設定例
 
 ```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateWithHeader("[dbo].[Customer]")
+var bulkCopier = FixedLengthBulkCopierBuilder
+    .Create("[dbo].[Customer]")
     .SetRowFilter(reader => reader.Parser.RawRecord.StartsWith("Comment"))
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
@@ -506,7 +454,6 @@ var bulkCopier = CsvBulkCopierBuilder
 {
   "SqlBulkCopier": {
     "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": true,
     "RowFilter": {
       "Equals": [ "Comment"],
       "StartsWith": [ "Prefix"],
@@ -537,8 +484,8 @@ var bulkCopier = CsvBulkCopierBuilder
 - **SetUseExponentialBackoff**: この設定を有効にすると、リトライ間の待機時間が指数関数的に増加します。例えば、最初のリトライで5秒待機した場合、次のリトライでは10秒、さらにその次では20秒といった具合に待機時間が増加します。これにより、短時間での連続的なリトライを避け、システムの負荷を軽減することができます。
 
 ```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateWithHeader("[dbo].[Customer]")
+var bulkCopier = FixedLengthBulkCopierBuilder
+    .Create("[dbo].[Customer]")
     .SetMaxRetryCount(3)
     .SetInitialDelay(TimeSpan.FromSeconds(5))
     .SetUseExponentialBackoff(true)
@@ -551,7 +498,6 @@ appsettings.jsonでの設定例:
 {
   "SqlBulkCopier": {
     "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": true,
     "MaxRetryCount": 3,
     "InitialDelay": "00:00:05",
     "UseExponentialBackoff": true
@@ -563,8 +509,8 @@ appsettings.jsonでの設定例:
 この関数は、バルクコピー操作のバッチサイズを設定します。以下のコード例は、その方法を示しています。
 
 ```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateWithHeader("[dbo].[Customer]")
+var bulkCopier = FixedLengthBulkCopierBuilder
+    .Create("[dbo].[Customer]")
     .SetBatchSize(1000)
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
@@ -575,7 +521,6 @@ appsettings.jsonでの設定例:
 {
   "SqlBulkCopier": {
     "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": true,
     "BatchSize": 1000
   }
 }
@@ -585,8 +530,8 @@ appsettings.jsonでの設定例:
 この関数は、通知イベントを発生させる行数を設定します。以下のコード例は、その方法を示しています。
 
 ```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateWithHeader("[dbo].[Customer]")
+var bulkCopier = FixedLengthBulkCopierBuilder
+    .Create("[dbo].[Customer]")
     .SetNotifyAfter(500)
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
@@ -597,7 +542,6 @@ appsettings.jsonでの設定例:
 {
   "SqlBulkCopier": {
     "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": true,
     "NotifyAfter": 500
   }
 }
@@ -609,8 +553,8 @@ appsettings.jsonでの設定例:
 個別のカラムに異なる設定がされていた場合は、そちらが優先されます。
 
 ```csharp
-var bulkCopier = CsvBulkCopierBuilder
-    .CreateWithHeader("[dbo].[Customer]")
+var bulkCopier = FixedLengthBulkCopierBuilder
+    .Create("[dbo].[Customer]")
     .SetDefaultColumnContext(c => c.TrimEnd().TreatEmptyStringAsNull())
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
@@ -621,7 +565,6 @@ appsettings.jsonでの設定例:
 {
   "SqlBulkCopier": {
     "DestinationTableName": "[dbo].[Customer]",
-    "HasHeader": true,
     "DefaultColumnSettings": {
       "TrimMode": "TrimEnd",
       "TreatEmptyStringAsNull": true
