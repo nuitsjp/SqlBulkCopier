@@ -23,63 +23,94 @@ jobs:
       with:
         dotnet-version: '9.0.x'
 
+    - name: Switch to Linux containers
+      run: |
+        & $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine
+        docker info
+      shell: pwsh
+
+    - name: Start SQL Server Container
+      run: |
+        docker run -d `
+          -e "ACCEPT_EULA=Y" `
+          -e "SA_PASSWORD=Password12!" `
+          -p 1433:1433 `
+          --name sql2019 `
+          mcr.microsoft.com/mssql/server:2019-latest
+        
+        Write-Host "Waiting for SQL Server to start..."
+        Start-Sleep -Seconds 30
+        
+        docker ps -a
+        docker logs sql2019
+      shell: pwsh
+
     - name: Test SQL Server Connection
       run: |
-        # SQLCmdツールのインストール
-        Write-Host "Installing SQL Server Command Line Tools..."
-        choco install sqlserver-cmdlineutils -y
-        
-        # 各種接続文字列でテスト
-        $testQueries = @(
-          @{
-            server = "(local)";
-            desc = "Local default instance"
-          },
-          @{
-            server = "(local)\SQLEXPRESS";
-            desc = "Local SQL Express instance"
-          },
-          @{
-            server = ".";
-            desc = "Local dot notation"
-          },
-          @{
-            server = "localhost";
-            desc = "Localhost"
-          }
-        )
-        
+        $connectionString = "Server=.,1433;Database=master;User Id=sa;Password=Password12!;TrustServerCertificate=True;"
+        $maxAttempts = 3
+        $attempt = 0
         $success = $false
-        foreach ($test in $testQueries) {
-          Write-Host "`nTesting connection to $($test.desc) ($($test.server))..."
-          try {
-            sqlcmd -S "$($test.server)" -Q "SELECT @@VERSION" -C -t 5
-            if ($LASTEXITCODE -eq 0) {
-              Write-Host "Successfully connected to $($test.server)!"
-              $success = $true
-              $global:workingServer = $test.server
-              break
+        
+        while ($attempt -lt $maxAttempts -and -not $success) {
+            $attempt++
+            try {
+                $connection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
+                $command = New-Object System.Data.SqlClient.SqlCommand("SELECT @@VERSION", $connection)
+                
+                $connection.Open()
+                $result = $command.ExecuteScalar()
+                Write-Host "SQL Server Version: $result"
+                Write-Host "Connection test successful!"
+                $success = $true
             }
-          }
-          catch {
-            Write-Host "Failed to connect to $($test.server): $_"
-          }
+            catch {
+                Write-Host "Attempt $attempt failed: $_"
+                if ($attempt -lt $maxAttempts) {
+                    Write-Host "Waiting before retry..."
+                    Start-Sleep -Seconds 10
+                }
+            }
+            finally {
+                if ($connection) {
+                    $connection.Close()
+                }
+            }
         }
         
         if (-not $success) {
-          Write-Host "Could not connect to any SQL Server instance"
-          Write-Host "Available SQL Server tools:"
-          Get-Command sqlcmd -ErrorAction SilentlyContinue
-          Get-Command osql -ErrorAction SilentlyContinue
-          exit 1
+            Write-Host "Failed to connect to SQL Server after $maxAttempts attempts"
+            docker logs sql2019
+            exit 1
         }
       shell: pwsh
 
     - name: Create Test Database
-      if: success()
       run: |
-        Write-Host "Creating test database using $global:workingServer..."
-        sqlcmd -S "$global:workingServer" -Q "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'TestDB') CREATE DATABASE TestDB;"
+        $connectionString = "Server=.,1433;Database=master;User Id=sa;Password=Password12!;TrustServerCertificate=True;"
+        $createDbQuery = "
+        IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'TestDB')
+        BEGIN
+            CREATE DATABASE TestDB;
+        END
+        "
+        
+        $connection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
+        $command = New-Object System.Data.SqlClient.SqlCommand($createDbQuery, $connection)
+        
+        try {
+            $connection.Open()
+            $command.ExecuteNonQuery()
+            Write-Host "TestDB database created successfully!"
+        }
+        catch {
+            Write-Host "Error creating database: $_"
+            docker logs sql2019
+            exit 1
+        }
+        finally {
+            $connection.Close()
+        }
       shell: pwsh
 
     - name: Restore dependencies
