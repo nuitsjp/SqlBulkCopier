@@ -28,7 +28,3 @@ jobs:
 
     - name: Build solution
       run: dotnet build src/SqlBulkCopier.sln --configuration Release --no-restore
-
-    - name: Upload build status badge
-      if: success()
-      run: echo "![Build Status](https://github.com/nuitsjp/SqlBulkCopier/actions/workflows/build.yml/badge.svg)" > build-status-badge.md
