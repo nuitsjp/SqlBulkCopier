@@ -241,8 +241,9 @@ public class BulkCopyService(
 | [トリム操作](#トリム操作) | `Trim`, `TrimStart`, `TrimEnd` | `"TrimMode": "Trim"`, `"TrimStart"`, `"TrimEnd"` |
 | [空文字列のNULL扱い](#空文字列のnull扱い) | `TreatEmptyStringAsNull` | `"TreatEmptyStringAsNull": true`, `false` |
 | [カスタム変換](#カスタム変換) | `Convert` | 設定ファイルでは未対応 |
+| [IBulkCopierのインスタンスを作成する](#ibulkcopierのインスタンスを作成する) | `Build` | 設定ファイルでは未対応 |
 | [事前にテーブルをトランケートする](#事前にテーブルをトランケートする) | `SetTruncateBeforeBulkInsert` | `"TruncateBeforeBulkInsert": true/false` |
-| [行ごとに取り込み対象を判定する](#行ごとに取り込み対象を判定する) | `SetRowFilter` | 設定ファイルでは未対応 |
+| [行ごとに取り込み対象を判定する](#行ごとに取り込み対象を判定する) | `SetRowFilter` | `"RowFilter": { ... }` |
 | [リトライ設定](#リトライ設定) | `SetMaxRetryCount`, `SetInitialDelay`, `SetUseExponentialBackoff` | `"MaxRetryCount": 3`, `"InitialDelay": "00:00:05"`, `"UseExponentialBackoff": true` |
 | [バッチサイズを設定する](#バッチサイズを設定する) | `SetBatchSize` | `"BatchSize": 1000` |
 | [通知イベントの行数を設定する](#通知イベントの行数を設定する) | `SetNotifyAfter` | `"NotifyAfter": 500` |
@@ -483,18 +484,49 @@ appsettings.jsonでの設定例:
 ```
 
 #### [行ごとに取り込み対象を判定する](#設定の詳細)
-この関数は、CSVデータの各行を評価し、取り込み対象とするかどうかを判定するために使用します。指定した条件に合致する行のみをデータベースにコピーします。以下のコード例は、その方法を示しています。
+
+この機能を使用すると、CSVデータの各行を評価し、取り込み対象とするかどうかを判定できます。指定した条件に合致する行のみをデータベースにコピーします。
+
+以下は、Fluent APIと`appsettings.json`の両方での設定例です。
+
+##### Fluent APIでの設定例
 
 ```csharp
 var bulkCopier = CsvBulkCopierBuilder
     .CreateWithHeader("[dbo].[Customer]")
-    .SetRowFilter(reader => reader.GetField<string>("Status") == "Active")
+    .SetRowFilter(reader => reader.Parser.RawRecord.StartsWith("Comment"))
     .Build(configuration.GetConnectionString("DefaultConnection")!);
 ```
 
-この例では、`Status`列の値が`"Active"`である行のみを取り込み対象としています。
+この例では、行が`"Comment"`で始まる場合、読取の対象外とします。RawRecordには改行も含まれるため注意してください。
 
-appsettings.jsonでの設定例は未対応です。
+##### appsettings.jsonでの設定例
+
+以下のように、`RowFilter`セクションを使用して条件を指定できます。
+
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": true,
+    "RowFilter": {
+      "Equals": [ "Comment"],
+      "StartsWith": [ "Prefix"],
+      "EndsWith": [ "Suffix" ]
+    }
+  }
+}
+```
+
+- **`Equals`**: 行が指定した値と一致する場合、取込対象外とします。
+- **`StartsWith`**: 行が指定した値で始まる場合、取込対象外とします。
+- **`EndsWith`**: 行が指定した値で終わる場合、取込対象外とします。
+
+##### 注意事項
+
+- `RowFilter`は複数の条件を組み合わせて使用できます。
+- 条件はANDで結合されます（すべての条件を満たす行のみが対象となります）。
+- `appsettings.json`での設定は、Fluent APIでの設定と同等の機能を提供します。
 
 #### [リトライ設定](#設定の詳細)
 リトライ設定を使用することで、特定の条件下で自動的にリトライを実行することができます。リトライが可能な条件は以下の通りです：
