@@ -342,6 +342,90 @@ public class FixedLengthBulkCopierParserTest
         bulkCopier.NotifyAfter.ShouldBe(0); // Default value
     }
 
+    [Fact]
+    public void RowFilter_Exists()
+    {
+        // Arrange
+        const string settings = """
+                                    {
+                                      "SqlBulkCopier": {
+                                        "DestinationTableName": "[dbo].[Customer]",
+                                        "RowFilter": {
+                                          "StartsWith": [ "A", "B" ],
+                                          "EndsWith": [ "X", "Y" ]
+                                        },
+                                        "Columns": {
+                                          "CustomerId": { "Offset": 0, "Length": 4 }
+                                        }
+                                      }
+                                    }
+                                    """;
+        var configuration = BuildJsonConfig(settings);
+
+        // Act
+        var bulkCopierBuilder = FixedLengthBulkCopierParser.Parse(configuration);
+
+        // Assert
+        using var connection = OpenConnection();
+        var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
+        var builder = (FixedLengthDataReaderBuilder)bulkCopier.DataReaderBuilder;
+        var csv = """
+                  A123
+                  B123
+                  1AX4
+                  123X
+                  123Y
+                  """;
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(csv));
+        var dataReader = builder.Build(stream, Encoding.UTF8);
+        dataReader.Read().ShouldBeTrue();
+        dataReader.GetValue(0).ToString().ShouldBe("1AX4");
+        dataReader.Read().ShouldBeFalse();
+    }
+
+    [Fact]
+    public void RowFilter_NotExists()
+    {
+        // Arrange
+        const string settings = """
+                                    {
+                                      "SqlBulkCopier": {
+                                        "DestinationTableName": "[dbo].[Customer]",
+                                        "RowFilter": {
+                                        },
+                                        "Columns": {
+                                          "CustomerId": { "Offset": 0, "Length": 4 }
+                                        }
+                                      }
+                                    }
+                                    """;
+        var configuration = BuildJsonConfig(settings);
+
+        // Act
+        var bulkCopierBuilder = FixedLengthBulkCopierParser.Parse(configuration);
+
+        // Assert
+        using var connection = OpenConnection();
+        var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
+        var builder = (FixedLengthDataReaderBuilder)bulkCopier.DataReaderBuilder;
+        var csv = """
+                  A123
+                  B123
+                  1AX4
+                  123X
+                  123Y
+                  """;
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(csv));
+        var dataReader = builder.Build(stream, Encoding.UTF8);
+        dataReader.Read().ShouldBeTrue();
+        dataReader.GetValue(0).ToString().ShouldBe("A123");
+        dataReader.Read().ShouldBeTrue();
+        dataReader.Read().ShouldBeTrue();
+        dataReader.Read().ShouldBeTrue();
+        dataReader.Read().ShouldBeTrue();
+        dataReader.Read().ShouldBeFalse();
+    }
+
     public class BuildBuilder
     {
         [Fact]
