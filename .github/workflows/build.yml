@@ -23,8 +23,31 @@ jobs:
       with:
         dotnet-version: '9.0.x'
 
+    - name: Start SQL Server container
+      uses: docker://mcr.microsoft.com/mssql/server:2019-latest
+      env:
+        SA_PASSWORD: "Your_password123"
+        ACCEPT_EULA: "Y"
+      options: --health-cmd="exit 0" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    - name: Wait for SQL Server to be ready
+      run: |
+        for i in {1..30}; do
+          if docker inspect --format '{{json .State.Health.Status}}' $(docker ps -q --filter ancestor=mcr.microsoft.com/mssql/server:2019-latest) | grep -q "healthy"; then
+            echo "SQL Server is ready!"
+            exit 0
+          fi
+          echo "Waiting for SQL Server..."
+          sleep 10
+        done
+        echo "SQL Server did not become ready in time."
+        exit 1
+
     - name: Restore dependencies
       run: dotnet restore src/SqlBulkCopier.sln
 
     - name: Build solution
       run: dotnet build src/SqlBulkCopier.sln --configuration Release --no-restore
+
+    - name: Run tests
+      run: dotnet test src/SqlBulkCopier.sln --configuration Release --no-build --logger trx
