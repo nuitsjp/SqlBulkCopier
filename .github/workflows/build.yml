@@ -24,16 +24,13 @@ jobs:
         dotnet-version: '9.0.x'
 
     - name: Start SQL Server container
-      uses: docker://mcr.microsoft.com/mssql/server:2019-latest
-      env:
-        SA_PASSWORD: "Your_password123"
-        ACCEPT_EULA: "Y"
-      options: --health-cmd="exit 0" --health-interval=10s --health-timeout=5s --health-retries=5
+      run: |
+        docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Your_password123' -p 1433:1433 -d --name sqlserver mcr.microsoft.com/mssql/server:2019-latest
 
     - name: Wait for SQL Server to be ready
       run: |
         for i in {1..30}; do
-          if docker inspect --format '{{json .State.Health.Status}}' $(docker ps -q --filter ancestor=mcr.microsoft.com/mssql/server:2019-latest) | grep -q "healthy"; then
+          if docker inspect --format '{{json .State.Health.Status}}' sqlserver | grep -q "healthy"; then
             echo "SQL Server is ready!"
             exit 0
           fi
