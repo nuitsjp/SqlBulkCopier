@@ -2,11 +2,13 @@ name: Build and Publish Solution
 
 on:
   push:
+    branches:
+      - '**'
     paths:
       - 'src/**'
       - '.github/**'
     tags:
-      - 'Release*'
+      - 'Release-*'
   pull_request:
     paths:
       - 'src/**'
@@ -60,10 +62,10 @@ jobs:
     - name: Extract version from tag
       id: extract_version
       run: |
-        if ($env:GITHUB_REF -like 'refs/tags/Release*') {
+        if ($env:GITHUB_REF -like 'refs/tags/Release-*') {
           $version = $env:GITHUB_REF -replace 'refs/tags/Release-', ''
         } else {
-          $version = '1.0.0'
+          $version = '1.0.0-preview'
         }
         echo "version=$version" >> $env:GITHUB_ENV
         echo "Extracted version: $version"
@@ -79,7 +81,7 @@ jobs:
     #   run: dotnet test src/SqlBulkCopier.sln --configuration Release --no-build --verbosity normal
 
     - name: Pack and Publish to NuGet
-      if: github.ref == 'refs/tags/Release*'
+      if: startsWith(github.ref, 'refs/tags/Release-')
       run: |
         dotnet pack src/SqlBulkCopier/SqlBulkCopier.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
         dotnet pack src/SqlBulkCopier.CsvHelper/SqlBulkCopier.CsvHelper.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
