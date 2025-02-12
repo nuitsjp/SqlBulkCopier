@@ -23,26 +23,22 @@ jobs:
       with:
         dotnet-version: '9.0.x'
 
-    - name: Start SQL Server Container
+    - name: Install SQL Server LocalDB
       run: |
-        docker pull mcr.microsoft.com/mssql/server:2019-latest
-        docker run -d `
-          -e "ACCEPT_EULA=Y" `
-          -e "SA_PASSWORD=Password12!" `
-          -p 1433:1433 `
-          --name sql2019 `
-          mcr.microsoft.com/mssql/server:2019-latest
-        
-        Write-Host "Waiting for SQL Server to start..."
-        Start-Sleep -Seconds 30
-        
-        docker ps
-        docker logs sql2019
+        choco install sql-server-express-localdb -y --no-progress
+        # バージョン情報の表示
+        sqllocaldb v
       shell: pwsh
 
-    - name: Test SQL Server Connection
+    - name: Start LocalDB Instance
       run: |
-        $connectionString = "Server=.,1433;Database=master;User Id=sa;Password=Password12!;TrustServerCertificate=True;"
+        sqllocaldb start MSSQLLocalDB
+        sqllocaldb info MSSQLLocalDB
+      shell: pwsh
+
+    - name: Test LocalDB Connection
+      run: |
+        $connectionString = "Server=(localdb)\MSSQLLocalDB;Database=master;Integrated Security=True"
         $maxAttempts = 3
         $attempt = 0
         $success = $false
@@ -63,7 +59,7 @@ jobs:
                 Write-Host "Attempt $attempt failed: $_"
                 if ($attempt -lt $maxAttempts) {
                     Write-Host "Waiting before retry..."
-                    Start-Sleep -Seconds 10
+                    Start-Sleep -Seconds 5
                 }
             }
             finally {
@@ -74,15 +70,15 @@ jobs:
         }
         
         if (-not $success) {
-            Write-Host "Failed to connect to SQL Server after $maxAttempts attempts"
-            docker logs sql2019
+            Write-Host "Failed to connect to LocalDB after $maxAttempts attempts"
+            sqllocaldb info MSSQLLocalDB
             exit 1
         }
       shell: pwsh
 
     - name: Create Test Database
       run: |
-        $connectionString = "Server=.,1433;Database=master;User Id=sa;Password=Password12!;TrustServerCertificate=True;"
+        $connectionString = "Server=(localdb)\MSSQLLocalDB;Database=master;Integrated Security=True"
         $createDbQuery = "
         IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'TestDB')
         BEGIN
@@ -100,7 +96,7 @@ jobs:
         }
         catch {
             Write-Host "Error creating database: $_"
-            docker logs sql2019
+            sqllocaldb info MSSQLLocalDB
             exit 1
         }
         finally {
