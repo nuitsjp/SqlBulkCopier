@@ -5,7 +5,7 @@ on:
     paths:
       - 'src/**'
       - '.github/**'
-    tags-ignore:
+    tags:
       - 'Release*'
   pull_request:
     paths:
