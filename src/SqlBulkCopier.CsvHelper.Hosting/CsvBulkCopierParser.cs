@@ -53,6 +53,42 @@ public static class CsvBulkCopierParser
         var notifyAfter = sqlBulkCopier.GetValue<int?>("NotifyAfter") ?? 0;
         builder.SetNotifyAfter(notifyAfter);
 
+        var rowFilterSection = sqlBulkCopier.GetSection("RowFilter");
+        if (rowFilterSection.Exists() && rowFilterSection.GetChildren().Any())
+        {
+            var startsWith = rowFilterSection.GetSection("StartsWith").Get<string[]>() ?? [];
+            var endsWith = rowFilterSection.GetSection("EndsWith").Get<string[]>() ?? [];
+            builder.SetRowFilter(row =>
+            {
+                var rowRecord = row.Parser.RawRecord;
+                // If rowRecord ends with a newline code, remove the newline code.
+                if (rowRecord.EndsWith("\r\n"))
+                {
+                    rowRecord = rowRecord.Substring(0, rowRecord.Length - 2);
+                }
+                if (rowRecord.EndsWith("\n"))
+                {
+                    rowRecord = rowRecord.Substring(0, rowRecord.Length - 1);
+                }
+
+                foreach (var prefix in startsWith)
+                {
+                    if (rowRecord.StartsWith(prefix))
+                    {
+                        return false;
+                    }
+                }
+                foreach (var suffix in endsWith)
+                {
+                    if (rowRecord.EndsWith(suffix))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            });
+        }
+
         return builder;
     }
 
@@ -96,6 +132,31 @@ public static class CsvBulkCopierParser
 
         var notifyAfter = sqlBulkCopier.GetValue<int?>("NotifyAfter") ?? 0;
         builder.SetNotifyAfter(notifyAfter);
+
+        var rowFilterSection = sqlBulkCopier.GetSection("RowFilter");
+        if (rowFilterSection.Exists() && rowFilterSection.GetChildren().Any())
+        {
+            var startsWith = rowFilterSection.GetSection("StartsWith").Get<string[]>() ?? [];
+            var endsWith = rowFilterSection.GetSection("EndsWith").Get<string[]>() ?? [];
+            builder.SetRowFilter(row =>
+            {
+                foreach (var prefix in startsWith)
+                {
+                    if (row.Parser.RawRecord.StartsWith("Header"))
+                    {
+                        return false;
+                    }
+                }
+                foreach (var suffix in endsWith)
+                {
+                    if (row.Parser.RawRecord.StartsWith("Footer"))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            });
+        }
 
         return builder;
 

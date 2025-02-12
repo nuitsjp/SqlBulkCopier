@@ -333,6 +333,22 @@ appsettings.jsonでの設定例:
 }
 ```
 
+ 有効な型は以下の通り。下記以外はSqlBulkCopyのデフォルトのコンバーターを利用するため指定は不要です。
+
+| SQL Server 型     | Fluent API (IColumnContext) | appsettings.json 設定例                   |
+|-------------------|-----------------------------|-------------------------------------------|
+| BIGINT            | AsBigInt                    | "SqlDbType": "BigInt"                      |
+| BIT               | AsBit                       | "SqlDbType": "Bit"                         |
+| UNIQUEIDENTIFIER  | AsUniqueIdentifier          | "SqlDbType": "UniqueIdentifier"            |
+| DATE              | AsDate                      | "SqlDbType": "Date", "Format": "yyyy-MM-dd" |
+| DATETIME          | AsDateTime                  | "SqlDbType": "DateTime", "Format": "..."    |
+| DECIMAL           | AsDecimal                   | "SqlDbType": "Decimal"                      |
+| FLOAT             | AsFloat                     | "SqlDbType": "Float"                        |
+| INT               | AsInt                       | "SqlDbType": "Int"                          |
+| MONEY             | AsMoney                     | "SqlDbType": "Money"                        |
+| REAL              | AsReal                      | "SqlDbType": "Real"                         |
+
+
 #### [トリム操作](#設定の詳細)
 文字列のトリム操作を行うことができます。これにより、データの前後の空白や特定の文字を削除できます。以下のコード例は、トリム操作の使用方法を示しています。
 
