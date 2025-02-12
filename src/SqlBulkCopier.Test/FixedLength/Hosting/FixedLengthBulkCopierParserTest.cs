@@ -346,20 +346,22 @@ public class FixedLengthBulkCopierParserTest
     public void RowFilter_Exists()
     {
         // Arrange
+        // ReSharper disable second StringLiteralTypo
         const string settings = """
-                                    {
-                                      "SqlBulkCopier": {
-                                        "DestinationTableName": "[dbo].[Customer]",
-                                        "RowFilter": {
-                                          "StartsWith": [ "A", "B" ],
-                                          "EndsWith": [ "X", "Y" ]
-                                        },
-                                        "Columns": {
-                                          "CustomerId": { "Offset": 0, "Length": 4 }
-                                        }
-                                      }
+                                {
+                                  "SqlBulkCopier": {
+                                    "DestinationTableName": "[dbo].[Customer]",
+                                    "RowFilter": {
+                                      "StartsWith": [ "A", "B" ],
+                                      "Equals": ["ABCD", "WXYZ"],
+                                      "EndsWith": [ "X", "Y" ]
+                                    },
+                                    "Columns": {
+                                      "CustomerId": { "Offset": 0, "Length": 4 }
                                     }
-                                    """;
+                                  }
+                                }
+                                """;
         var configuration = BuildJsonConfig(settings);
 
         // Act
@@ -372,6 +374,8 @@ public class FixedLengthBulkCopierParserTest
         var csv = """
                   A123
                   B123
+                  ABCD
+                  WXYZ
                   1AX4
                   123X
                   123Y

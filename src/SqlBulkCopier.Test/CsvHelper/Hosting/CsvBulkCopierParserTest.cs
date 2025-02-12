@@ -433,6 +433,7 @@ public class CsvBulkCopierParserTest
         public void RowFilter_Exists()
         {
             // Arrange
+            // ReSharper disable second StringLiteralTypo
             const string settings = """
                                     {
                                       "SqlBulkCopier": {
@@ -440,6 +441,7 @@ public class CsvBulkCopierParserTest
                                         "HasHeader": true,
                                         "RowFilter": {
                                           "StartsWith": [ "A", "B" ],
+                                          "Equals": ["ABCD", "WXYZ"],
                                           "EndsWith": [ "X", "Y" ]
                                         },
                                         "Columns": {
@@ -461,6 +463,8 @@ public class CsvBulkCopierParserTest
                       CustomerId
                       A123
                       B123
+                      ABCD
+                      WXYZ
                       1AX4
                       123X
                       123Y

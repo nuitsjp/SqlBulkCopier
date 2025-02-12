@@ -57,6 +57,7 @@ public static class CsvBulkCopierParser
         if (rowFilterSection.Exists() && rowFilterSection.GetChildren().Any())
         {
             var startsWith = rowFilterSection.GetSection("StartsWith").Get<string[]>() ?? [];
+            var equals = rowFilterSection.GetSection("Equals").Get<string[]>() ?? [];
             var endsWith = rowFilterSection.GetSection("EndsWith").Get<string[]>() ?? [];
             builder.SetRowFilter(row =>
             {
@@ -74,6 +75,13 @@ public static class CsvBulkCopierParser
                 foreach (var prefix in startsWith)
                 {
                     if (rowRecord.StartsWith(prefix))
+                    {
+                        return false;
+                    }
+                }
+                foreach (var equal in equals)
+                {
+                    if (rowRecord == equal)
                     {
                         return false;
                     }
