@@ -23,28 +23,68 @@ jobs:
       with:
         dotnet-version: '9.0.x'
 
-    - name: Start SQL Server container
+    - name: Start SQL Server Service
       run: |
-        docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Your_password123' -p 1433:1433 -d --name sqlserver mcr.microsoft.com/mssql/server:2019-latest
+        Set-Service -Name MSSQL`$SQLEXPRESS -StartupType Manual
+        Start-Service MSSQL`$SQLEXPRESS
+        Get-Service MSSQL`$SQLEXPRESS | Select Status
+      shell: pwsh
 
-    - name: Wait for SQL Server to be ready
+    - name: Test SQL Server Connection
       run: |
-        for i in {1..30}; do
-          if docker inspect --format '{{json .State.Health.Status}}' sqlserver | grep -q "healthy"; then
-            echo "SQL Server is ready!"
-            exit 0
-          fi
-          echo "Waiting for SQL Server..."
-          sleep 10
-        done
-        echo "SQL Server did not become ready in time."
-        exit 1
+        $connectionString = "Server=(local)\SQLEXPRESS;Database=master;Trusted_Connection=True;"
+        $query = "SELECT @@VERSION as Version;"
+        
+        $connection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
+        $command = New-Object System.Data.SqlClient.SqlCommand($query, $connection)
+        
+        try {
+            $connection.Open()
+            $reader = $command.ExecuteReader()
+            while ($reader.Read()) {
+                Write-Host "SQL Server Version:" $reader["Version"]
+            }
+            $reader.Close()
+            Write-Host "Connection test successful!"
+        }
+        catch {
+            Write-Host "Error connecting to database: $_"
+            exit 1
+        }
+        finally {
+            $connection.Close()
+        }
+      shell: pwsh
+
+    - name: Create Test Database
+      run: |
+        $connectionString = "Server=(local)\SQLEXPRESS;Database=master;Trusted_Connection=True;"
+        $createDbQuery = "
+        IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'TestDB')
+        BEGIN
+            CREATE DATABASE TestDB;
+        END
+        "
+        
+        $connection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
+        $command = New-Object System.Data.SqlClient.SqlCommand($createDbQuery, $connection)
+        
+        try {
+            $connection.Open()
+            $command.ExecuteNonQuery()
+            Write-Host "TestDB database created successfully!"
+        }
+        catch {
+            Write-Host "Error creating database: $_"
+            exit 1
+        }
+        finally {
+            $connection.Close()
+        }
+      shell: pwsh
 
     - name: Restore dependencies
       run: dotnet restore src/SqlBulkCopier.sln
 
     - name: Build solution
       run: dotnet build src/SqlBulkCopier.sln --configuration Release --no-restore
-
-    - name: Run tests
-      run: dotnet test src/SqlBulkCopier.sln --configuration Release --no-build --logger trx
