@@ -1,4 +1,4 @@
-name: Build Solution
+name: Build and Publish Solution
 
 on:
   push:
@@ -13,63 +13,8 @@ on:
       - '.github/**'
 
 jobs:
-  # build:
-  #   runs-on: windows-latest
-
-  #   steps:
-  #   - name: Checkout repository
-  #     uses: actions/checkout@v2
-
-  #   - name: Setup .NET
-  #     uses: actions/setup-dotnet@v2
-  #     with:
-  #       dotnet-version: '8.0.x'
-
-  #   - name: Install SQL Server LocalDB
-  #     run: |
-  #       # VS Build Toolsインストーラーのダウンロード
-  #       Invoke-WebRequest -Uri https://aka.ms/vs/17/release/vs_buildtools.exe -OutFile vs_buildtools.exe
-        
-  #       # LocalDBを含むSQL Server開発ツールのインストール
-  #       Start-Process -Wait -FilePath .\vs_buildtools.exe -ArgumentList `
-  #         "--quiet", `
-  #         "--wait", `
-  #         "--norestart", `
-  #         "--nocache", `
-  #         "--installPath", "C:\BuildTools", `
-  #         "--add", "Microsoft.VisualStudio.Workload.DataBuildTools", `
-  #         "--add", "Microsoft.VisualStudio.Component.SQL.LocalDB.Runtime"
-          
-  #       # インストール確認
-  #       Write-Host "Checking LocalDB installation..."
-  #       $localDBPath = "C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe"
-  #       if (Test-Path $localDBPath) {
-  #           & $localDBPath v
-  #       } else {
-  #           Write-Host "LocalDB executable not found at expected path"
-  #           exit 1
-  #       }
-  #     shell: pwsh
-
-  #   - name: Start LocalDB Instance
-  #     run: |
-  #       sqllocaldb start MSSQLLocalDB
-  #       sqllocaldb info MSSQLLocalDB
-  #     shell: pwsh
-
-  #   - name: Restore dependencies
-  #     run: dotnet restore src/SqlBulkCopier.sln
-
-  #   - name: Build solution
-  #     run: dotnet build src/SqlBulkCopier.sln --configuration Release --no-restore
-
-  #   - name: Run tests
-  #     run: dotnet test src/SqlBulkCopier.sln --configuration Release --no-build --verbosity normal
-
-  publish:
-    if: startsWith(github.ref, 'refs/tags/Release')
+  build-and-publish:
     runs-on: windows-latest
-    environment: nuget
 
     steps:
     - name: Checkout repository
@@ -80,10 +25,46 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
+    # - name: Install SQL Server LocalDB
+    #   run: |
+    #     # VS Build Toolsインストーラーのダウンロード
+    #     Invoke-WebRequest -Uri https://aka.ms/vs/17/release/vs_buildtools.exe -OutFile vs_buildtools.exe
+        
+    #     # LocalDBを含むSQL Server開発ツールのインストール
+    #     Start-Process -Wait -FilePath .\vs_buildtools.exe -ArgumentList `
+    #       "--quiet", `
+    #       "--wait", `
+    #       "--norestart", `
+    #       "--nocache", `
+    #       "--installPath", "C:\BuildTools", `
+    #       "--add", "Microsoft.VisualStudio.Workload.DataBuildTools", `
+    #       "--add", "Microsoft.VisualStudio.Component.SQL.LocalDB.Runtime"
+          
+    #     # インストール確認
+    #     Write-Host "Checking LocalDB installation..."
+    #     $localDBPath = "C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe"
+    #     if (Test-Path $localDBPath) {
+    #         & $localDBPath v
+    #     } else {
+    #         Write-Host "LocalDB executable not found at expected path"
+    #         exit 1
+    #     }
+    #   shell: pwsh
+
+    # - name: Start LocalDB Instance
+    #   run: |
+    #     sqllocaldb start MSSQLLocalDB
+    #     sqllocaldb info MSSQLLocalDB
+    #   shell: pwsh
+
     - name: Extract version from tag
       id: extract_version
       run: |
-        $version = $env:GITHUB_REF -replace 'refs/tags/Release-', ''
+        if (startsWith($env:GITHUB_REF, 'refs/tags/Release')) {
+          $version = $env:GITHUB_REF -replace 'refs/tags/Release-', ''
+        } else {
+          $version = '1.0.0'
+        }
         echo "version=$version" >> $env:GITHUB_ENV
         echo "Extracted version: $version"
       shell: pwsh
@@ -94,23 +75,16 @@ jobs:
     - name: Build solution
       run: dotnet build src/SqlBulkCopier.sln --configuration Release --no-restore /p:PackageVersion=${{ env.version }}
 
-    - name: Pack SqlBulkCopier
-      run: dotnet pack src/SqlBulkCopier/SqlBulkCopier.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
+    # - name: Run tests
+    #   run: dotnet test src/SqlBulkCopier.sln --configuration Release --no-build --verbosity normal
 
-    - name: Pack SqlBulkCopier.CsvHelper
-      run: dotnet pack src/SqlBulkCopier.CsvHelper/SqlBulkCopier.CsvHelper.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
-
-    - name: Pack SqlBulkCopier.CsvHelper.Hosting
-      run: dotnet pack src/SqlBulkCopier.CsvHelper.Hosting/SqlBulkCopier.CsvHelper.Hosting.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
-
-    - name: Pack SqlBulkCopier.FixedLength
-      run: dotnet pack src/SqlBulkCopier.FixedLength/SqlBulkCopier.FixedLength.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
-
-    - name: Pack SqlBulkCopier.FixedLength.Hosting
-      run: dotnet pack src/SqlBulkCopier.FixedLength.Hosting/SqlBulkCopier.FixedLength.Hosting.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
-
-    - name: Pack SqlBulkCopier.Hosting
-      run: dotnet pack src/SqlBulkCopier.Hosting/SqlBulkCopier.Hosting.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
-
-    - name: Publish to NuGet
-      run: dotnet nuget push ${{ github.workspace }}\nupkg\*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+    - name: Pack and Publish to NuGet
+      if: startsWith(github.ref, 'refs/tags/Release')
+      run: |
+        dotnet pack src/SqlBulkCopier/SqlBulkCopier.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
+        dotnet pack src/SqlBulkCopier.CsvHelper/SqlBulkCopier.CsvHelper.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
+        dotnet pack src/SqlBulkCopier.CsvHelper.Hosting/SqlBulkCopier.CsvHelper.Hosting.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
+        dotnet pack src/SqlBulkCopier.FixedLength/SqlBulkCopier.FixedLength.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
+        dotnet pack src/SqlBulkCopier.FixedLength.Hosting/SqlBulkCopier.FixedLength.Hosting.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
+        dotnet pack src/SqlBulkCopier.Hosting/SqlBulkCopier.Hosting.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
+        dotnet nuget push ${{ github.workspace }}\nupkg\*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
