@@ -7,7 +7,7 @@ public class Database
 {
     public static readonly string ConnectionString = new SqlConnectionStringBuilder
     {
-        DataSource = ".",
+        DataSource = @"(localdb)\MSSQLLocalDB",
         InitialCatalog = "SqlBulkCopier",
         IntegratedSecurity = true,
         TrustServerCertificate = true

@@ -16,7 +16,7 @@ public class CsvBulkCopierParserTest
         var connection = new SqlConnection(
             new SqlConnectionStringBuilder
             {
-                DataSource = ".",
+                DataSource = @"(localdb)\MSSQLLocalDB",
                 InitialCatalog = "master",
                 IntegratedSecurity = true,
                 TrustServerCertificate = true
