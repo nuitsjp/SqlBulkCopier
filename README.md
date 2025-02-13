@@ -34,7 +34,7 @@ You can install any of the following NuGet packages as needed:
 - [![NuGet (SqlBulkCopier)](https://img.shields.io/nuget/v/SqlBulkCopier.svg?label=SqlBulkCopier)](https://www.nuget.org/packages/SqlBulkCopier/)
 - [![NuGet (SqlBulkCopier.Hosting)](https://img.shields.io/nuget/v/SqlBulkCopier.Hosting.svg?label=SqlBulkCopier.Hosting)](https://www.nuget.org/packages/SqlBulkCopier.Hosting/)
 - [![NuGet (SqlBulkCopier.CsvHelper)](https://img.shields.io/nuget/v/SqlBulkCopier.CsvHelper.svg?label=SqlBulkCopier.CsvHelper)](https://www.nuget.org/packages/SqlBulkCopier.CsvHelper/)
-- [![NuGet](https://img.shields.io/nuget/v/SqlBulkCopier.CsvHelper.Hosting.svg?label=SqlBulkCopier.CsvHelper.Hosting)](https://www.nuget.org/packages/SqlBulkCopier.CsvHelper.Hosting/)
+- [![NuGet (SqlBulkCopier.CsvHelper.Hosting)](https://img.shields.io/nuget/v/SqlBulkCopier.CsvHelper.Hosting.svg?label=SqlBulkCopier.CsvHelper.Hosting)](https://www.nuget.org/packages/SqlBulkCopier.CsvHelper.Hosting/)
 - [![NuGet (SqlBulkCopier.FixedLength)](https://img.shields.io/nuget/v/SqlBulkCopier.FixedLength.svg?label=SqlBulkCopier.FixedLength)](https://www.nuget.org/packages/SqlBulkCopier.FixedLength/)
 - [![NuGet (SqlBulkCopier.FixedLength.Hosting)](https://img.shields.io/nuget/v/SqlBulkCopier.FixedLength.Hosting.svg?label=SqlBulkCopier.FixedLength.Hosting)](https://www.nuget.org/packages/SqlBulkCopier.FixedLength.Hosting/)
 
