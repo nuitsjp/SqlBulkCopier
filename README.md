@@ -1,6 +1,7 @@
 # SqlBulkCopier
 
 ![Build Status](https://github.com/nuitsjp/SqlBulkCopier/actions/workflows/build.yml/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 [Japanese Documents](README-ja.md)
 
@@ -16,16 +17,27 @@ SqlBulkCopier is a library that makes the high-speed bulk copy feature of SQL Se
 
 ## Table of Contents
 - [Supported Platforms](#supported-platforms)
+- [Available Packages](#available-packages)
 - [Getting Started](#getting-started)
 - [CSV Detailed Settings](doc/CSV.md)
 - [Fixed-Length File Detailed Settings](doc/FixedLength.md)
-- [License](#license)
 
 ## Supported Platforms
 
 This library is supported on the following platforms:
 - .NET 8.0
 - .NET Framework 4.8
+
+## Available Packages
+You can install any of the following NuGet packages as needed:
+
+- [![NuGet (SqlBulkCopier)](https://img.shields.io/nuget/v/SqlBulkCopier.svg?label=SqlBulkCopier)](https://www.nuget.org/packages/SqlBulkCopier/)
+- [![NuGet (SqlBulkCopier.Hosting)](https://img.shields.io/nuget/v/SqlBulkCopier.Hosting.svg?label=SqlBulkCopier.Hosting)](https://www.nuget.org/packages/SqlBulkCopier.Hosting/)
+- [![NuGet (SqlBulkCopier.CsvHelper)](https://img.shields.io/nuget/v/SqlBulkCopier.CsvHelper.svg?label=SqlBulkCopier.CsvHelper)](https://www.nuget.org/packages/SqlBulkCopier.CsvHelper/)
+- [![NuGet](https://img.shields.io/nuget/v/SqlBulkCopier.CsvHelper.Hosting.svg?label=SqlBulkCopier.CsvHelper.Hosting)](https://www.nuget.org/packages/SqlBulkCopier.CsvHelper.Hosting/)
+- [![NuGet (SqlBulkCopier.FixedLength)](https://img.shields.io/nuget/v/SqlBulkCopier.FixedLength.svg?label=SqlBulkCopier.FixedLength)](https://www.nuget.org/packages/SqlBulkCopier.FixedLength/)
+- [![NuGet (SqlBulkCopier.FixedLength.Hosting)](https://img.shields.io/nuget/v/SqlBulkCopier.FixedLength.Hosting.svg?label=SqlBulkCopier.FixedLength.Hosting)](https://www.nuget.org/packages/SqlBulkCopier.FixedLength.Hosting/)
+
 
 ## Getting Started
 
@@ -124,6 +136,3 @@ public class BulkCopyService(
     }
 }
 ```
-
-## License
-This project is licensed under the [MIT License](LICENSE).

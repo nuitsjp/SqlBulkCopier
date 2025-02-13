@@ -1,6 +1,7 @@
 # SqlBulkCopier
 
-[![Build Status](https://example.com/path/to/build_badge)](https://example.com) [![Coverage Status](https://example.com/path/to/coverage_badge)](https://example.com)
+![Build Status](https://github.com/nuitsjp/SqlBulkCopier/actions/workflows/build.yml/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## 概要
 SqlBulkCopierは、SQL Serverの高速なバルクコピー機能であるSqlBulkCopyを、CSVファイルおよび固定長ファイルでより扱いやすくするためのライブラリです。大量データの取り込みを効率化し、使いやすい設定手段（appsettings.jsonおよびFluent API）を提供します。
@@ -14,6 +15,7 @@ SqlBulkCopierは、SQL Serverの高速なバルクコピー機能であるSqlBul
 
 ## 目次
 - [サポート対象](#サポート対象)
+- [利用可能パッケージ](#利用可能パッケージ)
 - [Getting Started](#getting-started)
 - [CSVの詳細設定](doc/CSV-ja.md)
 - [固定長ファイルの詳細設定](doc/FixedLength-ja.md)
@@ -24,6 +26,16 @@ SqlBulkCopierは、SQL Serverの高速なバルクコピー機能であるSqlBul
 このライブラリは、以下のプラットフォームでサポートされています：
 - .NET 8.0
 - .NET Framework 4.8
+
+## 利用可能パッケージ
+You can install any of the following NuGet packages as needed:
+
+- [![NuGet (SqlBulkCopier)](https://img.shields.io/nuget/v/SqlBulkCopier.svg?label=SqlBulkCopier)](https://www.nuget.org/packages/SqlBulkCopier/)
+- [![NuGet (SqlBulkCopier.Hosting)](https://img.shields.io/nuget/v/SqlBulkCopier.Hosting.svg?label=SqlBulkCopier.Hosting)](https://www.nuget.org/packages/SqlBulkCopier.Hosting/)
+- [![NuGet (SqlBulkCopier.CsvHelper)](https://img.shields.io/nuget/v/SqlBulkCopier.CsvHelper.svg?label=SqlBulkCopier.CsvHelper)](https://www.nuget.org/packages/SqlBulkCopier.CsvHelper/)
+- [![NuGet](https://img.shields.io/nuget/v/SqlBulkCopier.CsvHelper.Hosting.svg?label=SqlBulkCopier.CsvHelper.Hosting)](https://www.nuget.org/packages/SqlBulkCopier.CsvHelper.Hosting/)
+- [![NuGet (SqlBulkCopier.FixedLength)](https://img.shields.io/nuget/v/SqlBulkCopier.FixedLength.svg?label=SqlBulkCopier.FixedLength)](https://www.nuget.org/packages/SqlBulkCopier.FixedLength/)
+- [![NuGet (SqlBulkCopier.FixedLength.Hosting)](https://img.shields.io/nuget/v/SqlBulkCopier.FixedLength.Hosting.svg?label=SqlBulkCopier.FixedLength.Hosting)](https://www.nuget.org/packages/SqlBulkCopier.FixedLength.Hosting/)
 
 ## Getting Started
 
