@@ -13,6 +13,7 @@ namespace SqlBulkCopier.CsvHelper;
 /// </remarks>
 /// <param name="Ordinal">The zero-based position of the column in the CSV file.</param>
 /// <param name="Name">The name of the column, used for header-based mapping.</param>
+/// <param name="CsvColumnName">The name of the column, used for header-based mapping.</param>
 /// <param name="SqlDbType">The SQL Server data type for the destination column.</param>
 /// <param name="NumberStyles">The number styles to use when parsing numeric values.</param>
 /// <param name="DateTimeStyle">The date/time styles to use when parsing date/time values.</param>
@@ -25,6 +26,7 @@ namespace SqlBulkCopier.CsvHelper;
 public record CsvColumn(
     int Ordinal,
     string Name,
+    string? CsvColumnName,
     SqlDbType? SqlDbType,
     NumberStyles NumberStyles,
     DateTimeStyles DateTimeStyle,
@@ -34,4 +36,4 @@ public record CsvColumn(
     char[]? TrimChars,
     bool TreatEmptyStringAsNull,
     Func<string, object>? ConvertValue)
-    : Column(Ordinal, Name, SqlDbType, NumberStyles, DateTimeStyle, Format, CultureInfo, TrimMode, TrimChars, TreatEmptyStringAsNull, ConvertValue);
+    : Column(Ordinal, Name, CsvColumnName, SqlDbType, NumberStyles, DateTimeStyle, Format, CultureInfo, TrimMode, TrimChars, TreatEmptyStringAsNull, ConvertValue);

@@ -50,6 +50,7 @@ namespace SqlBulkCopier;
 public abstract record Column(
     int Ordinal,
     string Name,
+    string? DataColumnName,
     SqlDbType? SqlDbType = null,
     NumberStyles NumberStyles = NumberStyles.None,
     DateTimeStyles DateTimeStyle = DateTimeStyles.None,

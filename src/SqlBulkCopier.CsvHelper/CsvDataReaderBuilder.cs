@@ -38,7 +38,7 @@ public class CsvDataReaderBuilder(bool hasHeader, IEnumerable<Column> columns, P
             if (hasHeader)
             {
                 // When the CSV file has a header, we can use the column name.
-                sqlBulkCopy.ColumnMappings.Add(column.Name, column.Name);
+                sqlBulkCopy.ColumnMappings.Add(column.DataColumnName ?? column.Name, column.Name);
             }
             else
             {

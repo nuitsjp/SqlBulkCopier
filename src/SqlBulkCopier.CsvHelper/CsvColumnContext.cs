@@ -11,7 +11,7 @@
 /// <param name="ordinal">The zero-based position of the column in the CSV file.</param>
 /// <param name="name">The name of the column, used for header-based mapping.</param>
 /// <param name="setColumnContext">Action to configure the column's context.</param>
-public class CsvColumnContext(int ordinal, string name, Action<IColumnContext> setColumnContext) : ColumnContextBase(ordinal, name)
+public class CsvColumnContext(int ordinal, string dbColumnName, string? csvColumnName, Action<IColumnContext> setColumnContext) : ColumnContextBase(ordinal, dbColumnName, csvColumnName)
 {
     /// <summary>
     /// Builds a CsvColumn instance with the configured settings.
@@ -29,6 +29,7 @@ public class CsvColumnContext(int ordinal, string name, Action<IColumnContext> s
         return new CsvColumn(
             Ordinal,
             Name,
+            DataName,
             SqlDbType,
             NumberStyles,
             DateTimeStyles,

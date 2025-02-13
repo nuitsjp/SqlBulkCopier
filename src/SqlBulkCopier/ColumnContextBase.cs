@@ -19,7 +19,7 @@ namespace SqlBulkCopier;
 /// </remarks>
 /// <param name="ordinal">The zero-based position of the column in the data source.</param>
 /// <param name="name">The name of the column in the destination table.</param>
-public abstract class ColumnContextBase(int ordinal, string name) : IColumnContext
+public abstract class ColumnContextBase(int ordinal, string name, string? dataName) : IColumnContext
 {
     /// <inheritdoc />
     public int Ordinal { get; } = ordinal;
@@ -74,6 +74,9 @@ public abstract class ColumnContextBase(int ordinal, string name) : IColumnConte
 
     /// <inheritdoc />
     public string Name { get; } = name;
+
+    /// <inheritdoc />
+    public string? DataName { get; } = dataName;
 
     #region Numeric Type Configuration Methods
 

@@ -141,6 +141,7 @@ public class CsvDataReaderTest
             ordinal,
             columnName,
             null,
+            null,
             NumberStyles.None,
             DateTimeStyles.None,
             null,

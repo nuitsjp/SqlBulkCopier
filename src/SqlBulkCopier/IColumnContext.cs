@@ -23,6 +23,10 @@ public interface IColumnContext
     string Name { get; }
 
     /// <summary>
+    /// Gets the name of the column in the source data.
+    /// </summary>
+    public string? DataName { get; }
+    /// <summary>
     /// Gets the zero-based ordinal position of the column in the source data.
     /// </summary>
     int Ordinal { get; }

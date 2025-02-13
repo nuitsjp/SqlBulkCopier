@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using CsvHelper;
+using MissingFieldException = CsvHelper.MissingFieldException;
 
 namespace SqlBulkCopier.CsvHelper;
 
@@ -54,7 +55,7 @@ public class CsvDataReader : IDataReader
 
         _columns = (hasHeader
                 // When the CSV file has a header, get the column ordinal from the header.
-                ? columns.Select(c => c with { Ordinal = csvReader.GetFieldIndex(c.Name) }).ToArray()
+                ? columns.Select(c => c with { Ordinal = csvReader.GetFieldIndex(c.DataColumnName ?? c.Name) }).ToArray()
                 : columns)
             .ToDictionary(x => x.Ordinal, x => x);
     }

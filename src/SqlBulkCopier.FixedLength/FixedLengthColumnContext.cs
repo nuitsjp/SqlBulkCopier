@@ -8,7 +8,7 @@
 /// <param name="name">The name of the column.</param>
 /// <param name="offsetBytes">The zero-based offset in bytes of the column in the fixed-length file.</param>
 /// <param name="lengthBytes">The length in bytes of the column in the fixed-length file.</param>
-public class FixedLengthColumnContext(int ordinal, string name, int offsetBytes, int lengthBytes) : ColumnContextBase(ordinal, name)
+public class FixedLengthColumnContext(int ordinal, string name, int offsetBytes, int lengthBytes) : ColumnContextBase(ordinal, name, null)
 {
     /// <summary>
     /// Gets the zero-based offset in bytes of the column in the fixed-length file.

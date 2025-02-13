@@ -37,6 +37,7 @@ public record FixedLengthColumn(
     : Column(
         Ordinal,
         Name,
+        null,
         SqlDbType,
         NumberStyles,
         DateTimeStyle,
