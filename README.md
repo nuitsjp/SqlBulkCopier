@@ -2,6 +2,8 @@
 
 ![Build Status](https://github.com/nuitsjp/SqlBulkCopier/actions/workflows/build.yml/badge.svg)
 
+[Japanese Documents](README-ja.md)
+
 ## Overview
 SqlBulkCopier is a library that makes the high-speed bulk copy feature of SQL Server, SqlBulkCopy, more manageable with CSV files and fixed-length files. It streamlines the import of large amounts of data and provides user-friendly configuration methods (appsettings.json and Fluent API).
 
