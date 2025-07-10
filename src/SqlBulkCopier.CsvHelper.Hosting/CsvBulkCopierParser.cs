@@ -32,7 +32,16 @@ public static class CsvBulkCopierParser
         var columns = sqlBulkCopier.GetSection("Columns");
         foreach (var column in columns.GetChildren())
         {
-            builder.AddColumnMapping(column.Key, SetupContext(column));
+            var csvColumnName = column.GetValue<string>("CsvColumnName");
+            var context = SetupContext(column);
+            if (string.IsNullOrEmpty(csvColumnName))
+            {
+                builder.AddColumnMapping(column.Key, context);
+            }
+            else
+            {
+                builder.AddColumnMapping(column.Key, csvColumnName, context);
+            }
         }
 
         var truncateBeforeBulkInsert = sqlBulkCopier.GetValue<bool?>("TruncateBeforeBulkInsert") ?? false;

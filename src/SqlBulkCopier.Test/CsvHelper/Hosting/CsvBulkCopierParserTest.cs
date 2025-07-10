@@ -2221,6 +2221,49 @@ public class CsvBulkCopierParserTest
             birthDate.SqlDbType.ShouldBe(SqlDbType.Date);
             birthDate.Format.ShouldBe("yyyyMMdd");
         }
+
+        [Fact]
+        public void Column_WithAnotherName()
+        {
+            // Arrange
+            const string settings = """
+                                    {
+                                      "SqlBulkCopier": {
+                                        "DestinationTableName": "[dbo].[Customer]",
+                                        "HasHeader": true,
+                                        "Columns": {
+                                          "CUSTOMER_ID": {
+                                            "CsvColumnName": "CustomerId"
+                                          },
+                                          "BIRTH_DATE": {
+                                            "CsvColumnName": "BirthDate",
+                                            "SqlDbType": "Date",
+                                            "Format": "yyyyMMdd"
+                                          }
+                                        }
+                                      }
+                                    }
+                                    """;
+            var configuration = BuildJsonConfig(settings);
+
+            // Act
+            var builder = (CsvBulkCopierBuilder)CsvBulkCopierParser.ParseHasHeaderBuilder(configuration.GetSection("SqlBulkCopier"));
+            var context = new CsvColumnContext(0, string.Empty, null, _ => { });
+            builder.DefaultColumnContext(context);
+            context.Build(_ => { });
+
+            // Assert
+            builder.ColumnContexts.Count.ShouldBe(2);
+            var customerId = builder.ColumnContexts.SingleOrDefault(x => x.Name == "CUSTOMER_ID");
+            customerId.ShouldNotBeNull();
+            customerId.DataName.ShouldBe("CustomerId");
+
+            var birthDate = builder.ColumnContexts.SingleOrDefault(x => x.Name == "BIRTH_DATE");
+            birthDate.ShouldNotBeNull();
+            birthDate.DataName.ShouldBe("BirthDate");
+            birthDate.SqlDbType.ShouldBe(SqlDbType.Date);
+            birthDate.Format.ShouldBe("yyyyMMdd");
+        }
     }
 
     public class ParseHasNotHeaderBulkCopier

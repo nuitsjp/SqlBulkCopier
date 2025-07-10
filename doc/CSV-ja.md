@@ -20,6 +20,7 @@ CSV利用時の設定方法として、以下の2つのアプローチを提供�
   - [Configuration アプローチ](#configuration-アプローチ)
 - [設定の詳細](#設定の詳細)
   - [CSVファイルをヘッダー有りで処理する](#csvファイルをヘッダー有りで処理する)
+    - [CSVの列名を別途指定する場合](#csvの列名を別途指定する場合)
   - [CSVファイルをヘッダー無しで処理する](#csvファイルをヘッダー無しで処理する)
   - [データ型の設定](#データ型の設定)
   - [トリム操作](#トリム操作)
@@ -276,6 +277,31 @@ appsettings.jsonでの設定例:
   }
 }
 ```
+
+##### CSVの列名を別途指定する場合
+
+データベースの列名とCSVファイルの列名が異なる場合は、`CsvColumnName`プロパティを使用してCSVファイルの列名を指定できます。
+
+appsettings.jsonでの設定例:
+
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "HasHeader": true,
+    "Columns": {
+      "CUSTOMER_ID": {
+        "CsvColumnName": "CustomerId"
+      },
+      "FIRST_NAME": {
+        "CsvColumnName": "FirstName"
+      }
+    }
+  }
+}
+```
+
+この設定により、CSVファイルの`CustomerId`列はデータベースの`CUSTOMER_ID`列にマッピングされ、CSVファイルの`FirstName`列はデータベースの`FIRST_NAME`列にマッピングされます。
 
 #### [CSVファイルをヘッダー無しで処理する](#設定の詳細)
 このメソッドは、ヘッダーを持たないCSVファイルを処理するためのビルダーを作成します。以下のコード例は、CSVファイルの列位置を使用してデータベース列にマッピングする方法を示しています。
