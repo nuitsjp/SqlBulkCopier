@@ -105,6 +105,13 @@ public interface IBulkCopierBuilder<out TBuilder> : IBulkCopierBuilder
     TBuilder SetTruncateBeforeBulkInsert(bool value);
 
     /// <summary>
+    /// Sets the method used to remove existing data before performing the bulk insert.
+    /// </summary>
+    /// <param name="value">The truncate method to use.</param>
+    /// <returns>The builder instance for method chaining.</returns>
+    TBuilder SetTruncateMethod(TruncateMethod value);
+
+    /// <summary>
     /// Sets whether to use exponential backoff for retry delays.
     /// </summary>
     /// <param name="value">True to use exponential backoff; otherwise, false.</param>

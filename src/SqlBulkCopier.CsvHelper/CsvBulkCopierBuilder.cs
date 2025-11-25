@@ -71,6 +71,11 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
     private bool _truncateBeforeBulkInsert;
 
     /// <summary>
+    /// Indicates how the destination table should be cleared before performing the bulk insert.
+    /// </summary>
+    private TruncateMethod _truncateMethod = TruncateMethod.Truncate;
+
+    /// <summary>
     /// Indicates whether exponential backoff should be used for retry delays.
     /// </summary>
     private bool _useExponentialBackoff = true;
@@ -212,6 +217,17 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
     }
 
     /// <summary>
+    /// Sets how the destination table should be cleared before performing the bulk insert.
+    /// </summary>
+    /// <param name="value">The truncate method to use.</param>
+    /// <returns>The builder instance for method chaining.</returns>
+    ICsvBulkCopierWithHeaderBuilder IBulkCopierBuilder<ICsvBulkCopierWithHeaderBuilder>.SetTruncateMethod(TruncateMethod value)
+    {
+        _truncateMethod = value;
+        return this;
+    }
+
+    /// <summary>
     /// Sets whether exponential backoff should be used for retry delays.
     /// </summary>
     /// <param name="value">True to use exponential backoff; otherwise, false.</param>
@@ -289,6 +305,17 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
     }
 
     /// <summary>
+    /// Sets how the destination table should be cleared before performing the bulk insert.
+    /// </summary>
+    /// <param name="value">The truncate method to use.</param>
+    /// <returns>The builder instance for method chaining.</returns>
+    ICsvBulkCopierNoHeaderBuilder IBulkCopierBuilder<ICsvBulkCopierNoHeaderBuilder>.SetTruncateMethod(TruncateMethod value)
+    {
+        _truncateMethod = value;
+        return this;
+    }
+
+    /// <summary>
     /// Sets whether exponential backoff should be used for retry delays.
     /// </summary>
     /// <param name="value">True to use exponential backoff; otherwise, false.</param>
@@ -360,6 +387,7 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
             MaxRetryCount = _maxRetryCount,
             InitialDelay = _initialDelay,
             TruncateBeforeBulkInsert = _truncateBeforeBulkInsert,
+            TruncateMethod = _truncateMethod,
             UseExponentialBackoff = _useExponentialBackoff,
             BatchSize = _batchSize,
             NotifyAfter = _notifyAfter
@@ -381,6 +409,7 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
             MaxRetryCount = _maxRetryCount,
             InitialDelay = _initialDelay,
             TruncateBeforeBulkInsert = _truncateBeforeBulkInsert,
+            TruncateMethod = _truncateMethod,
             UseExponentialBackoff = _useExponentialBackoff,
             BatchSize = _batchSize,
             NotifyAfter = _notifyAfter
@@ -404,6 +433,7 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
             MaxRetryCount = _maxRetryCount,
             InitialDelay = _initialDelay,
             TruncateBeforeBulkInsert = _truncateBeforeBulkInsert,
+            TruncateMethod = _truncateMethod,
             UseExponentialBackoff = _useExponentialBackoff,
             BatchSize = _batchSize,
             NotifyAfter = _notifyAfter
@@ -429,6 +459,7 @@ public class CsvBulkCopierBuilder : ICsvBulkCopierNoHeaderBuilder, ICsvBulkCopie
             MaxRetryCount = _maxRetryCount,
             InitialDelay = _initialDelay,
             TruncateBeforeBulkInsert = _truncateBeforeBulkInsert,
+            TruncateMethod = _truncateMethod,
             UseExponentialBackoff = _useExponentialBackoff,
             BatchSize = _batchSize,
             NotifyAfter = _notifyAfter

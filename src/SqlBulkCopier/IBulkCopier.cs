@@ -67,6 +67,11 @@ public interface IBulkCopier : IDisposable
     bool TruncateBeforeBulkInsert { get; }
 
     /// <summary>
+    /// Gets the method used to remove existing data before performing the bulk insert.
+    /// </summary>
+    TruncateMethod TruncateMethod { get; }
+
+    /// <summary>
     /// Gets whether exponential backoff should be used for retry delays.
     /// When true, the delay between retry attempts will increase exponentially.
     /// </summary>

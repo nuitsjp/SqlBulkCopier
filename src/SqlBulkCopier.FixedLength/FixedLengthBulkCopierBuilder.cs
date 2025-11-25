@@ -59,6 +59,11 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
     private bool _truncateBeforeBulkInsert;
 
     /// <summary>
+    /// Indicates how the destination table should be cleared before performing the bulk insert.
+    /// </summary>
+    private TruncateMethod _truncateMethod = TruncateMethod.Truncate;
+
+    /// <summary>
     /// Indicates whether exponential backoff should be used for retry delays.
     /// </summary>
     private bool _useExponentialBackoff = true;
@@ -112,6 +117,17 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
     public IFixedLengthBulkCopierBuilder SetTruncateBeforeBulkInsert(bool value)
     {
         _truncateBeforeBulkInsert = value;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets how the destination table should be cleared before performing the bulk insert.
+    /// </summary>
+    /// <param name="value">The truncate method to use.</param>
+    /// <returns>The builder instance for method chaining.</returns>
+    public IFixedLengthBulkCopierBuilder SetTruncateMethod(TruncateMethod value)
+    {
+        _truncateMethod = value;
         return this;
     }
 
@@ -221,6 +237,7 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
             MaxRetryCount = _maxRetryCount,
             InitialDelay = _initialDelay,
             TruncateBeforeBulkInsert = _truncateBeforeBulkInsert,
+            TruncateMethod = _truncateMethod,
             UseExponentialBackoff = _useExponentialBackoff,
             BatchSize = _batchSize,
             NotifyAfter = _notifyAfter
@@ -242,6 +259,7 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
             MaxRetryCount = _maxRetryCount,
             InitialDelay = _initialDelay,
             TruncateBeforeBulkInsert = _truncateBeforeBulkInsert,
+            TruncateMethod = _truncateMethod,
             UseExponentialBackoff = _useExponentialBackoff,
             BatchSize = _batchSize,
             NotifyAfter = _notifyAfter
@@ -265,6 +283,7 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
             MaxRetryCount = _maxRetryCount,
             InitialDelay = _initialDelay,
             TruncateBeforeBulkInsert = _truncateBeforeBulkInsert,
+            TruncateMethod = _truncateMethod,
             UseExponentialBackoff = _useExponentialBackoff,
             BatchSize = _batchSize,
             NotifyAfter = _notifyAfter
@@ -290,6 +309,7 @@ public class FixedLengthBulkCopierBuilder : IFixedLengthBulkCopierBuilder
             MaxRetryCount = _maxRetryCount,
             InitialDelay = _initialDelay,
             TruncateBeforeBulkInsert = _truncateBeforeBulkInsert,
+            TruncateMethod = _truncateMethod,
             UseExponentialBackoff = _useExponentialBackoff,
             BatchSize = _batchSize,
             NotifyAfter = _notifyAfter
