@@ -18,6 +18,8 @@ jobs:
   build-and-publish:
     runs-on: windows-latest
     environment: nuget
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout repository
