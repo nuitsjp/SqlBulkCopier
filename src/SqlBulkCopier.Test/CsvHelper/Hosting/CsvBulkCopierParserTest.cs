@@ -121,6 +121,7 @@ public class CsvBulkCopierParserTest
             using var connection = OpenConnection();
             var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
             bulkCopier.TruncateBeforeBulkInsert.ShouldBeTrue();
+            bulkCopier.TruncateMethod.ShouldBe(TruncateMethod.Truncate);
         }
 
         [Fact]
@@ -145,6 +146,7 @@ public class CsvBulkCopierParserTest
             using var connection = OpenConnection();
             var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
             bulkCopier.TruncateBeforeBulkInsert.ShouldBeFalse();
+            bulkCopier.TruncateMethod.ShouldBe(TruncateMethod.Truncate);
         }
 
         [Fact]
@@ -168,6 +170,33 @@ public class CsvBulkCopierParserTest
             using var connection = OpenConnection();
             var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
             bulkCopier.TruncateBeforeBulkInsert.ShouldBeFalse();
+            bulkCopier.TruncateMethod.ShouldBe(TruncateMethod.Truncate);
+        }
+
+        [Fact]
+        public void TruncateMethod_Delete()
+        {
+            // Arrange
+            const string settings = """
+                                    {
+                                      "SqlBulkCopier": {
+                                        "DestinationTableName": "[dbo].[Customer]",
+                                        "HasHeader": true,
+                                        "TruncateBeforeBulkInsert": true,
+                                        "TruncateMethod": "Delete"
+                                      }
+                                    }
+                                    """;
+            var configuration = BuildJsonConfig(settings);
+
+            // Act
+            var bulkCopierBuilder = CsvBulkCopierParser.Parse(configuration);
+
+            // Assert
+            using var connection = OpenConnection();
+            var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
+            bulkCopier.TruncateBeforeBulkInsert.ShouldBeTrue();
+            bulkCopier.TruncateMethod.ShouldBe(TruncateMethod.Delete);
         }
 
         [Fact]

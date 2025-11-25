@@ -155,6 +155,9 @@ public class BulkCopier : IBulkCopier
     public bool TruncateBeforeBulkInsert { get; set; }
 
     /// <inheritdoc />
+    public TruncateMethod TruncateMethod { get; set; } = TruncateMethod.Truncate;
+
+    /// <inheritdoc />
     public bool UseExponentialBackoff { get; set; }
 
     /// <inheritdoc />
@@ -285,7 +288,12 @@ public class BulkCopier : IBulkCopier
     /// <exception cref="SqlException">Thrown when the TRUNCATE TABLE operation fails.</exception>
     private async Task TruncateTableAsync()
     {
-        var query = $"TRUNCATE TABLE {_sqlBulkCopy.DestinationTableName}";
+        var query = TruncateMethod switch
+        {
+            TruncateMethod.Truncate => $"TRUNCATE TABLE {_sqlBulkCopy.DestinationTableName}",
+            TruncateMethod.Delete => $"DELETE FROM {_sqlBulkCopy.DestinationTableName}",
+            _ => throw new ArgumentOutOfRangeException(nameof(TruncateMethod), TruncateMethod, null)
+        };
         if (_externalTransaction is not null)
         {
             // Execute within the provided external transaction

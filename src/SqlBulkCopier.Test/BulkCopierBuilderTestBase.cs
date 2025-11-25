@@ -75,6 +75,7 @@ public abstract class WriteToServerAsync<TBuilder>
         sqlBulkCopier.NotifyAfter.ShouldBe(2);
         sqlBulkCopier.MaxRetryCount.ShouldBe(3);
         sqlBulkCopier.TruncateBeforeBulkInsert.ShouldBeTrue();
+        sqlBulkCopier.TruncateMethod.ShouldBe(TruncateMethod.Truncate);
         sqlBulkCopier.UseExponentialBackoff.ShouldBeFalse();
         sqlBulkCopier.InitialDelay.ShouldBe(TimeSpan.MaxValue);
     }
@@ -132,6 +133,36 @@ public abstract class WriteToServerAsync<TBuilder>
         using var sqlBulkCopier = ProvideBuilder()
             .SetTruncateBeforeBulkInsert(true)
             .Build(connection);
+
+        await sqlBulkCopier.WriteToServerAsync(
+            await CreateBulkInsertStreamAsync(Targets),
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+
+        await AssertAsync();
+
+        // Act
+        await sqlBulkCopier.WriteToServerAsync(
+            await CreateBulkInsertStreamAsync(Targets),
+            new UTF8Encoding(false),
+            TimeSpan.FromMinutes(30));
+
+        // Assert
+        await AssertAsync();
+        connection.Close();
+    }
+
+    [Fact]
+    public async Task NoRetry_WithConnection_BeforeDelete_ShouldSucceed()
+    {
+        // Arrange
+        using var connection = await OpenConnectionAsync();
+        using var sqlBulkCopier = ProvideBuilder()
+            .SetTruncateBeforeBulkInsert(true)
+            .SetTruncateMethod(TruncateMethod.Delete)
+            .Build(connection);
+
+        sqlBulkCopier.TruncateMethod.ShouldBe(TruncateMethod.Delete);
 
         await sqlBulkCopier.WriteToServerAsync(
             await CreateBulkInsertStreamAsync(Targets),
@@ -294,6 +325,7 @@ public abstract class WriteToServerAsync<TBuilder>
         {
             MaxRetryCount = dummyCopier.MaxRetryCount,
             TruncateBeforeBulkInsert = dummyCopier.TruncateBeforeBulkInsert,
+            TruncateMethod = dummyCopier.TruncateMethod,
             UseExponentialBackoff = dummyCopier.UseExponentialBackoff,
             InitialDelay = dummyCopier.InitialDelay
         };
@@ -327,6 +359,7 @@ public abstract class WriteToServerAsync<TBuilder>
         {
             MaxRetryCount = dummyCopier.MaxRetryCount,
             TruncateBeforeBulkInsert = dummyCopier.TruncateBeforeBulkInsert,
+            TruncateMethod = dummyCopier.TruncateMethod,
             UseExponentialBackoff = dummyCopier.UseExponentialBackoff,
             InitialDelay = dummyCopier.InitialDelay
         };
@@ -363,6 +396,7 @@ public abstract class WriteToServerAsync<TBuilder>
         {
             MaxRetryCount = dummyCopier.MaxRetryCount,
             TruncateBeforeBulkInsert = dummyCopier.TruncateBeforeBulkInsert,
+            TruncateMethod = dummyCopier.TruncateMethod,
             UseExponentialBackoff = dummyCopier.UseExponentialBackoff,
             InitialDelay = dummyCopier.InitialDelay
         };

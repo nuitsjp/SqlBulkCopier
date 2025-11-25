@@ -70,6 +70,7 @@ public class FixedLengthBulkCopierParserTest
         using var connection = OpenConnection();
         var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
         bulkCopier.TruncateBeforeBulkInsert.ShouldBeTrue();
+        bulkCopier.TruncateMethod.ShouldBe(TruncateMethod.Truncate);
     }
 
     [Fact]
@@ -93,6 +94,7 @@ public class FixedLengthBulkCopierParserTest
         using var connection = OpenConnection();
         var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
         bulkCopier.TruncateBeforeBulkInsert.ShouldBeFalse();
+        bulkCopier.TruncateMethod.ShouldBe(TruncateMethod.Truncate);
     }
 
     [Fact]
@@ -115,6 +117,32 @@ public class FixedLengthBulkCopierParserTest
         using var connection = OpenConnection();
         var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
         bulkCopier.TruncateBeforeBulkInsert.ShouldBeFalse(); // Default value
+        bulkCopier.TruncateMethod.ShouldBe(TruncateMethod.Truncate);
+    }
+
+    [Fact]
+    public void TruncateMethod_Delete()
+    {
+        // Arrange
+        const string settings = """
+                                {
+                                  "SqlBulkCopier": {
+                                    "DestinationTableName": "[dbo].[Customer]",
+                                    "TruncateBeforeBulkInsert": true,
+                                    "TruncateMethod": "Delete"
+                                  }
+                                }
+                                """;
+        var configuration = BuildJsonConfig(settings);
+
+        // Act
+        var bulkCopierBuilder = FixedLengthBulkCopierParser.Parse(configuration);
+
+        // Assert
+        using var connection = OpenConnection();
+        var bulkCopier = (BulkCopier)bulkCopierBuilder.Build(connection);
+        bulkCopier.TruncateBeforeBulkInsert.ShouldBeTrue();
+        bulkCopier.TruncateMethod.ShouldBe(TruncateMethod.Delete);
     }
 
     [Fact]

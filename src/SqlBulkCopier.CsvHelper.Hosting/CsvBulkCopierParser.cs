@@ -46,6 +46,8 @@ public static class CsvBulkCopierParser
 
         var truncateBeforeBulkInsert = sqlBulkCopier.GetValue<bool?>("TruncateBeforeBulkInsert") ?? false;
         builder.SetTruncateBeforeBulkInsert(truncateBeforeBulkInsert);
+        var truncateMethod = sqlBulkCopier.GetEnum("TruncateMethod", TruncateMethod.Truncate);
+        builder.SetTruncateMethod(truncateMethod);
 
         var maxRetryCount = sqlBulkCopier.GetValue<int?>("MaxRetryCount") ?? 0;
         builder.SetMaxRetryCount(maxRetryCount);
@@ -134,6 +136,8 @@ public static class CsvBulkCopierParser
 
         var truncateBeforeBulkInsert = sqlBulkCopier.GetValue<bool?>("TruncateBeforeBulkInsert") ?? false;
         builder.SetTruncateBeforeBulkInsert(truncateBeforeBulkInsert);
+        var truncateMethod = sqlBulkCopier.GetEnum("TruncateMethod", TruncateMethod.Truncate);
+        builder.SetTruncateMethod(truncateMethod);
 
         var maxRetryCount = sqlBulkCopier.GetValue<int?>("MaxRetryCount") ?? 0;
         builder.SetMaxRetryCount(maxRetryCount);
