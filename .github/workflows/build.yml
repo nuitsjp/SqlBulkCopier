@@ -69,6 +69,7 @@ jobs:
           $version = '1.0.0'
         }
         echo "version=$version" >> $env:GITHUB_ENV
+        echo "version=$version" >> $env:GITHUB_OUTPUT
         echo "Extracted version: $version"
       shell: pwsh
 
@@ -91,3 +92,15 @@ jobs:
         dotnet pack src/SqlBulkCopier.FixedLength.Hosting/SqlBulkCopier.FixedLength.Hosting.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
         dotnet pack src/SqlBulkCopier.Hosting/SqlBulkCopier.Hosting.csproj --configuration Release --no-build --output ${{ github.workspace }}/nupkg /p:PackageVersion=${{ env.version }}
         dotnet nuget push ${{ github.workspace }}\nupkg\*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+
+    - name: Create GitHub Release
+      if: startsWith(github.ref, 'refs/tags/Release-')
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ env.version }}
+        generate_release_notes: true
+        files: |
+          ${{ github.workspace }}/nupkg/*.nupkg
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
