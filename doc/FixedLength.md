@@ -25,6 +25,7 @@ We provide two approaches for configuring the use of fixed-length files:
   - [Custom Conversions](#custom-conversions)
   - [Creating an Instance of IBulkCopier](#creating-an-instance-of-ibulkcopier)
   - [Truncate Table Before Inserting](#truncate-table-before-inserting)
+  - [Setting Truncate Method](#setting-truncate-method)
   - [Determine Rows to Import](#determine-rows-to-import)
   - [Retry Settings](#retry-settings)
   - [Setting Batch Size](#setting-batch-size)
@@ -240,6 +241,7 @@ The following table shows the features that can be configured for bulk copying f
 | [Custom Conversions](#custom-conversions) | `Convert` | Not supported in configuration file |
 | [Creating an Instance of IBulkCopier](#creating-an-instance-of-ibulkcopier) | `Build` | Not supported in configuration file |
 | [Truncate Table Before Inserting](#truncate-table-before-inserting) | `SetTruncateBeforeBulkInsert` | `"TruncateBeforeBulkInsert": true/false` |
+| [Setting Truncate Method](#setting-truncate-method) | `SetTruncateMethod` | `"TruncateMethod": "Truncate"`, `"Delete"` |
 | [Determine Rows to Import](#determine-rows-to-import) | `SetRowFilter` | `"RowFilter": { ... }` |
 | [Retry Settings](#retry-settings) | `SetMaxRetryCount`, `SetInitialDelay`, `SetUseExponentialBackoff` | `"MaxRetryCount": 3`, `"InitialDelay": "00:00:05"`, `"UseExponentialBackoff": true` |
 | [Setting Batch Size](#setting-batch-size) | `SetBatchSize` | `"BatchSize": 1000` |
@@ -428,7 +430,33 @@ Example of setting in appsettings.json:
 }
 ```
 
-#### [Determine Rows to Import](#detailed-settings)
+#### [Setting Truncate Method](#detailed-settings)
+This function sets the method used to clear data from the table before the bulk insert. By default, `TRUNCATE TABLE` is used, but you can choose to use `DELETE FROM` instead. This is useful when the table has foreign key constraints, as `TRUNCATE TABLE` cannot be used in such cases.
+
+```csharp
+var bulkCopier = FixedLengthBulkCopierBuilder
+    .Create("[dbo].[Customer]")
+    .SetTruncateBeforeBulkInsert(true)
+    .SetTruncateMethod(TruncateMethod.Delete)
+    .Build(configuration.GetConnectionString("DefaultConnection")!);
+```
+
+Example of setting in appsettings.json:
+
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "TruncateBeforeBulkInsert": true,
+    "TruncateMethod": "Delete"
+  }
+}
+```
+
+| Method | Description |
+|--------|-------------|
+| `Truncate` | Uses `TRUNCATE TABLE` statement. Default. Faster but cannot be used with foreign key constraints. |
+| `Delete` | Uses `DELETE FROM` statement. Slower but works with foreign key constraints. |
 
 This feature allows you to evaluate each row of fixed-length file data and determine whether to import it. Only rows that meet the specified conditions will be copied to the database.
 

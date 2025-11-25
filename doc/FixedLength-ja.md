@@ -25,6 +25,7 @@ SqlBulkCopierは、CSVおよび固定長ファイルを効率的にデータベ�
   - [カスタム変換](#カスタム変換)
   - [IBulkCopierのインスタンスを作成する](#ibulkcopierのインスタンスを作成する)
   - [事前にテーブルをトランケートする](#事前にテーブルをトランケートする)
+  - [トランケート方法を設定する](#トランケート方法を設定する)
   - [行ごとに取り込み対象を判定する](#行ごとに取り込み対象を判定する)
   - [リトライ設定](#リトライ設定)
   - [バッチサイズを設定する](#バッチサイズを設定する)
@@ -240,6 +241,7 @@ public class FixedLengthBulkCopyService(
 | [カスタム変換](#カスタム変換) | `Convert` | 設定ファイルでは未対応 |
 | [IBulkCopierのインスタンスを作成する](#ibulkcopierのインスタンスを作成する) | `Build` | 設定ファイルでは未対応 |
 | [事前にテーブルをトランケートする](#事前にテーブルをトランケートする) | `SetTruncateBeforeBulkInsert` | `"TruncateBeforeBulkInsert": true/false` |
+| [トランケート方法を設定する](#トランケート方法を設定する) | `SetTruncateMethod` | `"TruncateMethod": "Truncate"`, `"Delete"` |
 | [行ごとに取り込み対象を判定する](#行ごとに取り込み対象を判定する) | `SetRowFilter` | `"RowFilter": { ... }` |
 | [リトライ設定](#リトライ設定) | `SetMaxRetryCount`, `SetInitialDelay`, `SetUseExponentialBackoff` | `"MaxRetryCount": 3`, `"InitialDelay": "00:00:05"`, `"UseExponentialBackoff": true` |
 | [バッチサイズを設定する](#バッチサイズを設定する) | `SetBatchSize` | `"BatchSize": 1000` |
@@ -429,7 +431,33 @@ appsettings.jsonでの設定例:
 }
 ```
 
-#### [行ごとに取り込み対象を判定する](#設定の詳細)
+#### [トランケート方法を設定する](#設定の詳細)
+この関数は、バルクインサート前にテーブルからデータを削除する方法を設定します。デフォルトでは `TRUNCATE TABLE` が使用されますが、代わりに `DELETE FROM` を使用することもできます。これは、テーブルに外部キー制約がある場合に便利です。`TRUNCATE TABLE` はそのような場合には使用できません。
+
+```csharp
+var bulkCopier = FixedLengthBulkCopierBuilder
+    .Create("[dbo].[Customer]")
+    .SetTruncateBeforeBulkInsert(true)
+    .SetTruncateMethod(TruncateMethod.Delete)
+    .Build(configuration.GetConnectionString("DefaultConnection")!);
+```
+
+appsettings.jsonでの設定例:
+
+```json
+{
+  "SqlBulkCopier": {
+    "DestinationTableName": "[dbo].[Customer]",
+    "TruncateBeforeBulkInsert": true,
+    "TruncateMethod": "Delete"
+  }
+}
+```
+
+| 方法 | 説明 |
+|------|------|
+| `Truncate` | `TRUNCATE TABLE` 文を使用します。デフォルト。高速ですが、外部キー制約がある場合は使用できません。 |
+| `Delete` | `DELETE FROM` 文を使用します。低速ですが、外部キー制約がある場合でも動作します。 |
 
 この機能を使用すると、固定長ファイルデータの各行を評価し、取り込み対象とするかどうかを判定できます。指定した条件に合致する行のみをデータベースにコピーします。
 
