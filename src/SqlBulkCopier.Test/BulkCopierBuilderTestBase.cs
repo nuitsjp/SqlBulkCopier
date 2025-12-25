@@ -183,6 +183,49 @@ public abstract class WriteToServerAsync<TBuilder>
     }
 
     [Fact]
+    public async Task TruncateBeforeBulkInsert_WithDelete_WhenTimeout_ShouldThrow()
+    {
+        // Arrange
+        using var connection = await OpenConnectionAsync();
+        await connection.ExecuteAsync("INSERT INTO dbo.BulkInsertTestTarget (Id) VALUES (1)");
+        await connection.ExecuteAsync(
+            """
+            CREATE OR ALTER TRIGGER dbo.TriggerBulkInsertTestTarget_DeleteDelay
+            ON dbo.BulkInsertTestTarget
+            AFTER DELETE
+            AS
+            BEGIN
+                SET NOCOUNT ON;
+                WAITFOR DELAY '00:00:03';
+            END
+            """);
+
+        using var sqlBulkCopier = ProvideBuilder()
+            .SetTruncateBeforeBulkInsert(true)
+            .SetTruncateMethod(TruncateMethod.Delete)
+            .Build(connection);
+
+        try
+        {
+            using var stream = await CreateBulkInsertStreamAsync(Targets);
+            var func = () => sqlBulkCopier.WriteToServerAsync(
+                stream,
+                new UTF8Encoding(false),
+                TimeSpan.FromSeconds(2));
+
+            // Act & Assert
+            var ex = func.ShouldThrow<InvalidOperationException>();
+            var inner = ex.InnerException.ShouldBeOfType<SqlException>();
+            inner.Number.ShouldBe(-2);
+        }
+        finally
+        {
+            using var cleanupConnection = await OpenConnectionAsync();
+            await cleanupConnection.ExecuteAsync("DROP TRIGGER IF EXISTS dbo.TriggerBulkInsertTestTarget_DeleteDelay");
+        }
+    }
+
+    [Fact]
     public async Task NoRetry_WithConnectionString_ShouldSucceed()
     {
         // Arrange
