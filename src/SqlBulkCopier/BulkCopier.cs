@@ -209,7 +209,8 @@ public class BulkCopier : IBulkCopier
     /// </remarks>
     public async Task WriteToServerAsync(Stream stream, Encoding encoding, TimeSpan timeout)
     {
-        _sqlBulkCopy.BulkCopyTimeout = (int)timeout.TotalSeconds;
+        var timeoutSeconds = (int)timeout.TotalSeconds;
+        _sqlBulkCopy.BulkCopyTimeout = timeoutSeconds;
 
         // Throw exception if retries are configured with an external transaction
         // as retrying bulk insert operations alone may not produce correct results
@@ -241,7 +242,7 @@ public class BulkCopier : IBulkCopier
                 // Truncate the destination table if enabled
                 if (TruncateBeforeBulkInsert)
                 {
-                    await TruncateTableAsync();
+                    await TruncateTableAsync(timeoutSeconds);
                 }
 
                 await _sqlBulkCopy.WriteToServerAsync(DataReaderBuilder.Build(stream, encoding));
@@ -286,7 +287,7 @@ public class BulkCopier : IBulkCopier
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     /// <exception cref="SqlException">Thrown when the TRUNCATE TABLE operation fails.</exception>
-    private async Task TruncateTableAsync()
+    private async Task TruncateTableAsync(int timeoutSeconds)
     {
         var query = TruncateMethod switch
         {
@@ -302,6 +303,7 @@ public class BulkCopier : IBulkCopier
 #else
             var command = new SqlCommand(query, _connection, _externalTransaction);
 #endif
+            command.CommandTimeout = timeoutSeconds;
             await command.ExecuteNonQueryAsync();
         }
         else if (_connection is not null)
@@ -312,6 +314,7 @@ public class BulkCopier : IBulkCopier
 #else
             var command = new SqlCommand(query, _connection);
 #endif
+            command.CommandTimeout = timeoutSeconds;
             await command.ExecuteNonQueryAsync();
         }
         else
@@ -326,6 +329,7 @@ public class BulkCopier : IBulkCopier
             await connection.OpenAsync();
             using var command = new SqlCommand(query, connection);
 #endif
+            command.CommandTimeout = timeoutSeconds;
             await command.ExecuteNonQueryAsync();
         }
     }
